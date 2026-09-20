@@ -31,7 +31,7 @@ game starts, and switches back when the game closes.
 
 ## Install
 
-1. Download `mov.remake.rlhud.streamDeckPlugin` from the [latest release](../../releases/latest), double-click it and confirm the install in the Stream Deck app. (Building it yourself: `npm run pack`, see Development.)
+1. Download `mov.remake.rlhud.streamDeckPlugin` from the [latest release](../../releases/latest) (direct link: [`mov.remake.rlhud.streamDeckPlugin`](../../releases/latest/download/mov.remake.rlhud.streamDeckPlugin)), double-click it and confirm the install in the Stream Deck app. (Building it yourself: `npm run pack`, see Development.)
 2. Start Rocket League. If the game was already running when you installed the plugin, **restart it once** (the game reads its
    configuration only at startup; until then a key shows "RESTART GAME").
 3. Click any key of the plugin in the Stream Deck app → inspector on the right: enter **your ranks** (see below).
