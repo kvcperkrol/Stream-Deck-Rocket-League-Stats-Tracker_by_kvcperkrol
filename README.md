@@ -89,6 +89,16 @@ and converts it with `MMR = mu × 20 + 100`. The conversion was checked against 
   ranked modes only.
 * The rank emblems are original artwork (not the game's graphics).
 
+## Rank icons
+
+The plugin draws its own rank emblems. The game's rank artwork belongs to Psyonix, so it is not part of this repository or of the
+plugin. If you want the game's icons on your deck, put your own PNG copies into `%APPDATA%\RLHUDank-icons\` (the folder is
+created on first start; the inspector shows its path and how many icons were found).
+
+* File names: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — or the tier number, `0.png` … `22.png`.
+* PNG, up to 200 KB, roughly square with a transparent background works best.
+* New files are picked up within a few seconds, no restart needed. The icons stay on your computer.
+
 ## Why there are no shortcuts into the game's menus
 
 Rocket League has no interface to open modes, the garage or menus from outside — not in the Stats API, not in the configuration,

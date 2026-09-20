@@ -54,6 +54,10 @@ fs.writeFileSync(
 	path.join(logDir, "Launch.log"),
 	"[0014.78] Party: HandleLocalPlayerLoginStatusChanged PlayerName=Player1 PlayerID=Epic|1000|0 LoginStatus=LS_LoggedIn IsPrimary=True IsInParty=False\n" + queueBlock(42.68, "2026-09-20 10:00:00"),
 );
+// One rank icon the "user" dropped into the plugin's rank-icons folder (a 1×1 PNG stands in for real artwork).
+const iconDir = path.join(fake, "data", "rank-icons");
+fs.mkdirSync(iconDir, { recursive: true });
+fs.writeFileSync(path.join(iconDir, "diamond-2.png"), Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64"));
 fs.writeFileSync(iniPath, `[TAGame.MatchStatsExporter_TA]\r\n\r\n; tcp\r\nPort=49123\r\n\r\n; web\r\nWebPort=${RL_PORT}\r\n\r\n; rate\r\nPacketSendRate=0`);
 
 // ---- mock Stream Deck ------------------------------------------------------------------------------------------------
@@ -202,6 +206,7 @@ async function main(): Promise<void> {
 	check("clock shows 2:21", has(3, 0, "2:21"));
 	check("mode key: DOUBLES / ranked (playlist 11, 2v2)", has(1, 0, "DOUBLES") && has(1, 0, "RANKINGOWY"));
 	check("rank key: Diamond II from the user's settings", has(0, 0, "DIAMOND"));
+	check("…drawn with the icon found in the rank-icons folder instead of the built-in emblem", has(0, 0, "<image") && has(0, 0, "data:image/png;base64,"), svgOf(0, 0).slice(0, 300));
 	check("MMR key: 954, read from the game log — it wins over the 900 typed into the settings", has(0, 1, ">954<") && !has(0, 1, ">900<"), svgOf(0, 1).slice(-350));
 	fs.appendFileSync(path.join(logDir, "Launch.log"), queueBlock(43.2, "2026-09-20 11:00:00")); // the next queue, after a win worth +10
 	check("a new queue in the game log updates the MMR (964) and shows the change (+10)", await waitFor(() => has(0, 1, ">964<") && has(0, 1, ">+10<"), 6000), svgOf(0, 1).slice(-350));
@@ -275,6 +280,7 @@ async function main(): Promise<void> {
 	const status = () => received.find((m) => m.event === "sendToPropertyInspector" && m.payload?.type === "status");
 	check("status request is answered", await waitFor(() => !!status(), 3000));
 	check("status reports game running + API connected + ini ok", status()?.payload?.connected === true && status()?.payload?.ini?.state !== undefined, JSON.stringify(status()?.payload));
+	check("status reports the rank icons found", status()?.payload?.rankIcons?.count === 1, JSON.stringify(status()?.payload?.rankIcons));
 	check("status names the local player found in the game log", status()?.payload?.localPlayer?.name === "Player1", JSON.stringify(status()?.payload?.localPlayer));
 	const captured = path.join(fake, "data", "captures", "stats-api.ndjson");
 	check("an anonymised diagnostics log of the match was written", fs.existsSync(captured) && fs.readFileSync(captured, "utf8").includes('"Event":"GoalScored"') && !fs.readFileSync(captured, "utf8").includes("Rival"), captured);

@@ -32,6 +32,11 @@ export function emblem(tier: TierInfo, cx: number, cy: number, scale = 1, glyphT
 	);
 }
 
+/** A rank icon supplied by the user, drawn where the emblem would be. */
+export function iconBadge(dataUri: string, cx: number, cy: number, size = 46): string {
+	return `<image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="${dataUri}" x="${cx - size / 2}" y="${cy - size / 2}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/>`;
+}
+
 /** Small dot row: `n` blue dots, a separator, `n` orange dots — shows the team size of the current mode. */
 export function teamDots(n: number, cx: number, y: number, left: string = COLORS.blue1, right: string = COLORS.orange1): string {
 	const count = Math.max(1, Math.min(4, n));

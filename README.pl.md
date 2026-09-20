@@ -87,6 +87,16 @@ w grę) i przelicza `MMR = mu × 20 + 100`. Przelicznik sprawdzony na profilu z 
   i dotyczy wyłącznie trybów rankingowych.
 * Emblematy rang są własnej roboty (nie grafiki z gry).
 
+## Ikony rang
+
+Wtyczka rysuje własne emblematy rang. Grafiki rang z gry należą do Psyonix, więc nie ma ich w repozytorium ani we wtyczce. Jeśli chcesz mieć
+na pokładzie ikony z gry, wrzuć własne kopie PNG do `%APPDATA%\RLHUDank-icons\` (folder powstaje przy pierwszym uruchomieniu; panel
+wtyczki pokazuje jego ścieżkę i liczbę znalezionych ikon).
+
+* Nazwy plików: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — albo numer tieru, `0.png` … `22.png`.
+* Najlepiej PNG do 200 KB, w przybliżeniu kwadratowy, z przezroczystym tłem.
+* Nowe pliki są wykrywane w kilka sekund, bez restartu. Ikony zostają na Twoim komputerze.
+
 ## Dlaczego nie ma skrótów do menu gry
 
 Rocket League nie ma żadnego interfejsu do otwierania trybów, garażu ani menu z zewnątrz: ani w Stats API, ani w konfiguracji,

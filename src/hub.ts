@@ -6,6 +6,7 @@ import { MatchStore } from "./core/match-store";
 import { describePlaylist } from "./core/playlists";
 import { DEFAULT_SETTINGS, mergeSettings, type GlobalSettings } from "./core/types";
 import { RLClient } from "./net/rl-client";
+import { RankIcons } from "./sys/rank-icons";
 import { MatchRecorder } from "./sys/recorder";
 import { findLogDir, readExistingSamples, readLocalIdentity, RlLogWatcher, type LocalIdentity, type MmrSample } from "./sys/rl-log";
 import { DEFAULT_WEB_PORT, findInstallDirs, patchStatsIni, type IniResult } from "./sys/ini";
@@ -195,6 +196,16 @@ export class Hub {
 		return process.env.RLHUD_DATA_DIR ?? path.join(process.env.APPDATA ?? "", "RLHUD");
 	}
 
+	private iconStore?: RankIcons;
+	/** Rank icons the user dropped into `<data dir>/rank-icons` (the plugin does not ship the game's artwork). */
+	private get rankIcons(): RankIcons {
+		if (!this.iconStore) {
+			this.iconStore = new RankIcons(path.join(this.dataDir, "rank-icons"));
+			this.iconStore.ensureDir();
+		}
+		return this.iconStore;
+	}
+
 	private get mmrFile(): string {
 		return path.join(this.dataDir, "mmr.json");
 	}
@@ -300,6 +311,7 @@ export class Hub {
 			restartHint: this.restartHint(Date.now()),
 			nickMismatch: !!(this.settings.playerName.trim() && this.local && this.settings.playerName.trim().toLowerCase() !== this.local.name.toLowerCase()),
 			localPlayer: this.local ? { name: this.local.name, id: this.local.id } : null,
+			rankIcons: { dir: this.rankIcons.dir, count: this.rankIcons.count() },
 			mmrLog: this.logDir ? { dir: this.logDir, playlists: Object.keys(this.autoMmr).length } : null,
 			ini: this.ini ? { state: this.ini.state, files: this.ini.files, message: this.ini.message ?? "", webPort: this.ini.webPort, packetRate: this.ini.packetRate, installDir: this.ini.installDir ?? "" } : null,
 		};
@@ -315,7 +327,7 @@ export class Hub {
 	}
 
 	private context(now: number): RenderCtx {
-		return { store: this.store, settings: this.settings, now, restartHint: this.restartHint(now), autoMmr: this.autoMmr, lastQueuedPlaylist: this.lastQueued };
+		return { store: this.store, settings: this.settings, now, restartHint: this.restartHint(now), autoMmr: this.autoMmr, lastQueuedPlaylist: this.lastQueued, rankIcon: (id) => this.rankIcons.get(id) };
 	}
 
 	/** Banner keys in one row form a single wide banner; slices are assigned left to right unless pinned. */

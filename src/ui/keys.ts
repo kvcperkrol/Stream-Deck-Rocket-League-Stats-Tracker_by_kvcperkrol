@@ -3,7 +3,7 @@ import { describePlaylist } from "../core/playlists";
 import { rankFor, tierInfo } from "../core/ranks";
 import type { TeamNum } from "../core/types";
 import { convertSpeed, formatClock } from "../core/units";
-import { emblem, teamDots } from "./art";
+import { emblem, iconBadge, teamDots } from "./art";
 import { renderBannerSlice } from "./banner";
 import { sideTeams, teamLabel, teamLook } from "./teams";
 import { boostKey, carSpeedKey, possessionKey, pointsKey } from "./live-keys";
@@ -44,7 +44,7 @@ function rankKey(ctx: RenderCtx): string {
 		const none = tierInfo(0);
 		return doc(
 			panel() +
-				emblem(none, 36, 25, 0.95, "—") +
+				(ctx.rankIcon?.(0) ? iconBadge(ctx.rankIcon(0)!, 36, 25) : emblem(none, 36, 25, 0.95, "—")) +
 				text(t(lang, "unranked"), { y: 54, size: 11.5, fill: none.color, skew: -6, maxWidth: 66 }) +
 				text(pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 66 }) +
 				veil(ctx),
@@ -52,10 +52,10 @@ function rankKey(ctx: RenderCtx): string {
 	}
 	const entry = rankFor(ctx.settings.ranks, pl.group);
 	const tier = tierInfo(entry.tier);
-	const div =tier.rank >= 1 && tier.rank <= 7 ? `${t(lang, "div")} ${entry.div}` : "";
+	const div = tier.rank >= 1 && tier.rank <= 7 ? `${t(lang, "div")} ${entry.div}` : "";
 	return doc(
 		panel() +
-			emblem(tier, 36, 25, 0.95) +
+			(ctx.rankIcon?.(tier.id) ? iconBadge(ctx.rankIcon(tier.id)!, 36, 25) : emblem(tier, 36, 25, 0.95)) +
 			text(tier.rank === 0 ? t(lang, "setRank") : tier.family, { y: 54, size: tier.rank === 0 ? 10 : 11.5, fill: tier.color, skew: -6, maxWidth: 66 }) +
 			text(tier.roman && tier.rank !== 8 ? `${tier.roman}${div ? "  ·  " + div : ""}` : div || pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 66 }) +
 			veil(ctx),
@@ -96,7 +96,7 @@ function modeKey(ctx: RenderCtx): string {
 	return doc(
 		panel() +
 			text(pl.name.toUpperCase(), { y: 27, size: 16, skew: -9, maxWidth: 66 }) +
-			text(pl.ranked ? t(lang, "ranked_") : t(lang, "unranked"),{ y: 42, size: 10.5, fill: pl.ranked ? COLORS.gold : COLORS.dim, maxWidth: 66 }) +
+			text(pl.ranked ? t(lang, "ranked_") : t(lang, "unranked"), { y: 42, size: 10.5, fill: pl.ranked ? COLORS.gold : COLORS.dim, maxWidth: 66 }) +
 			teamDots(pl.size ?? ctx.store.teamSize() ?? 3, 36, 58, teamLook(s, sideTeams(s, ctx.settings.scoreOrder)[0]).accent, teamLook(s, sideTeams(s, ctx.settings.scoreOrder)[1]).accent) +
 			veil(ctx),
 	);

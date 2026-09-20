@@ -38,6 +38,8 @@ export interface RenderCtx {
 	autoMmr?: Record<number, AutoMmr>;
 	/** Playlist of the most recent queue — what the MMR key shows while no match is running. */
 	lastQueuedPlaylist?: number;
+	/** A rank icon (`data:` URI) the user supplied for a tier; without one the built-in emblem is drawn. */
+	rankIcon?: (tierId: number) => string | undefined;
 }
 
 export interface RenderOpts {

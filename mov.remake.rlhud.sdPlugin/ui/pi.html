@@ -67,6 +67,7 @@
 <h2 data-t="ranks">Your ranks</h2>
 <p class="note" data-t="ranksNote">MMR fills in by itself from the game log when you start a queue for a single playlist (the value from before the match) — the MMR typed here is a fallback. The game does not write a per-playlist rank or division, so you enter those. Unranked modes (casual, free play) show “UNRANKED” instead of a rank.</p>
 <table id="rankTable"></table>
+<p class="note" id="iconsNote"></p>
 
 <h2 data-t="advanced">Advanced</h2>
 <div class="row"><label data-t="rate">Packets/s</label><input id="packetRate" type="number" min="1" max="120" class="grow" /></div>
@@ -88,7 +89,8 @@ const I18N = {
 		mmrLogOk: "MMR z logu gry: {n} playl.", mmrLogMissing: "Brak logu gry (MMR ręcznie)", order: "Kolejność wyniku", orderMe: "Moja drużyna po lewej (jak w grze)", orderBlue: "Niebiescy zawsze po lewej", record: "Zapisuj dane meczu do diagnostyki (lokalnie, inni gracze zanonimizowani)", me: "Ty w grze", nickMismatch: "Wpisany nick ≠ konto z gry — wyczyść pole „Nick w grze”", gameOn: "Gra: uruchomiona", gameOff: "Gra: wyłączona", apiOn: "Stats API: połączone", apiOff: "Stats API: brak połączenia",
 		iniOk: "Konfiguracja gry: OK", iniChanged: "Konfiguracja gry: zaktualizowana", iniMissing: "Nie znaleziono Rocket League", iniErr: "Błąd konfiguracji gry",
 		restart: "Zrestartuj Rocket League", mode: "Tryb", playlist: "playlista",
-		unranked: "Bez rangi", div: "Dyw.", mmr: "MMR", groups: { duel: "Duel 1v1", doubles: "Doubles 2v2", solo: "Solo Standard", standard: "Standard 3v3", hoops: "Hoops", rumble: "Rumble", dropshot: "Dropshot", snowday: "Snow Day" },
+		iconsNote: "Opcjonalnie: własne ikony rang. Wrzuć pliki PNG o nazwach jak diamond-2.png, grand-champion-3.png, supersonic-legend.png, unranked.png (albo 0–22.png) do folderu: {dir}", iconsLoaded: "Ikony rang: {n}",
+			unranked: "Bez rangi", div: "Dyw.", mmr: "MMR", groups: { duel: "Duel 1v1", doubles: "Doubles 2v2", solo: "Solo Standard", standard: "Standard 3v3", hoops: "Hoops", rumble: "Rumble", dropshot: "Dropshot", snowday: "Snow Day" },
 	},
 	en: {
 		status: "Status", refresh: "Refresh", thisKey: "This key", slice: "Slice", sliceAuto: "Automatic (left to right)", slice1: "Left", slice2: "Middle", slice3: "Right",
@@ -102,7 +104,8 @@ const I18N = {
 		mmrLogOk: "MMR from game log: {n} playlist(s)", mmrLogMissing: "No game log (manual MMR)", order: "Score order", orderMe: "My team on the left (like the game)", orderBlue: "Blue always on the left", record: "Keep a small anonymised match log for diagnostics (local only)", me: "You in game", nickMismatch: "Typed name ≠ game account — clear the “In-game name” field", gameOn: "Game: running", gameOff: "Game: not running", apiOn: "Stats API: connected", apiOff: "Stats API: not connected",
 		iniOk: "Game config: OK", iniChanged: "Game config: updated", iniMissing: "Rocket League not found", iniErr: "Game config error",
 		restart: "Restart Rocket League", mode: "Mode", playlist: "playlist",
-		unranked: "Unranked", div: "Div", mmr: "MMR", groups: { duel: "Duel 1v1", doubles: "Doubles 2v2", solo: "Solo Standard", standard: "Standard 3v3", hoops: "Hoops", rumble: "Rumble", dropshot: "Dropshot", snowday: "Snow Day" },
+		iconsNote: "Optional: use your own rank icons. Put PNG files named like diamond-2.png, grand-champion-3.png, supersonic-legend.png, unranked.png (or 0–22.png) into this folder: {dir}", iconsLoaded: "Rank icons: {n}",
+			unranked: "Unranked", div: "Div", mmr: "MMR", groups: { duel: "Duel 1v1", doubles: "Doubles 2v2", solo: "Solo Standard", standard: "Standard 3v3", hoops: "Hoops", rumble: "Rumble", dropshot: "Dropshot", snowday: "Snow Day" },
 	},
 };
 
@@ -180,6 +183,8 @@ function renderStatus() {
 	else if (ini.state === "not-found") html += pill(tr("iniMissing"), "bad");
 	else html += pill(tr("iniErr"), "bad");
 	html += s.mmrLog ? pill(tr("mmrLogOk").replace("{n}", s.mmrLog.playlists), s.mmrLog.playlists > 0 ? "ok" : "") : pill(tr("mmrLogMissing"), "warn");
+	if (s.rankIcons && s.rankIcons.count > 0) html += pill(tr("iconsLoaded").replace("{n}", s.rankIcons.count), "ok");
+	$("iconsNote").textContent = s.rankIcons ? tr("iconsNote").replace("{dir}", s.rankIcons.dir) : "";
 	if (s.localPlayer) html += pill(tr("me") + ": " + s.localPlayer.name, s.nickMismatch ? "warn" : "ok");
 	if (s.nickMismatch) html += pill(tr("nickMismatch"), "warn");
 	if (s.restartHint) html += pill(tr("restart"), "warn");
