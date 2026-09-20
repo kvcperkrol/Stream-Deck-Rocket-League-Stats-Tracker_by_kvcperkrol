@@ -27,7 +27,7 @@ function fitLine(str: string, o: { x: number; y: number; size: number; fill: str
 	let size = o.size;
 	let out = str;
 	if (estimateWidth(out, size) > maxWidth) size = Math.max(minSize, fitSize(out, maxWidth, size));
-	if (estimateWidth(out, size) > maxWidth) out = out.slice(0, Math.max(1, Math.floor(maxWidth / (size * 0.6)) - 1)) + "…";
+	if (estimateWidth(out, size) > maxWidth + 0.5) out = out.slice(0, Math.max(1, Math.floor(maxWidth / (size * 0.6)) - 1)) + "…";
 	return text(out, { x: o.x, y: o.y, size, fill: o.fill, opacity: o.opacity, skew: o.skew ?? -6 });
 }
 
