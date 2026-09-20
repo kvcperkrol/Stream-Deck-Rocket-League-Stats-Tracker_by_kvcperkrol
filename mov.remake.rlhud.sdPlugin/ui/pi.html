@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rocket League HUD</title>
+<style>
+	:root { color-scheme: dark; }
+	* { box-sizing: border-box; }
+	body { margin: 0; padding: 10px 12px 18px; background: #2d2d2d; color: #d8d8d8; font: 12px/1.35 "Segoe UI", system-ui, sans-serif; }
+	h2 { margin: 16px 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #9aa4c7; border-bottom: 1px solid #444; padding-bottom: 3px; }
+	h2:first-child { margin-top: 2px; }
+	.row { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+	.row > label { flex: 0 0 96px; color: #b8b8b8; }
+	.row > .grow { flex: 1; min-width: 0; }
+	input, select, textarea { width: 100%; background: #1e1e1e; color: #eee; border: 1px solid #555; border-radius: 3px; padding: 4px 6px; font: inherit; }
+	input:focus, select:focus, textarea:focus { outline: 1px solid #4b8dff; border-color: #4b8dff; }
+	textarea { resize: vertical; min-height: 52px; font-family: Consolas, monospace; }
+	input[type=checkbox] { width: auto; }
+	button { background: #3a3a3a; color: #eee; border: 1px solid #5a5a5a; border-radius: 3px; padding: 3px 9px; font: inherit; cursor: pointer; }
+	button:hover { background: #454545; }
+	.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+	.pill { padding: 2px 8px; border-radius: 10px; background: #3a3a3a; font-size: 11px; }
+	.pill.ok { background: #1c5a36; color: #b8f5cf; }
+	.pill.warn { background: #6b4b12; color: #ffe0a3; }
+	.pill.bad { background: #6b1d2b; color: #ffc0cb; }
+	.note { color: #8f8f8f; font-size: 11px; margin: 3px 0 0; }
+	.err { color: #ff8a9c; font-size: 11px; min-height: 14px; }
+	table { width: 100%; border-collapse: collapse; }
+	td { padding: 2px 3px; vertical-align: middle; }
+	td.grp { width: 92px; color: #b8b8b8; white-space: nowrap; }
+	tr.current td.grp { color: #ffc531; font-weight: 600; }
+	td select { padding: 3px 3px; }
+	td.div { width: 46px; } td.mmr { width: 66px; }
+	.hidden { display: none; }
+	code { background: #1e1e1e; padding: 0 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h2 data-t="status">Status</h2>
+<div class="pills" id="pills"></div>
+<div class="row" style="margin-top:6px"><button id="refresh" data-t="refresh">Refresh</button><span class="note" id="statusNote"></span></div>
+
+<div id="keySection" class="hidden">
+	<h2 data-t="thisKey">This key</h2>
+	<div id="bannerBox" class="hidden">
+		<div class="row"><label data-t="slice">Slice</label>
+			<select id="slice" class="grow">
+				<option value="auto" data-t="sliceAuto">Automatic (left to right)</option>
+				<option value="1" data-t="slice1">Left</option>
+				<option value="2" data-t="slice2">Middle</option>
+				<option value="3" data-t="slice3">Right</option>
+			</select></div>
+		<p class="note" data-t="sliceNote">Three keys of this type in one row form a single wide banner.</p>
+	</div>
+</div>
+
+<h2 data-t="general">General</h2>
+<div class="row"><label data-t="lang">Language</label><select id="lang" class="grow"><option value="en">English</option><option value="pl">Polski</option></select></div>
+<div class="row"><label data-t="units">Units</label><select id="units" class="grow"><option value="kmh">km/h</option><option value="mph">mph</option><option value="uu">uu/s</option></select></div>
+<div class="row"><label data-t="player">In-game name</label><input id="playerName" class="grow" data-tp="playerPh" /></div>
+<p class="note" data-t="playerNote">Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.</p>
+<div class="row"><label data-t="order">Score order</label><select id="scoreOrder" class="grow"><option value="me-left" data-t="orderMe">My team on the left (like the game)</option><option value="blue-left" data-t="orderBlue">Blue always on the left</option></select></div>
+<div class="row"><label></label><label style="flex:1"><input type="checkbox" id="recordMatches" /> <span data-t="record">Keep a small anonymised match log for diagnostics (local only)</span></label></div>
+<div class="row"><label></label><label style="flex:1"><input type="checkbox" id="autoSwitch" /> <span data-t="autoSwitch">Switch profile automatically when the game starts</span></label></div>
+
+<h2 data-t="ranks">Your ranks</h2>
+<p class="note" data-t="ranksNote">MMR fills in by itself from the game log when you start a queue for a single playlist (the value from before the match) — the MMR typed here is a fallback. The game does not write a per-playlist rank or division, so you enter those. Unranked modes (casual, free play) show “UNRANKED” instead of a rank.</p>
+<table id="rankTable"></table>
+
+<h2 data-t="advanced">Advanced</h2>
+<div class="row"><label data-t="rate">Packets/s</label><input id="packetRate" type="number" min="1" max="120" class="grow" /></div>
+<div class="row"><label data-t="install">Game folder</label><input id="installDir" class="grow" data-tp="installPh" /></div>
+<p class="note" data-t="advNote">How many times per second the game sends match state. Changes need a Rocket League restart.</p>
+
+<script>
+"use strict";
+const I18N = {
+	pl: {
+		status: "Status", refresh: "Odśwież", thisKey: "Ten klawisz", slice: "Fragment", sliceAuto: "Automatycznie (od lewej)", slice1: "Lewy", slice2: "Środkowy", slice3: "Prawy",
+		sliceNote: "Trzy klawisze tego typu w jednym rzędzie tworzą jeden szeroki baner.",
+		general: "Ogólne", lang: "Język", units: "Jednostki", player: "Nick w grze", playerPh: "wykrywany automatycznie",
+		playerNote: "Zostaw puste — wtyczka odczyta Twoje konto z logu gry. Wpisz nick tylko wtedy, gdy oznaczenie „TY” jest złe.",
+		autoSwitch: "Przełączaj profil automatycznie po uruchomieniu gry",
+		ranks: "Twoje rangi", ranksNote: "MMR uzupełnia się sam z logu gry, gdy zaczynasz kolejkę na jedną playlistę (wartość sprzed meczu) — wpisany tu MMR to zapas. Gra nie zapisuje rangi ani dywizji dla playlisty, więc tę wpisujesz sama. Tryby bez rankingu (towarzyski, trening) pokazują „NIERANKINGOWY” zamiast rangi.",
+		advanced: "Zaawansowane", rate: "Pakiety/s", install: "Folder gry", installPh: "wykrywany automatycznie (Epic/Steam)",
+		advNote: "Ile razy na sekundę gra ma wysyłać stan meczu. Zmiany wymagają restartu Rocket League.",
+		mmrLogOk: "MMR z logu gry: {n} playl.", mmrLogMissing: "Brak logu gry (MMR ręcznie)", order: "Kolejność wyniku", orderMe: "Moja drużyna po lewej (jak w grze)", orderBlue: "Niebiescy zawsze po lewej", record: "Zapisuj dane meczu do diagnostyki (lokalnie, inni gracze zanonimizowani)", me: "Ty w grze", nickMismatch: "Wpisany nick ≠ konto z gry — wyczyść pole „Nick w grze”", gameOn: "Gra: uruchomiona", gameOff: "Gra: wyłączona", apiOn: "Stats API: połączone", apiOff: "Stats API: brak połączenia",
+		iniOk: "Konfiguracja gry: OK", iniChanged: "Konfiguracja gry: zaktualizowana", iniMissing: "Nie znaleziono Rocket League", iniErr: "Błąd konfiguracji gry",
+		restart: "Zrestartuj Rocket League", mode: "Tryb", playlist: "playlista",
+		unranked: "Bez rangi", div: "Dyw.", mmr: "MMR", groups: { duel: "Duel 1v1", doubles: "Doubles 2v2", solo: "Solo Standard", standard: "Standard 3v3", hoops: "Hoops", rumble: "Rumble", dropshot: "Dropshot", snowday: "Snow Day" },
+	},
+	en: {
+		status: "Status", refresh: "Refresh", thisKey: "This key", slice: "Slice", sliceAuto: "Automatic (left to right)", slice1: "Left", slice2: "Middle", slice3: "Right",
+		sliceNote: "Three keys of this type in one row form a single wide banner.",
+		general: "General", lang: "Language", units: "Units", player: "In-game name", playerPh: "detected automatically",
+		playerNote: "Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.",
+		autoSwitch: "Switch profile automatically when the game starts",
+		ranks: "Your ranks", ranksNote: "MMR fills in by itself from the game log when you start a queue for a single playlist (the value from before the match) — the MMR typed here is a fallback. The game does not write a per-playlist rank or division, so you enter those. Unranked modes (casual, free play) show “UNRANKED” instead of a rank.",
+		advanced: "Advanced", rate: "Packets/s", install: "Game folder", installPh: "detected automatically (Epic/Steam)",
+		advNote: "How many times per second the game sends match state. Changes need a Rocket League restart.",
+		mmrLogOk: "MMR from game log: {n} playlist(s)", mmrLogMissing: "No game log (manual MMR)", order: "Score order", orderMe: "My team on the left (like the game)", orderBlue: "Blue always on the left", record: "Keep a small anonymised match log for diagnostics (local only)", me: "You in game", nickMismatch: "Typed name ≠ game account — clear the “In-game name” field", gameOn: "Game: running", gameOff: "Game: not running", apiOn: "Stats API: connected", apiOff: "Stats API: not connected",
+		iniOk: "Game config: OK", iniChanged: "Game config: updated", iniMissing: "Rocket League not found", iniErr: "Game config error",
+		restart: "Restart Rocket League", mode: "Mode", playlist: "playlist",
+		unranked: "Unranked", div: "Div", mmr: "MMR", groups: { duel: "Duel 1v1", doubles: "Doubles 2v2", solo: "Solo Standard", standard: "Standard 3v3", hoops: "Hoops", rumble: "Rumble", dropshot: "Dropshot", snowday: "Snow Day" },
+	},
+};
+
+const FAMILIES = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Champion", "Grand Champion"];
+const ROMAN = ["I", "II", "III"];
+const TIERS = ["Unranked"];
+FAMILIES.forEach((f) => ROMAN.forEach((r) => TIERS.push(`${f} ${r}`)));
+TIERS.push("Supersonic Legend");
+const GROUPS = ["duel", "doubles", "solo", "standard", "hoops", "rumble", "dropshot", "snowday"];
+const GROUP_OF_PLAYLIST = { Duel: "duel", Doubles: "doubles", "Solo Standard": "solo", Standard: "standard", Hoops: "hoops", Rumble: "rumble", Dropshot: "dropshot" };
+
+let ws, uuid, actionInfo, role = "";
+let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: true, packetRate: 10, installDir: "", scoreOrder: "me-left", recordMatches: false, ranks: {} };
+let keySettings = {};
+let lastStatus = null;
+
+const $ = (id) => document.getElementById(id);
+const tr = (k) => (I18N[settings.lang] || I18N.en)[k] ?? I18N.en[k] ?? k;
+
+function applyI18n() {
+	document.documentElement.lang = settings.lang;
+	document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = tr(el.dataset.t); });
+	document.querySelectorAll("[data-tp]").forEach((el) => { el.placeholder = tr(el.dataset.tp); });
+	buildRankTable();
+	renderStatus();
+}
+
+function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+let saveTimer;
+function saveGlobal() {
+	clearTimeout(saveTimer);
+	saveTimer = setTimeout(() => send({ event: "setGlobalSettings", context: uuid, payload: settings }), 250);
+}
+function saveKey() { send({ event: "setSettings", context: uuid, payload: keySettings }); }
+function askStatus() { send({ event: "sendToPlugin", action: actionInfo.action, context: uuid, payload: { cmd: "status" } }); }
+
+function buildRankTable() {
+	const t = $("rankTable");
+	t.innerHTML = "";
+	const current = lastStatus && lastStatus.ranked ? GROUP_OF_PLAYLIST[lastStatus.playlist] : undefined;
+	for (const g of GROUPS) {
+		const e = settings.ranks[g] || { tier: 0, div: 1, mmr: null };
+		const row = document.createElement("tr");
+		if (g === current) row.className = "current";
+		const tiers = TIERS.map((n, i) => `<option value="${i}" ${i === e.tier ? "selected" : ""}>${i === 0 ? tr("unranked") : n}</option>`).join("");
+		row.innerHTML =
+			`<td class="grp">${tr("groups")[g]}</td>` +
+			`<td><select data-g="${g}" data-f="tier">${tiers}</select></td>` +
+			`<td class="div"><select data-g="${g}" data-f="div">${[1, 2, 3, 4].map((d) => `<option value="${d}" ${d === e.div ? "selected" : ""}>${tr("div")} ${d}</option>`).join("")}</select></td>` +
+			`<td class="mmr"><input data-g="${g}" data-f="mmr" type="number" min="0" max="4000" placeholder="${tr("mmr")}" value="${e.mmr ?? ""}"></td>`;
+		t.appendChild(row);
+	}
+	t.querySelectorAll("select,input").forEach((el) => el.addEventListener("change", onRankChange));
+}
+
+function onRankChange(ev) {
+	const el = ev.target, g = el.dataset.g, f = el.dataset.f;
+	const e = (settings.ranks[g] = settings.ranks[g] || { tier: 0, div: 1, mmr: null });
+	if (f === "mmr") e.mmr = el.value === "" ? null : Math.max(0, Math.min(4000, Number(el.value)));
+	else e[f] = Number(el.value);
+	saveGlobal();
+}
+
+function pill(text, cls) { return `<span class="pill ${cls}">${text}</span>`; }
+function renderStatus() {
+	const s = lastStatus;
+	const box = $("pills");
+	if (!s) { box.innerHTML = ""; return; }
+	let html = pill(s.gameRunning ? tr("gameOn") : tr("gameOff"), s.gameRunning ? "ok" : "");
+	html += pill(s.connected ? tr("apiOn") : tr("apiOff"), s.connected ? "ok" : s.gameRunning ? "warn" : "");
+	const ini = s.ini;
+	if (!ini) html += pill(tr("iniMissing"), "bad");
+	else if (ini.state === "ok") html += pill(tr("iniOk"), "ok");
+	else if (ini.state === "changed") html += pill(tr("iniChanged"), "warn");
+	else if (ini.state === "not-found") html += pill(tr("iniMissing"), "bad");
+	else html += pill(tr("iniErr"), "bad");
+	html += s.mmrLog ? pill(tr("mmrLogOk").replace("{n}", s.mmrLog.playlists), s.mmrLog.playlists > 0 ? "ok" : "") : pill(tr("mmrLogMissing"), "warn");
+	if (s.localPlayer) html += pill(tr("me") + ": " + s.localPlayer.name, s.nickMismatch ? "warn" : "ok");
+	if (s.nickMismatch) html += pill(tr("nickMismatch"), "warn");
+	if (s.restartHint) html += pill(tr("restart"), "warn");
+	box.innerHTML = html;
+	$("statusNote").textContent = s.connected ? `${tr("mode")}: ${s.playlist}${s.playlistId != null ? ` (${tr("playlist")} #${s.playlistId})` : ""}${s.meName ? ` · ${s.meName}` : ""}` : (ini && ini.message) || "";
+}
+
+function bindGlobal() {
+	const map = [["lang", "value"], ["units", "value"], ["playerName", "value"], ["installDir", "value"]];
+	for (const [id] of map) $(id).addEventListener("input", () => { settings[id] = $(id).value; if (id === "lang") applyI18n(); saveGlobal(); });
+	$("scoreOrder").addEventListener("change", () => { settings.scoreOrder = $("scoreOrder").value; saveGlobal(); });
+	$("recordMatches").addEventListener("change", () => { settings.recordMatches = $("recordMatches").checked; saveGlobal(); });
+	$("autoSwitch").addEventListener("change", () => { settings.autoSwitch = $("autoSwitch").checked; saveGlobal(); });
+	$("packetRate").addEventListener("change", () => { settings.packetRate = Math.max(1, Math.min(120, Number($("packetRate").value) || 10)); saveGlobal(); });
+	$("refresh").addEventListener("click", askStatus);
+	$("slice").addEventListener("change", () => { const v = $("slice").value; keySettings.slice = v === "auto" ? "auto" : Number(v); saveKey(); });
+}
+
+function fillForm() {
+	$("lang").value = settings.lang; $("units").value = settings.units; $("playerName").value = settings.playerName || "";
+	$("autoSwitch").checked = !!settings.autoSwitch; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("installDir").value = settings.installDir || "";
+	if (role === "banner") $("slice").value = String(keySettings.slice ?? "auto");
+	applyI18n();
+}
+
+function connectElgatoStreamDeckSocket(port, inUUID, registerEvent, info, actionInfoJson) {
+	uuid = inUUID;
+	actionInfo = JSON.parse(actionInfoJson);
+	role = String(actionInfo.action || "").split(".").pop();
+	keySettings = (actionInfo.payload && actionInfo.payload.settings) || {};
+
+	$("keySection").classList.toggle("hidden", role !== "banner");
+	$("bannerBox").classList.toggle("hidden", role !== "banner");
+
+	ws = new WebSocket("ws://127.0.0.1:" + port);
+	ws.onopen = () => {
+		send({ event: registerEvent, uuid: inUUID });
+		send({ event: "getGlobalSettings", context: inUUID });
+	};
+	ws.onmessage = (m) => {
+		const msg = JSON.parse(m.data);
+		if (msg.event === "didReceiveGlobalSettings") {
+			const g = msg.payload && msg.payload.settings || {};
+			settings = { ...settings, ...g, ranks: { ...(g.ranks || {}) } };
+			fillForm();
+			askStatus();
+		} else if (msg.event === "sendToPropertyInspector") {
+			const p = msg.payload || {};
+			if (p.type === "status") { lastStatus = p; renderStatus(); buildRankTable(); }
+		}
+	};
+}
+
+bindGlobal();
+applyI18n();
+setInterval(() => { if (ws && ws.readyState === 1) askStatus(); }, 4000);
+</script>
+</body>
+</html>

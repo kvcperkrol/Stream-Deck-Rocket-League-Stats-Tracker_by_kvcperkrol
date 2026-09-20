@@ -1,0 +1,7 @@
+node_modules/
+.tsbuild/
+dist/
+*.log
+mov.remake.rlhud.sdPlugin/bin/
+captures/
+mov.remake.rlhud.sdPlugin/logs/

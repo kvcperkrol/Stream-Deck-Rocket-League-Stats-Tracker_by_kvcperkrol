@@ -1,0 +1,324 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"SDKVersion": 2,
+	"UUID": "mov.remake.rlhud",
+	"Name": "Rocket League HUD",
+	"Version": "1.5.1.0",
+	"Author": "kvcperkrol",
+	"Description": "Live Rocket League HUD for a 15-key Stream Deck: score, clock, rank, goals with scorer and ball speed, demos, saves and shortcuts. Turns the game's Stats API on by itself — install, start the game, play.",
+	"Icon": "imgs/plugin/marketplace",
+	"Category": "Rocket League HUD",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "disabled"
+	},
+	"Software": {
+		"MinimumVersion": "6.6"
+	},
+	"OS": [
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"ApplicationsToMonitor": {
+		"windows": [
+			"RocketLeague.exe"
+		]
+	},
+	"PropertyInspectorPath": "ui/pi.html",
+	"Profiles": [
+		{
+			"Name": "profiles/RL",
+			"DeviceType": 0,
+			"DontAutoSwitchWhenInstalled": true,
+			"AutoInstall": true
+		},
+		{
+			"Name": "profiles/RL",
+			"DeviceType": 3,
+			"DontAutoSwitchWhenInstalled": true,
+			"AutoInstall": true
+		}
+	],
+	"Actions": [
+		{
+			"Name": "Rank",
+			"UUID": "mov.remake.rlhud.rank",
+			"Icon": "imgs/actions/rank/icon",
+			"Tooltip": "Your rank for the mode being played (set in the property inspector).",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/rank/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "MMR + session",
+			"UUID": "mov.remake.rlhud.mmr",
+			"Icon": "imgs/actions/mmr/icon",
+			"Tooltip": "MMR for the current mode and this session's wins/losses.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/mmr/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Mode",
+			"UUID": "mov.remake.rlhud.mode",
+			"Icon": "imgs/actions/mode/icon",
+			"Tooltip": "Current playlist: Duel / Doubles / Standard …, ranked or casual.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/mode/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Score (left team)",
+			"UUID": "mov.remake.rlhud.blue",
+			"Icon": "imgs/actions/blue/icon",
+			"Tooltip": "Goals of the team on the left of the score: your own team, in the colours the game shows it in.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/blue/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Score (right team)",
+			"UUID": "mov.remake.rlhud.orange",
+			"Icon": "imgs/actions/orange/icon",
+			"Tooltip": "Goals of the team on the right of the score: the opponent, in the colours the game shows it in.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/orange/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Match clock",
+			"UUID": "mov.remake.rlhud.timer",
+			"Icon": "imgs/actions/timer/icon",
+			"Tooltip": "Time left, overtime and pause.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/timer/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Last goal",
+			"UUID": "mov.remake.rlhud.lastgoal",
+			"Icon": "imgs/actions/lastgoal/icon",
+			"Tooltip": "Who scored the last goal, and how fast the ball was.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/lastgoal/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Event banner",
+			"UUID": "mov.remake.rlhud.banner",
+			"Icon": "imgs/actions/banner/icon",
+			"Tooltip": "Place three in a row: goals, demos, saves, overtime, victory …",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/banner/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Ball speed",
+			"UUID": "mov.remake.rlhud.speed",
+			"Icon": "imgs/actions/speed/icon",
+			"Tooltip": "Live ball speed with a bar and the match maximum.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/speed/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Boost",
+			"UUID": "mov.remake.rlhud.boost",
+			"Icon": "imgs/actions/boost/icon",
+			"Tooltip": "Your boost, 0–100, as a ring. Turns red when it runs low.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/boost/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Car speed",
+			"UUID": "mov.remake.rlhud.carspeed",
+			"Icon": "imgs/actions/carspeed/icon",
+			"Tooltip": "Your car's speed; SUPERSONIC flashes when you break the sound barrier.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/carspeed/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Possession",
+			"UUID": "mov.remake.rlhud.possession",
+			"Icon": "imgs/actions/possession/icon",
+			"Tooltip": "Which team touched the ball last, and each team's share of the match.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/possession/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Score",
+			"UUID": "mov.remake.rlhud.points",
+			"Icon": "imgs/actions/points/icon",
+			"Tooltip": "Your points, with shots and demolitions.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/points/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Boost (previous key)",
+			"UUID": "mov.remake.rlhud.find",
+			"Icon": "imgs/actions/boost/icon",
+			"Tooltip": "Your boost, 0–100, as a ring. Turns red when it runs low.",
+			"VisibleInActionsList": false,
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/boost/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Car speed (previous key)",
+			"UUID": "mov.remake.rlhud.garage",
+			"Icon": "imgs/actions/carspeed/icon",
+			"Tooltip": "Your car's speed; SUPERSONIC flashes when you break the sound barrier.",
+			"VisibleInActionsList": false,
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/carspeed/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Possession (previous key)",
+			"UUID": "mov.remake.rlhud.ranked",
+			"Icon": "imgs/actions/possession/icon",
+			"Tooltip": "Which team touched the ball last, and each team's share of the match.",
+			"VisibleInActionsList": false,
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/possession/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Score (previous key)",
+			"UUID": "mov.remake.rlhud.freeplay",
+			"Icon": "imgs/actions/points/icon",
+			"Tooltip": "Your points, with shots and demolitions.",
+			"VisibleInActionsList": false,
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/points/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		}
+	]
+}

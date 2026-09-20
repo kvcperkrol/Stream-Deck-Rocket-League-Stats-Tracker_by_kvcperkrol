@@ -1,0 +1,143 @@
+# Rocket League HUD dla Stream Deck
+
+🇬🇧 [English](README.md) · 🇵🇱 **Polski**
+
+Wtyczka do 15-klawiszowego Stream Decka (5×3). Po uruchomieniu Rocket League pokazuje na klawiszach wynik, czas,
+rangę, ostatniego strzelca z prędkością piłki, demolki, obrony oraz Twój boost, prędkość auta, posiadanie piłki i punkty.
+
+**Instalacja → uruchom grę → działa.** Wtyczka sama włącza w grze oficjalne [Stats API](https://www.rocketleague.com/developer/stats-api),
+sama przełącza Stream Decka na swój profil, gdy gra startuje, i wraca do poprzedniego, gdy gra się zamknie.
+
+> Projekt nieoficjalny — nie jest powiązany z Psyonix, Epic Games ani Elgato. „Rocket League” jest znakiem towarowym Psyonix.
+
+## Instalacja
+
+1. Pobierz `mov.remake.rlhud.streamDeckPlugin` z [najnowszego wydania](../../releases/latest), dwukliknij go i potwierdź instalację w aplikacji Stream Deck. (Własna budowa: `npm run pack`, patrz Rozwój.)
+2. Uruchom Rocket League. Przy pierwszym uruchomieniu **po instalacji wtyczki zrestartuj grę raz**, jeśli była już włączona
+   (gra czyta konfigurację tylko przy starcie; klawisz pokaże wtedy „RESTART GRY”).
+3. Wejdź w dowolny klawisz wtyczki w aplikacji Stream Deck → panel po prawej: wpisz **swoje rangi** (patrz niżej).
+
+Wymagania: Stream Deck 6.6+ (sprawdzone z 7.0.3), Windows 10/11, Rocket League z Epic Games lub Steam.
+
+## Język
+
+Domyślnie klawisze i panel są **po angielsku**. Polski włączysz w panelu wtyczki (dowolny klawisz → **General / Ogólne →
+Language / Język**). Zmiana działa od razu na wszystkich klawiszach.
+
+## Układ klawiszy
+
+```
+ RANGA        TRYB           WYNIK (Ty)    CZAS         WYNIK (rywal)
+ MMR + W/P    OSTATNI GOL    ┌──────────  BANER ZDARZEŃ  ──────────┐
+ BOOST        AUTO           POSIADANIE    PUNKTY       PIŁKA (km/h)
+```
+
+| Klawisz | Co pokazuje |
+|---|---|
+| **Ranga** | Emblemat i nazwa rangi dla trybu rankingowego, w którym grasz (Duel / Doubles / Standard …). W trybach **bez rankingu** (towarzyski, trening, mecz prywatny) pokazuje **NIERANKINGOWY** i nazwę trybu — nie pożycza rangi z podobnego trybu rankingowego. |
+| **MMR + W/P** | Twój MMR dla tego trybu i bilans wygranych/porażek od uruchomienia gry. W meczu towarzyskim jest to ukryty MMR towarzyski z logu gry, opisany „MMR TOWARZ.”. |
+| **Tryb** | Playlista i **RANKINGOWY** / **NIERANKINGOWY**, liczba graczy w drużynie. |
+| **Wynik (lewy / prawy)** | Gole drużyn w **kolorach, w jakich pokazuje je gra** (np. czarny lub szary przeciwnik). Po lewej jest **Twoja drużyna** (jak w HUD-zie gry), po prawej przeciwnik; Twoja ma znacznik „TY”. Miga po golu. W ustawieniach można wymusić „niebiescy zawsze po lewej”. Nazwa drużyny to nazwa własna (np. klubu) albo „NIEBIESCY / POMARAŃCZOWI” w języku wtyczki. |
+| **Czas** | Czas do końca, dogrywka (`+0:12`), pauza. Ostatnie 30 s na czerwono. |
+| **Ostatni gol** | Kto strzelił i z jaką prędkością piłki — zostaje też po wyjściu z meczu. |
+| **Baner** (3 klawisze) | **Gol** (prędkość · GOL! + strzelec · asysta), **demolka** (kto → kogo), obrona, epicka obrona, poprzeczka, dogrywka, powtórka, odliczanie, zwycięstwo/porażka. Bez zdarzeń: Twoje gole / asysty / obrony w meczu. |
+| **Piłka** | Aktualna prędkość piłki, pasek i maksimum meczu. |
+| **Boost** | Twój boost 0–100 jako pierścień; robi się czerwony i miga, gdy się kończy. |
+| **Auto** | Prędkość Twojego auta i pasek do bariery dźwięku; po jej przekroczeniu miga **SUPERSONIC**. |
+| **Posiadanie** | Która drużyna ostatnio dotykała piłki (znacznik) i jaki procent meczu piłka „była” u każdej z nich — w tych samych kolorach i kolejności co wynik. |
+| **Punkty** | Twoje punkty w meczu oraz strzały i demolki. |
+
+Klawisze możesz dowolnie przestawiać (kategoria „Rocket League HUD”). Trzy klawisze *Baner* w jednym rzędzie łączą się
+w jeden szeroki baner (od lewej do prawej); kolejność można wymusić w panelu klawisza.
+
+## MMR — sam z logu gry; ranga — wpisujesz
+
+**MMR uzupełnia się sam.** Rocket League zapisuje w lokalnym pliku `Documents\My Games\Rocket League\TAGame\Logs\Launch.log`
+Twoją umiejętność przy każdym starcie kolejki (`PartyLeaderMMR`). Wtyczka czyta ten plik (bez logowania, bez API, bez ingerencji
+w grę) i przelicza `MMR = mu × 20 + 100`. Przelicznik sprawdzony na profilu z rocketleague.tracker.network: 47,4225 → 1048
+(tracker: Casual 1 048); 28,5405 → 671, a tracker pokazywał 655 po przegranym meczu (−16).
+
+* Wartość jest zapisana **przed meczem**, więc nowy wynik pojawia się przy następnym starcie kolejki na tę samą playlistę.
+  Klucz pokazuje też zmianę od poprzedniej kolejki (np. `+9`, `−16`).
+* Liczą się tylko kolejki **na jedną playlistę** i **bez grupy** (przy kilku playlistach gra loguje średnią, a w grupie „lider”
+  może być kimś innym). W menu klucz pokazuje MMR playlisty z ostatniej kolejki, w meczu — playlisty granego meczu.
+* `PartyLeaderTier` z logu to **nie** ranga danej playlisty (jest stały — to Twój najwyższy tier ze wszystkich
+  playlist), więc **rangę i dywizję wpisujesz ręcznie** w panelu (sekcja „Twoje rangi”). Wpisany tam MMR jest tylko zapasem
+  i dotyczy wyłącznie trybów rankingowych.
+* Emblematy rang są własnej roboty (nie grafiki z gry).
+
+## Dlaczego nie ma skrótów do menu gry
+
+Rocket League nie ma żadnego interfejsu do otwierania trybów, garażu ani menu z zewnątrz: ani w Stats API, ani w konfiguracji,
+ani w argumentach startowych. Jedyne narzędzia, które to potrafią, wstrzykują kod do procesu gry (BakkesMod działa dziś tylko bez
+anty-cheata, czyli bez trybu online), więc wtyczka **nie steruje ani myszą, ani klawiaturą** i niczego do gry nie wysyła.
+
+## Skąd wiadomo, który gracz to Ty
+
+Gra zapisuje w `Launch.log`, na które konto jest zalogowana (`HandleLocalPlayerLoginStatusChanged PlayerName=… PlayerID=Epic|…|0`).
+`PlayerID` jest dokładnie tym, co Stats API wysyła jako `PrimaryId`, więc Twoje punkty, boost, prędkość, drużyna i znacznik „TY”
+pochodzą zawsze od właściwego gracza — na każdym komputerze od razu, bez konfiguracji. Kamera jest tylko ostatecznością, gdy
+logu nie ma. Panel wtyczki pokazuje „Ty w grze: <nick>” i ostrzega, gdy ręcznie wpisany nick różni się od konta z gry.
+
+Wtyczka czyta z logu **tylko** tę jedną linię i linie MMR. W tym samym pliku są też linie z jednorazowym kodem logowania Epic —
+ich wtyczka nie czyta, nie zapisuje ani nie loguje.
+
+## Zapis danych meczu do diagnostyki
+
+**Domyślnie wyłączone.** Po włączeniu w panelu wtyczki („Zapisuj dane meczu do diagnostyki”) wtyczka zapisuje lokalnie mały, **zanonimizowany** log Stats API (`%APPDATA%\RLHUD\captures\stats-api.ndjson`, max ok. 2×3 MB):
+inni gracze są zastąpieni przez P2, P3…, zostaje tylko Twój nick i ID. Nic nie jest nigdzie wysyłane. Służy do analizy błędów
+widocznych w prawdziwym meczu, np. do dołączenia do zgłoszenia błędu; wtyczka do działania tego nie potrzebuje.
+
+## Diagnostyka
+
+Panel wtyczki u góry pokazuje: czy gra działa, czy Stats API jest połączone, stan konfiguracji gry i ID ostatniej playlisty.
+
+| Objaw | Przyczyna / rozwiązanie |
+|---|---|
+| „RESTART GRY” na banerze | Gra wystartowała, zanim wtyczka włączyła Stats API. Zrestartuj Rocket League. |
+| Baner: „Uruchom grę” mimo działającej gry | Zainstalowana wersja gry nie została znaleziona — wpisz folder w Zaawansowane → „Folder gry”. |
+| Zły tryb / „Playlist #NN” | Nieznane ID playlisty — nagraj mecz (`npm run record`) i dopisz ID w `src/core/playlists.ts`. |
+
+Log wtyczki: `%APPDATA%\Elgato\StreamDeck\Plugins\mov.remake.rlhud.sdPlugin\logs`.
+
+## Co dokładnie robi z plikami gry
+
+Przy starcie wtyczka (i po zamknięciu gry) ustawia w `…\TAGame\Config\DefaultStatsAPI.ini` (oraz `TAStatsAPI.ini`, jeśli istnieje)
+`PacketSendRate=10`, o ile było `0`. Istniejące, niezerowe wartości użytkownika nie są nadpisywane, komentarze i końce linii
+zostają, a przed pierwszą zmianą powstaje kopia `*.rlhud.bak`. Wynik testów tej logiki: `test/core.test.ts`.
+
+## Prawdziwe Stats API a jego dokumentacja
+
+Wtyczka była poprawiana na nagraniach prawdziwej gry (`npm run record`). Różnice względem oficjalnej dokumentacji:
+
+* `Data` w każdej wiadomości to **tekst z JSON-em**, a nie obiekt.
+* Prędkości (piłka, samochód, `GoalSpeed`) są **od razu w km/h** — dokumentacja pisze „uu/s”.
+* Polskie nazwy drużyn przychodzą w kodowaniu Windows-1250 — wtyczka naprawia kodowanie każdego napisu osobno.
+* Pola „tylko dla obserwatora” (`Speed`, `Boost` …) są wysyłane także graczowi — także w meczach online.
+* `Teams[].ColorPrimary` to prawdziwy kolor drużyny (domyślnie `1873FF` / `C26418`; klub może go zmienić, np. na czarny `262626`).
+* Wynik w `UpdateState` jest wiarygodny w trakcie powtórek; wtyczka mimo to ignoruje wszystko, co przychodzi w powtórce.
+* **Nie sprawdzone jeszcze w meczu z innymi graczami:** nazwy zdarzeń `StatfeedEvent` (demolka, obrona), ID playlist Hoops/Rumble/Dropshot.
+
+## Licencja
+
+[MIT](LICENSE) **z klauzulą Commons Clause**: możesz swobodnie używać, kopiować, modyfikować i udostępniać wtyczkę, ale nie wolno jej
+**sprzedawać** ani sprzedawać produktu lub usługi, której wartość w istotnej części pochodzi z wtyczki (także płatnego hostingu,
+wsparcia czy konsultacji wokół niej). Przez ten warunek projekt jest „source-available”, a nie „open source” w rozumieniu OSI.
+Streamowanie z jej użyciem na monetyzowanym kanale jest w porządku — nie sprzedajesz wtyczki.
+
+## Rozwój
+
+```bash
+npm install
+npm run build        # manifest + grafiki + profil + paczka (esbuild)
+npm test             # testy jednostkowe + testy na prawdziwym nagraniu meczu (test/fixtures)
+npm run e2e          # wtyczka ⇄ udawany Stream Deck ⇄ udawana gra (hermetyczny — nie dotyka prawdziwej gry)
+npm run preview      # rysuje pokład dla scenariuszy meczu → preview/*.png
+npm run mock         # udawana gra (ws://127.0.0.1:49124) — pokaz bez Rocket League
+npm run record       # nagrywa prawdziwe Stats API do captures/*.ndjson + podsumowanie
+npm run pack         # typecheck + testy + build + walidacja + dist/*.streamDeckPlugin
+```
+
+Struktura: `src/core` (stan meczu, bez zależności od Stream Decka; teksty w `src/core/i18n.ts`), `src/ui` (rysowanie SVG),
+`src/net` + `src/sys` (WebSocket, konfiguracja gry), `src/hub.ts` (spina wszystko), `tools/` (generatory i testy).
+Nowy język to jeden słownik w `src/core/i18n.ts` i jeden w `mov.remake.rlhud.sdPlugin/ui/pi.html`.

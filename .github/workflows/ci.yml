@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write # only used to attach the package to a release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      # The generated artwork and the bundled profile are committed, so CI does not regenerate them
+      # (the artwork needs the Bahnschrift font that ships with Windows, but the profile must stay byte-stable).
+      - run: npm run manifest
+      - run: npm run bundle
+      - run: npm run e2e
+      - run: npx streamdeck validate mov.remake.rlhud.sdPlugin
+      - run: npx streamdeck pack mov.remake.rlhud.sdPlugin --output dist --force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mov.remake.rlhud.streamDeckPlugin
+          path: dist/mov.remake.rlhud.streamDeckPlugin
+      - name: Attach the package to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/mov.remake.rlhud.streamDeckPlugin --generate-notes
