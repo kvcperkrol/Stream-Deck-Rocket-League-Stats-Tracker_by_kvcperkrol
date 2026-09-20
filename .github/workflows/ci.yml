@@ -30,13 +30,16 @@ jobs:
       - run: npm run e2e
       - run: npx streamdeck validate mov.remake.rlhud.sdPlugin
       - run: npx streamdeck pack mov.remake.rlhud.sdPlugin --output dist --force
+      - name: Give the installer a descriptive file name
+        shell: bash
+        run: mv dist/mov.remake.rlhud.streamDeckPlugin dist/Rocket-League-HUD.streamDeckPlugin
       - uses: actions/upload-artifact@v4
         with:
-          name: mov.remake.rlhud.streamDeckPlugin
-          path: dist/mov.remake.rlhud.streamDeckPlugin
+          name: Rocket-League-HUD.streamDeckPlugin
+          path: dist/Rocket-League-HUD.streamDeckPlugin
       - name: Attach the package to the release
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" dist/mov.remake.rlhud.streamDeckPlugin --generate-notes
+        run: gh release create "${{ github.ref_name }}" dist/Rocket-League-HUD.streamDeckPlugin --generate-notes

@@ -30,7 +30,7 @@ sama przełącza Stream Decka na swój profil, gdy gra startuje, i wraca do popr
 
 ## Instalacja
 
-1. Pobierz `mov.remake.rlhud.streamDeckPlugin` z [najnowszego wydania](../../releases/latest) (bezpośredni link: [`mov.remake.rlhud.streamDeckPlugin`](../../releases/latest/download/mov.remake.rlhud.streamDeckPlugin)), dwukliknij go i potwierdź instalację w aplikacji Stream Deck. (Własna budowa: `npm run pack`, patrz Rozwój.)
+1. Pobierz `Rocket-League-HUD.streamDeckPlugin` z [najnowszego wydania](../../releases/latest) (bezpośredni link: [`Rocket-League-HUD.streamDeckPlugin`](../../releases/latest/download/Rocket-League-HUD.streamDeckPlugin)), dwukliknij go i potwierdź instalację w aplikacji Stream Deck. (Własna budowa: `npm run pack`, patrz Rozwój.)
 2. Uruchom Rocket League. Przy pierwszym uruchomieniu **po instalacji wtyczki zrestartuj grę raz**, jeśli była już włączona
    (gra czyta konfigurację tylko przy starcie; klawisz pokaże wtedy „RESTART GRY”).
 3. Wejdź w dowolny klawisz wtyczki w aplikacji Stream Deck → panel po prawej: wpisz **swoje rangi** (patrz niżej).

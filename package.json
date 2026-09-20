@@ -19,7 +19,7 @@
     "mock": "tsx tools/mock-rl.ts",
     "record": "tsx tools/record.ts",
     "e2e": "tsx tools/e2e.ts",
-    "pack": "npm run typecheck && npm test && npm run build && streamdeck pack mov.remake.rlhud.sdPlugin --output dist --force"
+    "pack": "npm run typecheck && npm test && npm run build && streamdeck pack mov.remake.rlhud.sdPlugin --output dist --force && node -e \"require('fs').renameSync('dist/mov.remake.rlhud.streamDeckPlugin','dist/Rocket-League-HUD.streamDeckPlugin')\""
   },
   "dependencies": {
     "@elgato/streamdeck": "^1.4.1",
