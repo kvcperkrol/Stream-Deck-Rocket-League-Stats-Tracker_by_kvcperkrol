@@ -4,7 +4,7 @@
   "private": true,
   "author": "kvcperkrol",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": { "type": "git", "url": "git+https://github.com/kvcperkrol/Stream-Desk-Rocket-League-Stats-Tracker_by_kvcperkrol.git" },
+  "repository": { "type": "git", "url": "git+https://github.com/kvcperkrol/Stream-Deck-Rocket-League-Stats-Tracker_by_kvcperkrol.git" },
   "type": "module",
   "description": "Rocket League HUD + shortcuts for Elgato Stream Deck (15-key)",
   "scripts": {
