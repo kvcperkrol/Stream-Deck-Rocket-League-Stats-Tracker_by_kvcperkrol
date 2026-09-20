@@ -90,7 +90,7 @@ w grę) i przelicza `MMR = mu × 20 + 100`. Przelicznik sprawdzony na profilu z 
 ## Ikony rang
 
 Wtyczka rysuje własne emblematy rang. Grafiki rang z gry należą do Psyonix, więc nie ma ich w repozytorium ani we wtyczce. Jeśli chcesz mieć
-na pokładzie ikony z gry, wrzuć własne kopie PNG do `%APPDATA%\RLHUDank-icons\` (folder powstaje przy pierwszym uruchomieniu; panel
+na pokładzie ikony z gry, wrzuć własne kopie PNG do `%APPDATA%\RLHUD\rank-icons\` (folder powstaje przy pierwszym uruchomieniu; panel
 wtyczki pokazuje jego ścieżkę i liczbę znalezionych ikon).
 
 * Nazwy plików: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — albo numer tieru, `0.png` … `22.png`.

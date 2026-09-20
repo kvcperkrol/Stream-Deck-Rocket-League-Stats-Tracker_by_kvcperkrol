@@ -92,7 +92,7 @@ and converts it with `MMR = mu × 20 + 100`. The conversion was checked against 
 ## Rank icons
 
 The plugin draws its own rank emblems. The game's rank artwork belongs to Psyonix, so it is not part of this repository or of the
-plugin. If you want the game's icons on your deck, put your own PNG copies into `%APPDATA%\RLHUDank-icons\` (the folder is
+plugin. If you want the game's icons on your deck, put your own PNG copies into `%APPDATA%\RLHUD\rank-icons\` (the folder is
 created on first start; the inspector shows its path and how many icons were found).
 
 * File names: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — or the tier number, `0.png` … `22.png`.
