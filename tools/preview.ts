@@ -21,7 +21,7 @@ const state = (over: { blue?: number; orange?: number; time?: number; ot?: boole
 	Event: "UpdateState",
 	Data: {
 		MatchGuid: "G",
-		Players: [P("Player1", 0, { ...(over.me ?? { Goals: 1, Assists: 0, Saves: 2 }), Score: 340, Shots: 4, Demos: 1, Boost: 62, Speed: 64, bBoosting: true, bSupersonic: false, ...(over.car ?? {}) }), P("Mate", 0), P("Rival", 1), P("Rival2", 1)],
+		Players: [P("Player1", 0, { ...(over.me ?? { Goals: 3, Assists: 0, Saves: 1 }), Score: 457, Shots: 3, Demos: 0, Boost: 45, Speed: 47, bBoosting: true, bSupersonic: false, ...(over.car ?? {}) }), P("Mate", 0), P("Rival", 1), P("Rival2", 1)],
 		Game: {
 			Teams: [
 				{ Name: "Blue", TeamNum: 0, Score: over.blue ?? 0 },
@@ -50,7 +50,7 @@ interface Scenario {
 
 const SETTINGS: Partial<GlobalSettings> = {
 	lang: "en",
-	ranks: { doubles: { tier: 14, div: 2, mmr: 1247 }, duel: { tier: 19, div: 1, mmr: 1512 }, standard: { tier: 22, div: 1, mmr: 1890 } },
+	ranks: { doubles: { tier: 14, div: 2, mmr: 964 }, snowday: { tier: 5, div: 3, mmr: 447 } }, // Diamond II 954 → 964 after a win; Snow Day Silver II, division III
 };
 
 const scenarios: Scenario[] = [
@@ -67,9 +67,9 @@ const scenarios: Scenario[] = [
 		build: (s) => {
 			s.setGameRunning(true);
 			s.setConnected(true);
-			s.handle(state({ blue: 2, orange: 1, time: 141, ball: 68 }));
-			s.handle({ Event: "GoalScored", Data: { GoalSpeed: 95, Scorer: { Name: "Mate", TeamNum: 0 } } });
-			s.handle(state({ blue: 2, orange: 1, time: 141, ball: 68 }));
+			s.handle(state({ blue: 4, orange: 3, time: 72, ball: 78 }));
+s.handle({ Event: "GoalScored", Data: { GoalSpeed: 81, Scorer: { Name: "Mate", TeamNum: 0 } } });
+s.handle(state({ blue: 4, orange: 3, time: 72, ball: 78 }));
 		},
 		at: 6000,
 	},
@@ -78,8 +78,8 @@ const scenarios: Scenario[] = [
 		build: (s) => {
 			s.setGameRunning(true);
 			s.setConnected(true);
-			s.handle(state({ blue: 2, orange: 1, time: 141 }));
-			s.handle({ Event: "GoalScored", Data: { GoalSpeed: 102, GoalTime: 90, Scorer: { Name: "Player1", TeamNum: 0 }, Assister: { Name: "Mate", TeamNum: 0 } } });
+			s.handle(state({ blue: 4, orange: 3, time: 72 }));
+s.handle({ Event: "GoalScored", Data: { GoalSpeed: 86, GoalTime: 20, Scorer: { Name: "Player1", TeamNum: 0 }, Assister: { Name: "Mate", TeamNum: 0 } } });
 		},
 		at: 700,
 	},
@@ -98,8 +98,8 @@ const scenarios: Scenario[] = [
 		build: (s) => {
 			s.setGameRunning(true);
 			s.setConnected(true);
-			s.handle(state({ blue: 1, orange: 1, time: 200, ball: 32 }));
-			s.handle({ Event: "StatfeedEvent", Data: { EventName: "Demolish", Type: "Demolition", MainTarget: { Name: "Player1", TeamNum: 0 }, SecondaryTarget: { Name: "Rival", TeamNum: 1 } } });
+			s.handle(state({ blue: 3, orange: 3, time: 96, ball: 78, car: { Demos: 1 } }));
+s.handle({ Event: "StatfeedEvent", Data: { EventName: "Demolish", Type: "Demolition", MainTarget: { Name: "Player1", TeamNum: 0 }, SecondaryTarget: { Name: "Rival", TeamNum: 1 } } });
 		},
 		at: 900,
 	},
@@ -184,12 +184,12 @@ const scenarios: Scenario[] = [
 		build: (s, clock) => {
 			s.setGameRunning(true);
 			s.setConnected(true);
-			const car = { Speed: 82.8, Boost: 18, bBoosting: true, bSupersonic: true, Score: 340, Shots: 4, Demos: 1 };
+			const car = { Speed: 82.8, Boost: 18, bBoosting: true, bSupersonic: true, Score: 457, Shots: 3, Demos: 0 };
 			s.handle({ Event: "RoundStarted", Data: {} });
 			// 6 s of blue touching the ball last, then 4 s of orange (the store credits the time between updates)
 			for (let i = 0; i < 100; i++) {
 				clock.t += 100;
-				s.handle(state({ blue: 2, orange: 1, time: 141, ball: 96, car, ballTeam: i < 60 ? 0 : 1 }));
+				s.handle(state({ blue: 4, orange: 3, time: 72, ball: 78, car, ballTeam: i < 60 ? 0 : 1 }));
 			}
 		},
 	},
@@ -201,14 +201,15 @@ const scenarios: Scenario[] = [
 			s.setConnected(true);
 			s.handle({ Event: "RoundStarted", Data: {} });
 			const msg = (i: number): RLMessage => {
-				const m = state({ blue: 1, orange: 2, time: 95, ball: 70, ballTeam: i < 55 ? 1 : 0, car: { Speed: 71, Boost: 43, bBoosting: false, bSupersonic: false, Score: 210, Shots: 3, Demos: 1 } });
+				const m = state({ blue: 3, orange: 4, time: 72, ball: 78, ballTeam: i < 55 ? 1 : 0, car: { Speed: 47, Boost: 45, bBoosting: false, bSupersonic: false, Score: 457, Shots: 3, Demos: 0 } });
 				// the user plays ORANGE (team 1); the blue side is a BLACK team, as some players set it
 				m.Data.Players[0].TeamNum = 1;
 				m.Data.Players[1].TeamNum = 1;
 				m.Data.Players[2].TeamNum = 0;
 				m.Data.Players[3].TeamNum = 0;
-				m.Data.Game.Teams[0].ColorPrimary = "1A1A1A";
-				m.Data.Game.Teams[1].ColorPrimary = "FF9A26";
+				m.Data.Game.Teams[0].ColorPrimary = "262626";
+m.Data.Game.Teams[0].Name = "Club";
+m.Data.Game.Teams[1].ColorPrimary = "C26418";
 				m.Data.Game.Target = { Name: "Rival", TeamNum: 0 }; // the camera may show anybody at the start
 				return m;
 			};
@@ -216,9 +217,7 @@ const scenarios: Scenario[] = [
 				clock.t += 100;
 				s.handle(msg(i));
 			}
-			s.handle({ Event: "GoalScored", Data: { GoalSpeed: 88, GoalTime: 40, Scorer: { Name: "Player1", TeamNum: 1 } } });
-		},
-		at: 500,
+			},
 	},
 	{
 		name: "15-polish-mph",
@@ -226,8 +225,8 @@ const scenarios: Scenario[] = [
 		build: (s) => {
 			s.setGameRunning(true);
 			s.setConnected(true);
-			s.handle(state({ blue: 2, orange: 1, time: 141, ball: 90 }));
-			s.handle({ Event: "GoalScored", Data: { GoalSpeed: 102, Scorer: { Name: "Player1", TeamNum: 0 }, Assister: { Name: "Mate", TeamNum: 0 } } });
+			s.handle(state({ blue: 4, orange: 3, time: 72, ball: 78 }));
+s.handle({ Event: "GoalScored", Data: { GoalSpeed: 86, Scorer: { Name: "Player1", TeamNum: 0 }, Assister: { Name: "Mate", TeamNum: 0 } } });
 		},
 		at: 900,
 	},
@@ -237,7 +236,7 @@ const scenarios: Scenario[] = [
 		build: (s) => {
 			s.setGameRunning(true);
 			s.setConnected(true);
-			s.handle(state({ blue: 1, orange: 0, time: 210, ball: 40, playlist: 2 }));
+			s.handle(state({ blue: 4, orange: 3, time: 72, ball: 78, playlist: 2 }));
 		},
 		at: 300,
 	},
@@ -277,7 +276,14 @@ for (const sc of scenarios) {
 	const store = new MatchStore(() => clock.t);
 	sc.build(store, clock);
 	clock.t += sc.at ?? 0;
-	const ctx: RenderCtx = { store, settings: mergeSettings({ ...SETTINGS, ...sc.settings }), now: clock.t, restartHint: !!sc.restartHint };
+	const ctx: RenderCtx = {
+		store,
+		settings: mergeSettings({ ...SETTINGS, ...sc.settings }),
+		now: clock.t,
+		restartHint: !!sc.restartHint,
+		// what the game log gave: ranked doubles 954 → 964 after a win (+10); casual 1048
+		autoMmr: { 11: { mmr: 964, at: "2026-09-20T15:00:00Z", delta: 10 }, 2: { mmr: 1048, at: "2026-09-20T15:00:00Z" } },
+	};
 	const svg = deckSvg(ctx);
 	const png = new Resvg(svg, { fitTo: { mode: "zoom", value: SCALE }, font: { loadSystemFonts: true, defaultFontFamily: "Bahnschrift" } }).render().asPng();
 	fs.writeFileSync(path.join(OUT, `${sc.name}.png`), png);

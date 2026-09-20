@@ -23,9 +23,12 @@ sama przełącza Stream Decka na swój profil, gdy gra startuje, i wraca do popr
     <td align="center"><img src="docs/screenshots/unranked.png" alt="Mecz towarzyski pokazany jako bez rankingu" width="360"><br><sub>Mecz towarzyski: <b>UNRANKED</b> zamiast rangi</sub></td>
     <td align="center"><img src="docs/screenshots/polish.png" alt="Ten sam pokład po polsku, prędkość w mph" width="360"><br><sub>Interfejs po polsku, prędkość w mph (oba to ustawienia)</sub></td>
   </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/screenshots/black-club.png" alt="Drużyna pomarańczowa przeciw czarnemu klubowi, kolory z gry" width="360"><br><sub>Kolory drużyn pochodzą z gry: tu pomarańczowi przeciw czarnemu klubowi</sub></td>
+  </tr>
 </table>
 
-<sub>Obrazy to rendery z symulowanych danych meczu (generuje je `npm run preview`), nie dane prawdziwych graczy.</sub>
+<sub>Rendery generowane przez `npm run preview`. Liczby (MMR, ranga, wynik, punkty, prędkości, kolory drużyn) pochodzą z prawdziwych meczów; nicki graczy to zamienniki.</sub>
 
 
 ## Instalacja
