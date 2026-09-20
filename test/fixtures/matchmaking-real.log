@@ -1,0 +1,28 @@
+[0116.14] Prime24121: StartSearch.PreferredRegions.Length 5
+[0118.70] Prime24121: HandleRegionsPinged.PreferredRegions.Length 5
+[0118.70] Matchmaking: Pre-divide PartyLeaderMMR: 47.4225
+[0118.70] Matchmaking: Post-divide PartyLeaderMMR: 47.4225
+[0118.70] Matchmaking: PartyLeaderTier=(15)
+[0118.70] Matchmaking: StartMatchmaking at 2026-09-20 13:05:33 in EU7,EU5,EU3,EU1,EU9 for playlists 2 on game server 
+[0118.70] Matchmaking: PreferredRegions.Length=(5) PreferredPlaylists.Length=(1) Party.GetOrderedPartyMemberIDs().Length=(1)
+[0211.02] Prime24121: StartSearch.PreferredRegions.Length 5
+[0213.70] Prime24121: HandleRegionsPinged.PreferredRegions.Length 5
+[0213.70] Matchmaking: Pre-divide PartyLeaderMMR: 47.4225
+[0213.70] Matchmaking: Post-divide PartyLeaderMMR: 47.4225
+[0213.70] Matchmaking: PartyLeaderTier=(15)
+[0213.70] Matchmaking: StartMatchmaking at 2026-09-20 13:07:09 in EU7,EU5,EU3,EU1,EU9 for playlists 2 on game server 
+[0213.70] Matchmaking: PreferredRegions.Length=(5) PreferredPlaylists.Length=(1) Party.GetOrderedPartyMemberIDs().Length=(1)
+[1412.87] Prime24121: StartSearch.PreferredRegions.Length 5
+[1416.65] Prime24121: HandleRegionsPinged.PreferredRegions.Length 5
+[1416.65] Matchmaking: Pre-divide PartyLeaderMMR: 28.5405
+[1416.65] Matchmaking: Post-divide PartyLeaderMMR: 28.5405
+[1416.65] Matchmaking: PartyLeaderTier=(15)
+[1416.65] Matchmaking: StartMatchmaking at 2026-09-20 13:27:11 in EU7,EU1,EU9,EU3,EU5 for playlists 10 on game server 
+[1416.65] Matchmaking: PreferredRegions.Length=(5) PreferredPlaylists.Length=(1) Party.GetOrderedPartyMemberIDs().Length=(1)
+[0256.97] Prime24121: StartSearch.PreferredRegions.Length 5
+[0259.57] Prime24121: HandleRegionsPinged.PreferredRegions.Length 5
+[0259.57] Matchmaking: Pre-divide PartyLeaderMMR: 93.5708
+[0259.57] Matchmaking: Post-divide PartyLeaderMMR: 46.7854
+[0259.57] Matchmaking: PartyLeaderTier=(15)
+[0259.57] Matchmaking: StartMatchmaking at 2026-09-20 13:41:05 in EU7,EU9,EU5,EU1,EU3 for playlists 3,2 on game server 
+[0259.57] Matchmaking: PreferredRegions.Length=(5) PreferredPlaylists.Length=(2) Party.GetOrderedPartyMemberIDs().Length=(1)

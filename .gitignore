@@ -5,3 +5,5 @@ dist/
 mov.remake.rlhud.sdPlugin/bin/
 captures/
 mov.remake.rlhud.sdPlugin/logs/
+# test fixtures are real (anonymised) game-log excerpts and must be committed
+!test/fixtures/*.log
