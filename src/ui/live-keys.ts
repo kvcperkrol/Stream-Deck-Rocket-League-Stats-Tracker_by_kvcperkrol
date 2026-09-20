@@ -58,8 +58,8 @@ export function carSpeedKey(ctx: RenderCtx): string {
 	const bg = sonic ? linear("cs", "#e11d8a", "#3b1a8f") + `<rect width="72" height="72" fill="url(#cs)"/>` + stripes(72, 72, 6, 0.14) : panel();
 	return doc(
 		bg +
-			text(sonic ? t(lang, "supersonic") : t(lang, "carSpeed"), { y: 15, size: 9.5, fill: sonic ? "#ffffff" : COLORS.dim, opacity: sonic && !blink ? 0.55 : 1, maxWidth: 66 }) +
-			text(v ? String(v.value) : me ? "n/d" : "—", { y: 46, size: v ? 31 : 24, fill: v ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 66 }) +
+			text(sonic ? t(lang, "supersonic") : t(lang, "carSpeed"), { y: 15, size: 9.5, fill: sonic ? "#ffffff" : COLORS.dim, opacity: sonic && !blink ? 0.55 : 1, maxWidth: 56 }) +
+			text(v ? String(v.value) : me ? "n/d" : "—", { y: 46, size: v ? 31 : 24, fill: v ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 56 }) +
 			text(v ? v.unit : "", { y: 57, size: 8.5, fill: sonic ? "#ffd3f0" : COLORS.dim }) +
 			`<rect x="8" y="62" width="56" height="4" fill="#000000" fill-opacity="0.45"/>` +
 			(barW > 0 ? `<rect x="8" y="62" width="${barW}" height="4" fill="${sonic ? "#ffffff" : COLORS.blue1}"/>` : "") +
@@ -83,7 +83,7 @@ export function possessionKey(ctx: RenderCtx): string {
 	const markX = s.ballTeam === undefined || !live ? undefined : s.ballTeam === leftTeam ? 8 + leftW / 2 : 8 + leftW + (barW - leftW) / 2;
 	return doc(
 		panel() +
-			text(t(lang, "possession"), { y: 14, size: 8.5, fill: COLORS.dim, maxWidth: 66 }) +
+			text(t(lang, "possession"), { y: 14, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 			(markX !== undefined ? `<polygon points="${markX - 4},19 ${markX + 4},19 ${markX},25" fill="#ffffff"/>` : "") +
 			`<rect x="8" y="28" width="${barW}" height="14" fill="${COLORS.line}"/>` +
 			(pct ? `<rect x="8" y="28" width="${leftW}" height="14" fill="${leftColor}"/><rect x="${8 + leftW}" y="28" width="${barW - leftW}" height="14" fill="${rightColor}"/>` : "") +
@@ -99,10 +99,10 @@ export function pointsKey(ctx: RenderCtx): string {
 	return doc(
 		panel() +
 			text(t(lang, "points"), { y: 14, size: 9.5, fill: COLORS.dim }) +
-			text(me ? String(me.score) : "—", { y: 42, size: 30, fill: me ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 66 }) +
+			text(me ? String(me.score) : "—", { y: 42, size: 30, fill: me ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 56 }) +
 			`<rect x="10" y="48" width="52" height="1.5" fill="${COLORS.line}"/>` +
-			text(me ? `${t(lang, "shots")} ${me.shots}` : "", { y: 58, size: 8.5, fill: COLORS.dim, maxWidth: 64 }) +
-			text(me ? `${t(lang, "demosLabel")} ${me.demos}` : "", { y: 68, size: 8.5, fill: COLORS.dim, maxWidth: 64 }) +
+			text(me ? `${t(lang, "shots")} ${me.shots}` : "", { y: 58, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
+			text(me ? `${t(lang, "demosLabel")} ${me.demos}` : "", { y: 68, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 			veil(ctx),
 	);
 }

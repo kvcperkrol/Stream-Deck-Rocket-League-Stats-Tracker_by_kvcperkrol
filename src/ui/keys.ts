@@ -45,8 +45,8 @@ function rankKey(ctx: RenderCtx): string {
 		return doc(
 			panel() +
 				(ctx.rankIcon?.(0) ? iconBadge(ctx.rankIcon(0)!, 36, 25) : emblem(none, 36, 25, 0.95, "—")) +
-				text(t(lang, "unranked"), { y: 54, size: 11.5, fill: none.color, skew: -6, maxWidth: 66 }) +
-				text(pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 66 }) +
+				text(t(lang, "unranked"), { y: 54, size: 11.5, fill: none.color, skew: -6, maxWidth: 56 }) +
+				text(pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 				veil(ctx),
 		);
 	}
@@ -56,8 +56,8 @@ function rankKey(ctx: RenderCtx): string {
 	return doc(
 		panel() +
 			(ctx.rankIcon?.(tier.id) ? iconBadge(ctx.rankIcon(tier.id)!, 36, 25) : emblem(tier, 36, 25, 0.95)) +
-			text(tier.rank === 0 ? t(lang, "setRank") : tier.family, { y: 54, size: tier.rank === 0 ? 10 : 11.5, fill: tier.color, skew: -6, maxWidth: 66 }) +
-			text(tier.roman && tier.rank !== 8 ? `${tier.roman}${div ? "  ·  " + div : ""}` : div || pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 66 }) +
+			text(tier.rank === 0 ? t(lang, "setRank") : tier.family, { y: 54, size: tier.rank === 0 ? 10 : 11.5, fill: tier.color, skew: -6, maxWidth: 56 }) +
+			text(tier.roman && tier.rank !== 8 ? `${tier.roman}${div ? "  ·  " + div : ""}` : div || pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 			veil(ctx),
 	);
 }
@@ -76,9 +76,9 @@ function mmrKey(ctx: RenderCtx): string {
 	const delta = auto?.delta;
 	return doc(
 		panel() +
-			text(!pl.ranked && has ? t(lang, "mmrCasual") : "MMR", { y: 15, size: !pl.ranked && has ? 8.5 : 10, fill: COLORS.dim, maxWidth: 66 }) +
+			text(!pl.ranked && has ? t(lang, "mmrCasual") : "MMR", { y: 15, size: !pl.ranked && has ? 8.5 : 10, fill: COLORS.dim, maxWidth: 56 }) +
 			(delta ? text(`${delta > 0 ? "+" : "−"}${Math.abs(delta)}`, { x: 64, y: 14, size: 9.5, fill: delta > 0 ? COLORS.green : COLORS.red, anchor: "end", skew: -6 }) : "") +
-			text(has ? String(value) : "—", { y: 45, size: has ? 28 : 26, fill: has ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 66 }) +
+			text(has ? String(value) : "—", { y: 45, size: has ? 28 : 26, fill: has ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 56 }) +
 			`<rect x="10" y="51" width="52" height="1.5" fill="${COLORS.line}"/>` +
 			text(`${wins}${t(lang, "w")}`, { x: 33, y: 64, size: 11, fill: COLORS.green, anchor: "end", skew: -6 }) +
 			text(`${losses}${t(lang, "l")}`, { x: 39, y: 64, size: 11, fill: COLORS.red, anchor: "start", skew: -6 }) +
@@ -95,8 +95,8 @@ function modeKey(ctx: RenderCtx): string {
 	const pl = currentPlaylist(ctx);
 	return doc(
 		panel() +
-			text(pl.name.toUpperCase(), { y: 27, size: 16, skew: -9, maxWidth: 66 }) +
-			text(pl.ranked ? t(lang, "ranked_") : t(lang, "unranked"), { y: 42, size: 10.5, fill: pl.ranked ? COLORS.gold : COLORS.dim, maxWidth: 66 }) +
+			text(pl.name.toUpperCase(), { y: 27, size: 14, skew: -9, maxWidth: 56 }) +
+			text(pl.ranked ? t(lang, "ranked_") : t(lang, "unranked"), { y: 42, size: 10.5, fill: pl.ranked ? COLORS.gold : COLORS.dim, maxWidth: 56 }) +
 			teamDots(pl.size ?? ctx.store.teamSize() ?? 3, 36, 58, teamLook(s, sideTeams(s, ctx.settings.scoreOrder)[0]).accent, teamLook(s, sideTeams(s, ctx.settings.scoreOrder)[1]).accent) +
 			veil(ctx),
 	);
@@ -118,8 +118,8 @@ function teamKey(ctx: RenderCtx, side: 0 | 1): string {
 		linear("t", look.c1, look.c2, false) +
 			`<rect width="72" height="72" fill="url(#t)"/>` +
 			stripes(72, 72, 6, 0.13, look.ink) +
-			text(teamLabel(s, team, t(lang, team === 0 ? "blue" : "orange")), { y: 15, size: 10, fill: look.ink, opacity: 0.92, maxWidth: 64 }) +
-			text(String(s.scores[team]), { y: mine ? 53 : 56, size: mine ? 40 : 44, fill: look.ink, skew: -9, maxWidth: 62 }) +
+			text(teamLabel(s, team, t(lang, team === 0 ? "blue" : "orange")), { y: 15, size: 10, fill: look.ink, opacity: 0.92, maxWidth: 56 }) +
+			text(String(s.scores[team]), { y: mine ? 53 : 56, size: mine ? 40 : 44, fill: look.ink, skew: -9, maxWidth: 56 }) +
 			(mine ? `<rect x="0" y="62" width="72" height="10" fill="${look.ink}" fill-opacity="0.94"/>` + text(t(lang, "you"), { y: 70, size: 8, fill: look.c2 }) : "") +
 			(flashOpacity > 0 ? `<rect width="72" height="72" fill="#ffffff" fill-opacity="${flashOpacity.toFixed(2)}"/>` : "") +
 			veil(ctx),
@@ -138,8 +138,8 @@ function timerKey(ctx: RenderCtx): string {
 	return doc(
 		panel() +
 			frame(s.overtime ? COLORS.orange1 : urgent ? COLORS.red : COLORS.line) +
-			text(label, { y: 16, size: 9.5, fill: s.overtime || s.paused ? COLORS.orange1 : COLORS.dim, maxWidth: 62 }) +
-			text(clock, { y: 51, size: 30, fill: live ? color : COLORS.dim, skew: -9, maxWidth: 66 }) +
+			text(label, { y: 16, size: 9.5, fill: s.overtime || s.paused ? COLORS.orange1 : COLORS.dim, maxWidth: 56 }) +
+			text(clock, { y: 51, size: 30, fill: live ? color : COLORS.dim, skew: -9, maxWidth: 56 }) +
 			veil(ctx),
 	);
 }
@@ -155,9 +155,9 @@ function lastGoalKey(ctx: RenderCtx): string {
 	return doc(
 		panel() +
 			`<rect width="72" height="4" fill="${barColor}"/>` +
-			text(t(lang, "lastGoal"), { y: 15, size: 8.5, fill: COLORS.dim, maxWidth: 66 }) +
-			text(g ? g.scorer : t(lang, "noGoal"), { y: 30, size: 13, fill: g ? "#ffffff" : COLORS.dim, skew: -8, maxWidth: 66 }) +
-			text(speed && speed.value > 0 ? String(speed.value) : "—", { y: 54, size: 27, fill: g ? barColor : COLORS.dim, skew: -9, maxWidth: 66 }) +
+			text(t(lang, "lastGoal"), { y: 15, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
+			text(g ? g.scorer : t(lang, "noGoal"), { y: 30, size: 13, fill: g ? "#ffffff" : COLORS.dim, skew: -8, maxWidth: 56 }) +
+			text(speed && speed.value > 0 ? String(speed.value) : "—", { y: 54, size: 27, fill: g ? barColor : COLORS.dim, skew: -9, maxWidth: 56 }) +
 			text(speed ? speed.unit : "", { y: 66, size: 9, fill: COLORS.dim }) +
 			veil(ctx),
 	);
@@ -175,7 +175,7 @@ function speedKey(ctx: RenderCtx): string {
 	return doc(
 		panel() +
 			text(t(lang, "ball"), { y: 15, size: 9.5, fill: COLORS.dim }) +
-			text(String(v.value), { y: 43, size: 29, fill: "#ffffff", skew: -9, maxWidth: 66 }) +
+			text(String(v.value), { y: 43, size: 29, fill: "#ffffff", skew: -9, maxWidth: 56 }) +
 			text(v.unit, { y: 53, size: 8.5, fill: COLORS.dim }) +
 			`<rect x="8" y="58" width="56" height="5" fill="#000000" fill-opacity="0.45"/>` +
 			(barW > 0 ? `<rect x="8" y="58" width="${barW}" height="5" fill="${hot}"/>` : "") +

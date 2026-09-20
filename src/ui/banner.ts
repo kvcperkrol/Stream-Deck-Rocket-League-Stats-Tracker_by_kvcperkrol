@@ -22,7 +22,7 @@ const keyX = (i: number) => i * (KEY + KEY_GAP) + KEY / 2;
  * sub-line goes through here; only large headlines are allowed to span keys.
  */
 function fitLine(str: string, o: { x: number; y: number; size: number; fill: string; opacity?: number; skew?: number; maxWidth?: number; minSize?: number }): string {
-	const maxWidth = o.maxWidth ?? KEY - 6;
+	const maxWidth = o.maxWidth ?? KEY - 16;
 	const minSize = o.minSize ?? 9;
 	let size = o.size;
 	let out = str;
@@ -93,7 +93,7 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 		const centre = (inner: string) => `<g transform="translate(${cx} 36) scale(${pop.toFixed(3)}) translate(${-cx} -36)">${inner}</g>`;
 		// Headline rule: a title either fits inside the middle key, or is long enough to span all three.
 		// Anything in between would put half a glyph into a physical gap, so it is shrunk to the middle key.
-		const MID_MAX = 68;
+		const MID_MAX = 58;
 		const headlineSize = (str: string, base: number) => {
 			const w = estimateWidth(str, base);
 			if (w <= MID_MAX) return base;
@@ -119,7 +119,7 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 					animated: true,
 					content: centre(
 						text(sp.unit.toUpperCase(), { x: left, y: 15, size: 9.5, fill: l.ink, opacity: 0.8 }) +
-							text(sp.value > 0 ? String(sp.value) : "—", { x: left, y: 46, size: 31, fill: l.ink, skew: -9, maxWidth: 66 }) +
+							text(sp.value > 0 ? String(sp.value) : "—", { x: left, y: 46, size: 31, fill: l.ink, skew: -9, maxWidth: 56 }) +
 							big(t(lang, "goal"), 38, 30) +
 							text(banner.assist ? t(lang, "assist") : "", { x: right, y: 15, size: 9.5, fill: l.ink, opacity: 0.8 }) +
 							nameIn(banner.assist ?? teamName, right, banner.assist ? 44 : 42, banner.assist ? 15 : 12) +
@@ -165,7 +165,7 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 			}
 			case "countdown": {
 				const left = Math.max(1, Math.min(3, Math.ceil((3000 - age) / 1000)));
-				return { look: l, animated: true, content: big(String(left), 52, 50) + text(t(lang, "kickoff"), { x: keyX(0), y: 42, size: 9, fill: l.ink, opacity: 0.75, maxWidth: 66 }) };
+				return { look: l, animated: true, content: big(String(left), 52, 50) + text(t(lang, "kickoff"), { x: keyX(0), y: 42, size: 9, fill: l.ink, opacity: 0.75, maxWidth: 56 }) };
 			}
 			case "go":
 				return { look: l, animated: true, content: centre(big(t(lang, "go"), 48, 38)) };
@@ -199,8 +199,8 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 			content:
 				fitLine(t(lang, "restartA"), { x: keyX(0), y: 33, size: 11, fill: COLORS.dim, skew: 0 }) +
 				fitLine(t(lang, "restartB"), { x: keyX(0), y: 48, size: 11, fill: COLORS.dim, skew: 0 }) +
-				text(t(lang, "restartTitle"), { x: cx, y: 33, size: 17, fill: COLORS.gold, skew: -9, maxWidth: 66 }) +
-				text(t(lang, "restartWord"), { x: cx, y: 56, size: 24, fill: COLORS.gold, skew: -9, maxWidth: 66 }) +
+				text(t(lang, "restartTitle"), { x: cx, y: 33, size: 17, fill: COLORS.gold, skew: -9, maxWidth: 56 }) +
+				text(t(lang, "restartWord"), { x: cx, y: 56, size: 24, fill: COLORS.gold, skew: -9, maxWidth: 56 }) +
 				arc,
 		};
 	}
@@ -215,7 +215,7 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 	let out = "";
 	for (let i = 0; i < 3; i++) {
 		const x = keyX(i);
-		out += text(labels[i]!, { x, y: 15, size: 9, fill: COLORS.dim, maxWidth: 62 });
+		out += text(labels[i]!, { x, y: 15, size: 9, fill: COLORS.dim, maxWidth: 56 });
 		out += text(String(values[i]), { x, y: 52, size: 34, fill: "#ffffff", skew: -9 });
 	}
 	return { look: IDLE, animated: false, content: out };
