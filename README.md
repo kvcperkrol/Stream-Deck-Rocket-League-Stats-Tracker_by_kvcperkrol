@@ -87,17 +87,22 @@ and converts it with `MMR = mu × 20 + 100`. The conversion was checked against 
 * `PartyLeaderTier` in the log is **not** the rank of a playlist (it is constant — your highest tier over all playlists), so you
   **enter rank and division by hand** in the inspector ("Your ranks"). The MMR typed there is only a fallback, and applies to
   ranked modes only.
-* The rank emblems are original artwork (not the game's graphics).
+* If an icon file is missing, the plugin draws its own emblem instead.
 
 ## Rank icons
 
-The plugin draws its own rank emblems. The game's rank artwork belongs to Psyonix, so it is not part of this repository or of the
-plugin. If you want the game's icons on your deck, put your own PNG copies into `%APPDATA%\RLHUD\rank-icons\` (the folder is
-created on first start; the inspector shows its path and how many icons were found).
+The rank key uses the game's own rank icons (Bronze I … Supersonic Legend, and one for unranked play). They are © Psyonix / Epic Games,
+taken from the [Rocket League Wiki](https://rocketleague.fandom.com), reduced to 96×96 px and used only to show your own rank in
+this free, unofficial plugin. They are **not** covered by this repository's licence — see
+[`imgs/ranks/NOTICE.txt`](mov.remake.rlhud.sdPlugin/imgs/ranks/NOTICE.txt). If the rights holder objects, they will be removed
+and the plugin falls back to its own built-in emblems.
+
+To use different icons, put PNG files into `%APPDATA%\RLHUD\rank-icons\` — they win over the bundled ones (the folder is created on
+first start; the inspector shows its path and how many custom icons were found).
 
 * File names: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — or the tier number, `0.png` … `22.png`.
 * PNG, up to 200 KB, roughly square with a transparent background works best.
-* New files are picked up within a few seconds, no restart needed. The icons stay on your computer.
+* New files are picked up within a few seconds, no restart needed.
 
 ## Why there are no shortcuts into the game's menus
 
@@ -154,7 +159,7 @@ The plugin was corrected against recordings of the real game (`npm run record`).
 
 ## License
 
-[MIT](LICENSE) **with the Commons Clause**: you may use, copy, modify and share the plugin freely, but you may not **sell** it
+[MIT](LICENSE) **with the Commons Clause** (this applies to the plugin's own code and artwork, not to the game's rank icons — see above): you may use, copy, modify and share the plugin freely, but you may not **sell** it
 or a product or service whose value comes substantially from it (including paid hosting, support or consulting around it).
 Because of that condition this is *source-available*, not "open source" in the OSI sense. Streaming with it on a monetised
 channel is fine — you are not selling the plugin.

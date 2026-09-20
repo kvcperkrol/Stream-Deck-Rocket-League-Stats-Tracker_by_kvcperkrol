@@ -13,7 +13,11 @@ import { KEY_GAP } from "../src/ui/banner.ts";
 import { LAYOUT } from "../src/ui/layout.ts";
 import { renderRole } from "../src/ui/keys.ts";
 
+import { RankIcons } from "../src/sys/rank-icons.ts";
+
 const OUT = path.resolve("preview");
+// the same lookup the plugin uses: no custom icons, the ones bundled with the plugin
+const rankIcons = new RankIcons(path.join(OUT, ".no-custom-icons"), Date.now, [path.resolve("mov.remake.rlhud.sdPlugin", "imgs", "ranks")]);
 fs.mkdirSync(OUT, { recursive: true });
 
 const P = (name: string, team: number, x: object = {}) => ({ Name: name, TeamNum: team, Score: 0, Goals: 0, Shots: 0, Assists: 0, Saves: 0, Touches: 0, Demos: 0, ...x });
@@ -281,6 +285,7 @@ for (const sc of scenarios) {
 		settings: mergeSettings({ ...SETTINGS, ...sc.settings }),
 		now: clock.t,
 		restartHint: !!sc.restartHint,
+		rankIcon: (id) => rankIcons.get(id),
 		// what the game log gave: ranked doubles 954 → 964 after a win (+10); casual 1048
 		autoMmr: { 11: { mmr: 964, at: "2026-09-20T15:00:00Z", delta: 10 }, 2: { mmr: 1048, at: "2026-09-20T15:00:00Z" } },
 	};

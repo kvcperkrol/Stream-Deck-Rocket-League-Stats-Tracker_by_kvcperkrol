@@ -197,10 +197,12 @@ export class Hub {
 	}
 
 	private iconStore?: RankIcons;
-	/** Rank icons the user dropped into `<data dir>/rank-icons` (the plugin does not ship the game's artwork). */
+	/** Rank icons: the game's own (bundled, see imgs/ranks/NOTICE.txt), overridable with PNGs in `<data dir>/rank-icons`. */
 	private get rankIcons(): RankIcons {
 		if (!this.iconStore) {
-			this.iconStore = new RankIcons(path.join(this.dataDir, "rank-icons"));
+			// The plugin's own folder is found from the running script (bin/plugin.js → ../imgs/ranks), with the working directory as a fallback.
+			const bundled = [path.resolve(path.dirname(process.argv[1] ?? ""), "..", "imgs", "ranks"), path.resolve(process.cwd(), "imgs", "ranks")];
+			this.iconStore = new RankIcons(path.join(this.dataDir, "rank-icons"), Date.now, [...new Set(bundled)]);
 			this.iconStore.ensureDir();
 		}
 		return this.iconStore;

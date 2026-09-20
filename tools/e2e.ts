@@ -296,6 +296,11 @@ async function main(): Promise<void> {
 	check("the keys switch to English at once", await waitFor(() => has(2, 2, "POSSESSION"), 2500), svgOf(2, 2).slice(-200));
 	check("…and no Polish word is left on the possession key", !has(2, 2, "POSIADANIE"));
 
+	console.log("\n[10d] rank icons: the bundled ones are the fallback");
+	fs.rmSync(path.join(iconDir, "diamond-2.png"));
+	const tiny = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB";
+	check("without the user's file the key switches to the icon bundled with the plugin", await waitFor(() => has(0, 0, "<image") && !has(0, 0, tiny), 9000), svgOf(0, 0).slice(0, 200));
+
 	console.log("\n[11] game closes");
 	send({ event: "applicationDidTerminate", payload: { application: FAKE_GAME } });
 	const back = () => received.filter((m) => m.event === "switchToProfile").length >= 2;

@@ -1,0 +1,11 @@
+Rank icons (bronze-1.png ... supersonic-legend.png, unranked.png)
+
+These are the rank icons of Rocket League. Rocket League and its artwork are (c) Psyonix LLC / Epic Games, Inc.
+They were taken from the Rocket League Wiki (https://rocketleague.fandom.com), reduced to 96x96 px, and are used only to
+show the player's own rank in this free, unofficial, fan-made Stream Deck plugin.
+
+They are NOT covered by the licence of this repository (see LICENSE, which applies to the plugin's own code and artwork).
+The plugin is not affiliated with or endorsed by Psyonix, Epic Games or Elgato. If the rights holder asks for these files to
+be removed, they will be removed; the plugin then falls back to its own built-in emblems.
+
+To use different icons, put PNG files with the same names into %APPDATA%\RLHUD\rank-icons\ - files there win over these.

@@ -25,7 +25,7 @@ const manifest = {
 	SDKVersion: 2,
 	UUID: PLUGIN_UUID,
 	Name: "Rocket League HUD",
-	Version: "1.6.0.0",
+	Version: "1.7.0.0",
 	Author: "kvcperkrol",
 	Description:
 		"Live Rocket League HUD for a 15-key Stream Deck: score, clock, rank, goals with scorer and ball speed, demos, saves and shortcuts. Turns the game's Stats API on by itself — install, start the game, play.",

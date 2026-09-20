@@ -85,17 +85,22 @@ w grę) i przelicza `MMR = mu × 20 + 100`. Przelicznik sprawdzony na profilu z 
 * `PartyLeaderTier` z logu to **nie** ranga danej playlisty (jest stały — to Twój najwyższy tier ze wszystkich
   playlist), więc **rangę i dywizję wpisujesz ręcznie** w panelu (sekcja „Twoje rangi”). Wpisany tam MMR jest tylko zapasem
   i dotyczy wyłącznie trybów rankingowych.
-* Emblematy rang są własnej roboty (nie grafiki z gry).
+* Gdy brakuje pliku ikony, wtyczka rysuje własny emblemat.
 
 ## Ikony rang
 
-Wtyczka rysuje własne emblematy rang. Grafiki rang z gry należą do Psyonix, więc nie ma ich w repozytorium ani we wtyczce. Jeśli chcesz mieć
-na pokładzie ikony z gry, wrzuć własne kopie PNG do `%APPDATA%\RLHUD\rank-icons\` (folder powstaje przy pierwszym uruchomieniu; panel
-wtyczki pokazuje jego ścieżkę i liczbę znalezionych ikon).
+Klawisz Ranga używa ikon rang z gry (Bronze I … Supersonic Legend oraz jedna dla gry bez rankingu). Są © Psyonix / Epic Games,
+pobrane z [Rocket League Wiki](https://rocketleague.fandom.com), zmniejszone do 96×96 px i użyte wyłącznie do pokazania Twojej
+własnej rangi w tej darmowej, nieoficjalnej wtyczce. **Nie** obejmuje ich licencja tego repozytorium — patrz
+[`imgs/ranks/NOTICE.txt`](mov.remake.rlhud.sdPlugin/imgs/ranks/NOTICE.txt). Jeśli właściciel praw sobie tego nie życzy, zostaną usunięte,
+a wtyczka wróci do własnych emblematów.
+
+Żeby użyć innych ikon, wrzuć pliki PNG do `%APPDATA%\RLHUD\rank-icons\` — mają pierwszeństwo przed dołączonymi (folder
+powstaje przy pierwszym uruchomieniu; panel wtyczki pokazuje jego ścieżkę i liczbę znalezionych własnych ikon).
 
 * Nazwy plików: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — albo numer tieru, `0.png` … `22.png`.
 * Najlepiej PNG do 200 KB, w przybliżeniu kwadratowy, z przezroczystym tłem.
-* Nowe pliki są wykrywane w kilka sekund, bez restartu. Ikony zostają na Twoim komputerze.
+* Nowe pliki są wykrywane w kilka sekund, bez restartu.
 
 ## Dlaczego nie ma skrótów do menu gry
 
@@ -151,7 +156,7 @@ Wtyczka była poprawiana na nagraniach prawdziwej gry (`npm run record`). Różn
 
 ## Licencja
 
-[MIT](LICENSE) **z klauzulą Commons Clause**: możesz swobodnie używać, kopiować, modyfikować i udostępniać wtyczkę, ale nie wolno jej
+[MIT](LICENSE) **z klauzulą Commons Clause** (dotyczy kodu i własnej grafiki wtyczki, nie ikon rang z gry — patrz wyżej): możesz swobodnie używać, kopiować, modyfikować i udostępniać wtyczkę, ale nie wolno jej
 **sprzedawać** ani sprzedawać produktu lub usługi, której wartość w istotnej części pochodzi z wtyczki (także płatnego hostingu,
 wsparcia czy konsultacji wokół niej). Przez ten warunek projekt jest „source-available”, a nie „open source” w rozumieniu OSI.
 Streamowanie z jej użyciem na monetyzowanym kanale jest w porządku — nie sprzedajesz wtyczki.

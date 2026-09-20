@@ -60,3 +60,31 @@ test("the rank key uses the supplied icon, and the built-in emblem otherwise", (
 	assert.ok(withIcon.includes("DIAMOND") && withIcon.includes("DIV 2"), "the text stays under the icon");
 	assert.ok(!withIcon.includes("eg14"), "and the built-in emblem is not drawn on top of it");
 });
+
+test("bundled icons are the fallback, and a file in the user folder wins over them", () => {
+	const user = folder();
+	const bundled = folder();
+	fs.writeFileSync(path.join(bundled, "diamond-2.png"), PNG);
+	let now = 1_000;
+	const icons = new RankIcons(user, () => now, [bundled]);
+	const fromBundle = icons.get(14);
+	assert.ok(fromBundle?.startsWith("data:image/png;base64,"), "nothing in the user folder: the bundled icon is used");
+	assert.equal(icons.count(), 0, "bundled icons are not counted as custom ones");
+	const custom = Buffer.concat([PNG, Buffer.from([0])]);
+	fs.writeFileSync(path.join(user, "diamond-2.png"), custom);
+	now += 6_000;
+	assert.equal(icons.get(14), `data:image/png;base64,${custom.toString("base64")}`, "the user's file wins");
+	assert.equal(icons.count(), 1);
+});
+
+test("the plugin ships an icon for every tier, all valid and small", () => {
+	const dir = path.resolve("mov.remake.rlhud.sdPlugin", "imgs", "ranks");
+	for (let id = 0; id <= 22; id++) {
+		const file = path.join(dir, iconFileNames(id)[0]!);
+		assert.ok(fs.existsSync(file), `missing ${path.basename(file)}`);
+		const buf = fs.readFileSync(file);
+		assert.ok(buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), `${path.basename(file)} is not a PNG`);
+		assert.ok(buf.length < 40 * 1024, `${path.basename(file)} is large`);
+	}
+	assert.ok(fs.existsSync(path.join(dir, "NOTICE.txt")), "the attribution notice ships with the icons");
+});

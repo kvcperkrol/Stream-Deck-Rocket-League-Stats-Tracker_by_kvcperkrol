@@ -8,6 +8,22 @@ const MAX_BYTES = 200 * 1024;
 const TTL_MS = 5_000;
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
+function readIcon(dir: string, tierId: number): string | undefined {
+	for (const name of iconFileNames(tierId)) {
+		try {
+			const file = path.join(dir, name);
+			const st = fs.statSync(file);
+			if (!st.isFile() || st.size > MAX_BYTES || st.size < PNG_MAGIC.length) continue;
+			const buf = fs.readFileSync(file);
+			if (!buf.subarray(0, PNG_MAGIC.length).equals(PNG_MAGIC)) continue;
+			return `data:image/png;base64,${buf.toString("base64")}`;
+		} catch {
+			/* missing or unreadable: try the next name */
+		}
+	}
+	return undefined;
+}
+
 /**
  * File names accepted for a tier, in order of preference: `diamond-2.png`, `grand-champion-3.png`, `supersonic-legend.png`,
  * `unranked.png`, or simply the tier number (`14.png`).
@@ -27,8 +43,8 @@ export function iconFileNames(tierId: number): string[] {
 }
 
 /**
- * Optional rank icons the user put into a folder. The plugin does not ship the game's rank artwork (it belongs to Psyonix);
- * anything found here is used instead of the built-in emblem, on that computer only.
+ * Rank icons: PNG files the user put into `dir` win; the icons bundled with the plugin (`fallbackDirs`) come next; when there
+ * is neither, the caller draws the built-in emblem.
  */
 export class RankIcons {
 	private readonly cache = new Map<number, { at: number; uri?: string }>();
@@ -36,6 +52,7 @@ export class RankIcons {
 	constructor(
 		readonly dir: string,
 		private readonly now: () => number = Date.now,
+		private readonly fallbackDirs: string[] = [],
 	) {}
 
 	/** Creates the folder so the user can find it. Failure is harmless. */
@@ -57,25 +74,17 @@ export class RankIcons {
 		return uri;
 	}
 
-	/** How many of the 23 tiers currently have an icon. */
+	/** How many of the 23 tiers have an icon the user supplied (the bundled ones are not counted). */
 	count(): number {
 		let n = 0;
-		for (const t of TIERS) if (this.get(t.id)) n++;
+		for (const t of TIERS) if (readIcon(this.dir, t.id)) n++;
 		return n;
 	}
 
 	private read(tierId: number): string | undefined {
-		for (const name of iconFileNames(tierId)) {
-			try {
-				const file = path.join(this.dir, name);
-				const st = fs.statSync(file);
-				if (!st.isFile() || st.size > MAX_BYTES || st.size < PNG_MAGIC.length) continue;
-				const buf = fs.readFileSync(file);
-				if (!buf.subarray(0, PNG_MAGIC.length).equals(PNG_MAGIC)) continue;
-				return `data:image/png;base64,${buf.toString("base64")}`;
-			} catch {
-				/* missing or unreadable: try the next name */
-			}
+		for (const dir of [this.dir, ...this.fallbackDirs]) {
+			const uri = readIcon(dir, tierId);
+			if (uri) return uri;
 		}
 		return undefined;
 	}

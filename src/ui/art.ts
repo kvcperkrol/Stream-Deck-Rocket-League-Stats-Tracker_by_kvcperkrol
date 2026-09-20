@@ -33,7 +33,7 @@ export function emblem(tier: TierInfo, cx: number, cy: number, scale = 1, glyphT
 }
 
 /** A rank icon supplied by the user, drawn where the emblem would be. */
-export function iconBadge(dataUri: string, cx: number, cy: number, size = 46): string {
+export function iconBadge(dataUri: string, cx: number, cy: number, size = 48): string {
 	return `<image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="${dataUri}" x="${cx - size / 2}" y="${cy - size / 2}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/>`;
 }
 
