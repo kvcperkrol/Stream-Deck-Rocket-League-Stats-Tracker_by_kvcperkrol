@@ -97,7 +97,7 @@ store.handle({
 store.handle({ Event: "GoalScored", Data: { GoalSpeed: 95, Scorer: { Name: "Player", TeamNum: 0 } } });
 const ctx = {
 	store,
-	settings: mergeSettings({ ranks: { doubles: { tier: 14, div: 2, mmr: 1247 } } }),
+	settings: mergeSettings({ ranks: { doubles: { tier: 14, div: 2, mmr: 964 } } }),
 	now: 1_000_000 + 9_000,
 	restartHint: false,
 };

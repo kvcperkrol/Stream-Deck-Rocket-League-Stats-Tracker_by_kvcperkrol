@@ -375,10 +375,10 @@ test("possession percentage stays undefined until there is a few seconds of data
 });
 
 test("settings written by older versions (with macros) load cleanly and drop what no longer exists", () => {
-	const s = mergeSettings({ lang: "en", units: "mph", ranks: { doubles: { tier: 14, div: 2, mmr: 1247 } }, macros: { find: "TAB" } } as never);
+	const s = mergeSettings({ lang: "en", units: "mph", ranks: { doubles: { tier: 14, div: 2, mmr: 964 } }, macros: { find: "TAB" } } as never);
 	assert.equal(s.lang, "en");
 	assert.equal(s.units, "mph");
-	assert.equal(s.ranks.doubles?.mmr, 1247);
+	assert.equal(s.ranks.doubles?.mmr, 964);
 	assert.ok(!("macros" in s));
 	assert.deepEqual(mergeSettings(undefined), mergeSettings({}));
 	assert.equal(mergeSettings({ autoSwitch: false }).autoSwitch, false);

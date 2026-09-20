@@ -42,7 +42,7 @@ const fake = fs.mkdtempSync(path.join(os.tmpdir(), "rlhud-e2e-"));
 const cfgDir = path.join(fake, "TAGame", "Config");
 fs.mkdirSync(cfgDir, { recursive: true });
 const iniPath = path.join(cfgDir, "DefaultStatsAPI.ini");
-// A fake game log folder holding one earlier ranked-doubles queue (mu 40 → 900 MMR).
+// A fake game log folder holding one earlier ranked-doubles queue (mu 42.68 → 954 MMR).
 const logDir = path.join(fake, "Logs");
 fs.mkdirSync(logDir, { recursive: true });
 const queueBlock = (mu: number, at: string, playlist = 11) =>
@@ -52,7 +52,7 @@ const queueBlock = (mu: number, at: string, playlist = 11) =>
 // The game states its own account when it logs in; the mock game's local player ("Player1") has PrimaryId Epic|1000|0.
 fs.writeFileSync(
 	path.join(logDir, "Launch.log"),
-	"[0014.78] Party: HandleLocalPlayerLoginStatusChanged PlayerName=Player1 PlayerID=Epic|1000|0 LoginStatus=LS_LoggedIn IsPrimary=True IsInParty=False\n" + queueBlock(40, "2026-09-20 10:00:00"),
+	"[0014.78] Party: HandleLocalPlayerLoginStatusChanged PlayerName=Player1 PlayerID=Epic|1000|0 LoginStatus=LS_LoggedIn IsPrimary=True IsInParty=False\n" + queueBlock(42.68, "2026-09-20 10:00:00"),
 );
 fs.writeFileSync(iniPath, `[TAGame.MatchStatsExporter_TA]\r\n\r\n; tcp\r\nPort=49123\r\n\r\n; web\r\nWebPort=${RL_PORT}\r\n\r\n; rate\r\nPacketSendRate=0`);
 
@@ -81,7 +81,7 @@ wss.on("connection", (ws) => {
 		if (m.event === "getGlobalSettings") {
 			send({
 				event: "didReceiveGlobalSettings",
-				payload: { settings: { installDir: fake, lang: "pl", autoSwitch: true, recordMatches: true, ranks: { doubles: { tier: 14, div: 2, mmr: 1247 } } } },
+				payload: { settings: { installDir: fake, lang: "pl", autoSwitch: true, recordMatches: true, ranks: { doubles: { tier: 14, div: 2, mmr: 900 } } } },
 			});
 		}
 		if (m.event === "setImage") {
@@ -202,9 +202,9 @@ async function main(): Promise<void> {
 	check("clock shows 2:21", has(3, 0, "2:21"));
 	check("mode key: DOUBLES / ranked (playlist 11, 2v2)", has(1, 0, "DOUBLES") && has(1, 0, "RANKINGOWY"));
 	check("rank key: Diamond II from the user's settings", has(0, 0, "DIAMOND"));
-	check("MMR key: 900, read from the game log — it wins over the 1247 typed into the settings", has(0, 1, ">900<") && !has(0, 1, "1247"), svgOf(0, 1).slice(-350));
-	fs.appendFileSync(path.join(logDir, "Launch.log"), queueBlock(41, "2026-09-20 11:00:00")); // the next queue, after a win worth +20
-	check("a new queue in the game log updates the MMR (920) and shows the change (+20)", await waitFor(() => has(0, 1, ">920<") && has(0, 1, ">+20<"), 6000), svgOf(0, 1).slice(-350));
+	check("MMR key: 954, read from the game log — it wins over the 900 typed into the settings", has(0, 1, ">954<") && !has(0, 1, ">900<"), svgOf(0, 1).slice(-350));
+	fs.appendFileSync(path.join(logDir, "Launch.log"), queueBlock(43.2, "2026-09-20 11:00:00")); // the next queue, after a win worth +10
+	check("a new queue in the game log updates the MMR (964) and shows the change (+10)", await waitFor(() => has(0, 1, ">964<") && has(0, 1, ">+10<"), 6000), svgOf(0, 1).slice(-350));
 	check("the value is stored for the next start", fs.existsSync(path.join(fake, "data", "mmr.json")));
 	check("'me' auto-detected from the camera target → blue key marked TY", has(2, 0, ">TY<"));
 
@@ -286,7 +286,7 @@ async function main(): Promise<void> {
 
 	console.log("\n[10c] switching the language in the inspector");
 	check("the deck was Polish", has(2, 2, "POSIADANIE"));
-	send({ event: "didReceiveGlobalSettings", payload: { settings: { installDir: fake, lang: "en", autoSwitch: true, recordMatches: true, ranks: { doubles: { tier: 14, div: 2, mmr: 1247 } } } } });
+	send({ event: "didReceiveGlobalSettings", payload: { settings: { installDir: fake, lang: "en", autoSwitch: true, recordMatches: true, ranks: { doubles: { tier: 14, div: 2, mmr: 900 } } } } });
 	check("the keys switch to English at once", await waitFor(() => has(2, 2, "POSSESSION"), 2500), svgOf(2, 2).slice(-200));
 	check("…and no Polish word is left on the possession key", !has(2, 2, "POSIADANIE"));
 

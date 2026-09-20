@@ -23,7 +23,7 @@ function inMatch(playlist: number, arena = "Stadium_P") {
 	return store;
 }
 
-const ranks = { doubles: { tier: 14, div: 2, mmr: 1247 } }; // Diamond II
+const ranks = { doubles: { tier: 14, div: 2, mmr: 964 } }; // Diamond II
 const ctx = (store: MatchStore, lang: "en" | "pl" = "en", autoMmr?: Record<number, AutoMmr>): RenderCtx => ({
 	store,
 	settings: mergeSettings({ lang, ranks }),
@@ -78,10 +78,10 @@ test("MMR: a casual match uses the casual MMR from the log, never the value type
 	const casual = renderRole("mmr", ctx(store, "en", { 2: { mmr: 1048, at: "t", delta: 9 } }));
 	assert.ok(casual.includes("CASUAL MMR") && casual.includes("1048") && casual.includes("+9"));
 	const none = renderRole("mmr", ctx(store));
-	assert.ok(!none.includes("1247"), "the typed ranked MMR is not shown for casual play");
+	assert.ok(!none.includes(">964<"), "the typed ranked MMR is not shown for casual play");
 	assert.ok(!none.includes("CASUAL MMR"), "no value, so just a dash under a plain MMR label");
 	const ranked = renderRole("mmr", ctx(inMatch(11)));
-	assert.ok(ranked.includes("1247") && !ranked.includes("CASUAL"), "ranked still falls back to the typed value");
+	assert.ok(ranked.includes(">964<") && !ranked.includes("CASUAL"), "ranked still falls back to the typed value");
 });
 
 test("the Polish texts exist for the unranked keys", () => {
