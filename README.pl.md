@@ -10,6 +10,24 @@ sama przełącza Stream Decka na swój profil, gdy gra startuje, i wraca do popr
 
 > Projekt nieoficjalny — nie jest powiązany z Psyonix, Epic Games ani Elgato. „Rocket League” jest znakiem towarowym Psyonix.
 
+## Zrzuty ekranu
+
+<p align="center"><img src="docs/screenshots/live-match.png" alt="Pokład 5×3 w trakcie meczu" width="720"></p>
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/goal.png" alt="Baner gola ze strzelcem, asystą i prędkością piłki" width="360"><br><sub>Gol: strzelec, asysta i prędkość piłki na banerze</sub></td>
+    <td align="center"><img src="docs/screenshots/demo.png" alt="Baner demolki" width="360"><br><sub>Demolka: kto kogo zdemolował</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/unranked.png" alt="Mecz towarzyski pokazany jako bez rankingu" width="360"><br><sub>Mecz towarzyski: <b>UNRANKED</b> zamiast rangi</sub></td>
+    <td align="center"><img src="docs/screenshots/polish.png" alt="Ten sam pokład po polsku, prędkość w mph" width="360"><br><sub>Interfejs po polsku, prędkość w mph (oba to ustawienia)</sub></td>
+  </tr>
+</table>
+
+<sub>Obrazy to rendery z symulowanych danych meczu (generuje je `npm run preview`), nie dane prawdziwych graczy.</sub>
+
+
 ## Instalacja
 
 1. Pobierz `mov.remake.rlhud.streamDeckPlugin` z [najnowszego wydania](../../releases/latest), dwukliknij go i potwierdź instalację w aplikacji Stream Deck. (Własna budowa: `npm run pack`, patrz Rozwój.)
