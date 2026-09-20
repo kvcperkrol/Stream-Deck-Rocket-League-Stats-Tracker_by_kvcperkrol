@@ -9,23 +9,25 @@ ball speed, demos, saves, and your own boost, car speed, possession and points o
 [Stats API](https://www.rocketleague.com/developer/stats-api) by itself, switches your Stream Deck to its own profile when the
 game starts, and switches back when the game closes.
 
+The plugin only reads data: it controls neither mouse nor keyboard and sends nothing to the game.
+
 > Unofficial project — not affiliated with Psyonix, Epic Games or Elgato. "Rocket League" is a trademark of Psyonix.
 
 ## Screenshots
 
-<p align="center"><img src="docs/screenshots/live-match.png" alt="The 5×3 deck during a live match" width="720"></p>
+<p align="center"><img src="preview/16-live-keys-supersonic.png" alt="The 5×3 deck during a live match" width="720"></p>
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/goal.png" alt="Goal banner with scorer, assist and ball speed" width="360"><br><sub>Goal: scorer, assist and ball speed on the banner</sub></td>
-    <td align="center"><img src="docs/screenshots/demo.png" alt="Demolition banner" width="360"><br><sub>Demolition: who demolished whom</sub></td>
+    <td align="center"><img src="preview/04-goal-blue.png" alt="Goal banner with scorer, assist and ball speed" width="360"><br><sub>Goal: scorer, assist and ball speed on the banner</sub></td>
+    <td align="center"><img src="preview/06-demo.png" alt="Demolition banner" width="360"><br><sub>Demolition: who demolished whom</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/unranked.png" alt="Casual match shown as unranked" width="360"><br><sub>Casual match: <b>UNRANKED</b> instead of a rank</sub></td>
-    <td align="center"><img src="docs/screenshots/polish.png" alt="The same deck in Polish with miles per hour" width="360"><br><sub>Polish interface, speed in mph (both are settings)</sub></td>
+    <td align="center"><img src="preview/18-casual-unranked.png" alt="Casual match shown as unranked" width="360"><br><sub>Casual match: <b>UNRANKED</b> instead of a rank</sub></td>
+    <td align="center"><img src="preview/15-polish-mph.png" alt="The same deck in Polish with miles per hour" width="360"><br><sub>Polish interface, speed in mph (both are settings)</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="docs/screenshots/black-club.png" alt="Orange team against a black club, colours taken from the game" width="360"><br><sub>Team colours come from the game: here orange against a black club</sub></td>
+    <td align="center" colspan="2"><img src="preview/17-orange-vs-black.png" alt="Orange team against a black club, colours taken from the game" width="360"><br><sub>Team colours come from the game: here orange against a black club</sub></td>
   </tr>
 </table>
 
@@ -103,12 +105,6 @@ first start; the inspector shows its path and how many custom icons were found).
 * File names: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — or the tier number, `0.png` … `22.png`.
 * PNG, up to 200 KB, roughly square with a transparent background works best.
 * New files are picked up within a few seconds, no restart needed.
-
-## Why there are no shortcuts into the game's menus
-
-Rocket League has no interface to open modes, the garage or menus from outside — not in the Stats API, not in the configuration,
-not in the launch arguments. The only tools that can do it inject code into the game process (BakkesMod today works only without
-the anti-cheat, i.e. without online play), so the plugin **controls neither mouse nor keyboard** and sends nothing to the game.
 
 ## How it knows which player is you
 

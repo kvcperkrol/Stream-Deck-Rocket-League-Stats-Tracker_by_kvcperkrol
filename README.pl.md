@@ -8,23 +8,25 @@ rangę, ostatniego strzelca z prędkością piłki, demolki, obrony oraz Twój b
 **Instalacja → uruchom grę → działa.** Wtyczka sama włącza w grze oficjalne [Stats API](https://www.rocketleague.com/developer/stats-api),
 sama przełącza Stream Decka na swój profil, gdy gra startuje, i wraca do poprzedniego, gdy gra się zamknie.
 
+Wtyczka tylko czyta dane: nie steruje ani myszą, ani klawiaturą i niczego do gry nie wysyła.
+
 > Projekt nieoficjalny — nie jest powiązany z Psyonix, Epic Games ani Elgato. „Rocket League” jest znakiem towarowym Psyonix.
 
 ## Zrzuty ekranu
 
-<p align="center"><img src="docs/screenshots/live-match.png" alt="Pokład 5×3 w trakcie meczu" width="720"></p>
+<p align="center"><img src="preview/16-live-keys-supersonic.png" alt="Pokład 5×3 w trakcie meczu" width="720"></p>
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/goal.png" alt="Baner gola ze strzelcem, asystą i prędkością piłki" width="360"><br><sub>Gol: strzelec, asysta i prędkość piłki na banerze</sub></td>
-    <td align="center"><img src="docs/screenshots/demo.png" alt="Baner demolki" width="360"><br><sub>Demolka: kto kogo zdemolował</sub></td>
+    <td align="center"><img src="preview/04-goal-blue.png" alt="Baner gola ze strzelcem, asystą i prędkością piłki" width="360"><br><sub>Gol: strzelec, asysta i prędkość piłki na banerze</sub></td>
+    <td align="center"><img src="preview/06-demo.png" alt="Baner demolki" width="360"><br><sub>Demolka: kto kogo zdemolował</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/unranked.png" alt="Mecz towarzyski pokazany jako bez rankingu" width="360"><br><sub>Mecz towarzyski: <b>UNRANKED</b> zamiast rangi</sub></td>
-    <td align="center"><img src="docs/screenshots/polish.png" alt="Ten sam pokład po polsku, prędkość w mph" width="360"><br><sub>Interfejs po polsku, prędkość w mph (oba to ustawienia)</sub></td>
+    <td align="center"><img src="preview/18-casual-unranked.png" alt="Mecz towarzyski pokazany jako bez rankingu" width="360"><br><sub>Mecz towarzyski: <b>UNRANKED</b> zamiast rangi</sub></td>
+    <td align="center"><img src="preview/15-polish-mph.png" alt="Ten sam pokład po polsku, prędkość w mph" width="360"><br><sub>Interfejs po polsku, prędkość w mph (oba to ustawienia)</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="docs/screenshots/black-club.png" alt="Drużyna pomarańczowa przeciw czarnemu klubowi, kolory z gry" width="360"><br><sub>Kolory drużyn pochodzą z gry: tu pomarańczowi przeciw czarnemu klubowi</sub></td>
+    <td align="center" colspan="2"><img src="preview/17-orange-vs-black.png" alt="Drużyna pomarańczowa przeciw czarnemu klubowi, kolory z gry" width="360"><br><sub>Kolory drużyn pochodzą z gry: tu pomarańczowi przeciw czarnemu klubowi</sub></td>
   </tr>
 </table>
 
@@ -101,12 +103,6 @@ powstaje przy pierwszym uruchomieniu; panel wtyczki pokazuje jego ścieżkę i l
 * Nazwy plików: `bronze-1.png` … `diamond-2.png` … `grand-champion-3.png`, `supersonic-legend.png`, `unranked.png` — albo numer tieru, `0.png` … `22.png`.
 * Najlepiej PNG do 200 KB, w przybliżeniu kwadratowy, z przezroczystym tłem.
 * Nowe pliki są wykrywane w kilka sekund, bez restartu.
-
-## Dlaczego nie ma skrótów do menu gry
-
-Rocket League nie ma żadnego interfejsu do otwierania trybów, garażu ani menu z zewnątrz: ani w Stats API, ani w konfiguracji,
-ani w argumentach startowych. Jedyne narzędzia, które to potrafią, wstrzykują kod do procesu gry (BakkesMod działa dziś tylko bez
-anty-cheata, czyli bez trybu online), więc wtyczka **nie steruje ani myszą, ani klawiaturą** i niczego do gry nie wysyła.
 
 ## Skąd wiadomo, który gracz to Ty
 

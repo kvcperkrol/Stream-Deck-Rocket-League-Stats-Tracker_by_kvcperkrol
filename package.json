@@ -1,12 +1,12 @@
 {
-  "name": "rl-streamdeck",
+  "name": "streamdeck-rocket-league-hud",
   "version": "1.0.0",
   "private": true,
   "author": "kvcperkrol",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": { "type": "git", "url": "git+https://github.com/kvcperkrol/Stream-Deck-Rocket-League-Stats-Tracker_by_kvcperkrol.git" },
+  "repository": { "type": "git", "url": "git+https://github.com/kvcperkrol/StreamDeckRocketLeagueHUD.git" },
   "type": "module",
-  "description": "Rocket League HUD + shortcuts for Elgato Stream Deck (15-key)",
+  "description": "Rocket League HUD for Elgato Stream Deck (15-key)",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",

@@ -28,7 +28,7 @@ const manifest = {
 	Version: "1.7.0.0",
 	Author: "kvcperkrol",
 	Description:
-		"Live Rocket League HUD for a 15-key Stream Deck: score, clock, rank, goals with scorer and ball speed, demos, saves and shortcuts. Turns the game's Stats API on by itself — install, start the game, play.",
+		"Live Rocket League HUD for a 15-key Stream Deck: score, clock, rank, goals with scorer and ball speed, demos and saves. Turns the game's Stats API on by itself — install, start the game, play.",
 	Icon: "imgs/plugin/marketplace",
 	Category: "Rocket League HUD",
 	CategoryIcon: "imgs/plugin/category-icon",
