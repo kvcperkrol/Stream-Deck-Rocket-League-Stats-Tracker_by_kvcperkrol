@@ -10,7 +10,7 @@ import AdmZip from "adm-zip";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { actionUuid, type Cell, LAYOUT, LAYOUT_PLUS, PLUGIN_UUID, PLUS_DIALS, STRIP_ACTION } from "../src/ui/layout.ts";
+import { actionUuid, type Cell, PLUGIN_UUID, PROFILES, STRIP_ACTION } from "../src/ui/layout.ts";
 import { ACTION_INFO, STRIP_INFO } from "./build-manifest.ts";
 import { pageDirName } from "./profile-format.ts";
 
@@ -83,7 +83,8 @@ function writeProfile(spec: ProfileSpec): void {
 	console.log(`wrote ${path.relative(process.cwd(), out)}  (page dir ${pageDir})`);
 }
 
-// The 5×3 grid (Stream Deck / MK.2). Its ids are the ones released before, so decks that already have it keep matching.
-writeProfile({ seed: "RL", fileName: "RL.streamDeckProfile", model: "VSD/WiFi", keys: LAYOUT, dials: 0, keySeedPrefix: "action:" });
-// The Stream Deck + (model 20GBD9901): 8 keys and a touch strip.
-writeProfile({ seed: "RL-Plus", fileName: "RL-Plus.streamDeckProfile", model: "20GBD9901", keys: LAYOUT_PLUS, dials: PLUS_DIALS });
+// One profile per kind of deck (see PROFILES). The 5×3 one keeps the ids it was released with, so decks that have it stay matched.
+for (const p of PROFILES) {
+	const file = `${p.name.replace(/^profiles\//, "")}.streamDeckProfile`;
+	writeProfile({ seed: p.seed, fileName: file, model: p.model, keys: p.keys, dials: p.dials, keySeedPrefix: p.seed === "RL" ? "action:" : undefined });
+}

@@ -12,7 +12,7 @@ import { findLogDir, readExistingSamples, readLocalIdentity, RlLogWatcher, type 
 import { DEFAULT_WEB_PORT, findInstallDirs, patchStatsIni, type IniResult } from "./sys/ini";
 import type { AutoMmr, RenderCtx, Role } from "./ui/context";
 import { renderRole } from "./ui/keys";
-import { DEVICE_TYPE_PLUS, PROFILE_NAME, PROFILE_PLUS_NAME } from "./ui/layout";
+import { profileNameFor } from "./ui/layout";
 import { renderStrip } from "./ui/strip";
 import { svgDataUri } from "./ui/svg";
 
@@ -157,15 +157,8 @@ export class Hub {
 		for (const device of streamDeck.devices) await this.switchDevice(device, toGame);
 	}
 
-	/** The bundled profile that fits a device: the 5×3 grid, or the Stream Deck + (its 8 keys and touch strip). */
-	private profileFor(device: { type: number; size: { columns: number; rows: number } }): string | undefined {
-		if (device.type === DEVICE_TYPE_PLUS) return PROFILE_PLUS_NAME;
-		if (device.size.columns === 5 && device.size.rows === 3) return PROFILE_NAME;
-		return undefined;
-	}
-
 	private async switchDevice(device: { id: string; name: string; type: number; isConnected: boolean; size: { columns: number; rows: number } }, toGame: boolean): Promise<void> {
-		const profile = this.profileFor(device);
+		const profile = profileNameFor(device.type, device.size.columns, device.size.rows);
 		if (!device.isConnected || !profile) return;
 		try {
 			if (toGame) {

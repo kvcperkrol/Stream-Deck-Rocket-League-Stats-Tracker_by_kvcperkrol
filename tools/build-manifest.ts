@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ROLES, type Role } from "../src/ui/context.ts";
-import { actionUuid, DEVICE_TYPE_PLUS, LEGACY_ACTIONS, legacyUuid, PLUGIN_UUID, PROFILE_NAME, PROFILE_PLUS_NAME, STRIP_ACTION, STRIP_LAYOUT_FILE } from "../src/ui/layout.ts";
+import { actionUuid, LEGACY_ACTIONS, legacyUuid, PLUGIN_UUID, PROFILES, STRIP_ACTION, STRIP_LAYOUT_FILE } from "../src/ui/layout.ts";
 
 export const ACTION_INFO: Record<Role, { name: string; tooltip: string }> = {
 	rank: { name: "Rank", tooltip: "Your rank for the mode being played (set in the property inspector)." },
@@ -31,7 +31,7 @@ const manifest = {
 	SDKVersion: 2,
 	UUID: PLUGIN_UUID,
 	Name: "Rocket League HUD",
-	Version: "1.8.0.0",
+	Version: "1.9.0.0",
 	Author: "kvcperkrol",
 	Description:
 		"Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",
@@ -44,11 +44,8 @@ const manifest = {
 	OS: [{ Platform: "windows", MinimumVersion: "10" }],
 	ApplicationsToMonitor: { windows: ["RocketLeague.exe"] },
 	PropertyInspectorPath: "ui/pi.html",
-	Profiles: [
-		{ Name: PROFILE_NAME, DeviceType: 0, DontAutoSwitchWhenInstalled: true, AutoInstall: true },
-		{ Name: PROFILE_NAME, DeviceType: 3, DontAutoSwitchWhenInstalled: true, AutoInstall: true },
-		{ Name: PROFILE_PLUS_NAME, DeviceType: DEVICE_TYPE_PLUS, DontAutoSwitchWhenInstalled: true, AutoInstall: true },
-	],
+	// One bundled profile per kind of deck: installing the plugin creates a separate "Rocket League HUD" profile on every connected deck.
+	Profiles: PROFILES.flatMap((p) => p.deviceTypes.map((t) => ({ Name: p.name, DeviceType: t, DontAutoSwitchWhenInstalled: true, AutoInstall: true }))),
 	Actions: [
 		...ROLES.map((role) => ({
 			Name: ACTION_INFO[role].name,

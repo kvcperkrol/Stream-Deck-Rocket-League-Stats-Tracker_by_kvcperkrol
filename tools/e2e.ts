@@ -19,6 +19,9 @@ const PLUGIN_DIR = path.resolve(`${PLUGIN_UUID}.sdPlugin`);
 const RL_PORT = 49555;
 const DEVICE = "DEVICE-5X3";
 const DEVICE_PLUS = "DEVICE-PLUS";
+const DEVICE_MINI = "DEVICE-MINI";
+const DEVICE_XL = "DEVICE-XL";
+const DEVICE_NEO = "DEVICE-NEO";
 // Hermetic: never look at a real Rocket League that may be running on this machine.
 const FAKE_GAME = "RLHUDTestGame.exe";
 
@@ -84,6 +87,7 @@ wss.on("connection", (ws) => {
 			// The real app announces every connected device right after the plugin registers.
 			send({ event: "deviceDidConnect", device: DEVICE, deviceInfo: info.devices[0] });
 			send({ event: "deviceDidConnect", device: DEVICE_PLUS, deviceInfo: info.devices[1] });
+			for (const d of info.devices.slice(2)) send({ event: "deviceDidConnect", device: d.id, deviceInfo: d });
 		}
 		if (m.event === "getGlobalSettings") {
 			send({
@@ -112,6 +116,9 @@ const info = {
 	devices: [
 		{ id: DEVICE, name: "Stream Deck MK.2", size: { columns: 5, rows: 3 }, type: 0 },
 		{ id: DEVICE_PLUS, name: "Stream Deck +", size: { columns: 4, rows: 2 }, type: 7 },
+		{ id: DEVICE_MINI, name: "Stream Deck Mini", size: { columns: 3, rows: 2 }, type: 1 },
+		{ id: DEVICE_XL, name: "Stream Deck XL", size: { columns: 8, rows: 4 }, type: 2 },
+		{ id: DEVICE_NEO, name: "Stream Deck Neo", size: { columns: 4, rows: 2 }, type: 9 },
 	],
 	plugin: { uuid: PLUGIN_UUID, version: "1.0.0.0" },
 };
@@ -221,6 +228,10 @@ async function main(): Promise<void> {
 	check("…targets the right device", sw()?.device === DEVICE, JSON.stringify(sw()));
 	const swPlus = () => received.find((m) => m.event === "switchToProfile" && m.payload?.profile === PROFILE_PLUS_NAME);
 	check("switchToProfile → profiles/RL-Plus for the Stream Deck +", (await waitFor(() => !!swPlus(), 3000)) && swPlus()?.device === DEVICE_PLUS, JSON.stringify(swPlus()));
+	for (const [device, profile] of [[DEVICE_MINI, "profiles/RL-Mini"], [DEVICE_XL, "profiles/RL-XL"], [DEVICE_NEO, "profiles/RL-Neo"]] as const) {
+		const hit = () => received.find((m) => m.event === "switchToProfile" && m.payload?.profile === profile);
+		check(`switchToProfile → ${profile} for the ${device.replace("DEVICE-", "")} deck (each model gets its own profile)`, (await waitFor(() => !!hit(), 3000)) && hit()?.device === device, JSON.stringify(hit()));
+	}
 
 	console.log("\n[6] live match");
 	const sim = freshSim();
@@ -341,8 +352,8 @@ async function main(): Promise<void> {
 
 	console.log("\n[11] game closes");
 	send({ event: "applicationDidTerminate", payload: { application: FAKE_GAME } });
-	const back = () => received.filter((m) => m.event === "switchToProfile" && m.payload?.profile === undefined).length >= 2; // one per deck
-	check("previous profile is restored on both decks", await waitFor(back, 3000));
+	const back = () => received.filter((m) => m.event === "switchToProfile" && m.payload?.profile === undefined).length >= 5; // one per deck
+	check("previous profile is restored on every deck", await waitFor(back, 3000));
 	const last = received.filter((m) => m.event === "switchToProfile").at(-1);
 	check("…by switching without a profile name", last?.payload?.profile === undefined, JSON.stringify(last));
 	check("banner is back to 'launch the game'", await waitFor(() => has(3, 1, "ROCKET LEAGUE") || has(2, 1, "ROCKET"), 2000));

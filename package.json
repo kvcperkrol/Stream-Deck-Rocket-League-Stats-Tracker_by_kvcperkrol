@@ -16,6 +16,7 @@
     "bundle": "tsx tools/build.ts",
     "build": "npm run manifest && npm run assets && npm run profile && npm run bundle",
     "preview": "tsx tools/preview.ts",
+    "preview:layout": "tsx tools/preview-layout.ts",
     "mock": "tsx tools/mock-rl.ts",
     "record": "tsx tools/record.ts",
     "e2e": "tsx tools/e2e.ts",

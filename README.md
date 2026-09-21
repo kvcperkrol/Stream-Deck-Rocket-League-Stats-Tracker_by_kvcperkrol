@@ -74,10 +74,41 @@ Language**). The change applies to all keys immediately.
 Arrange the keys any way you like (category "Rocket League HUD"). Three *Banner* keys in one row join into one wide banner
 (left to right); the order can be forced in the key's inspector.
 
+## Supported decks
+
+Installing the plugin creates a separate **"Rocket League HUD"** profile on every connected deck of a supported model (Stream Deck
+6.6+ does this on install and does not switch to it). When the game starts the deck switches to its profile, and back when the
+game closes.
+
+| Deck | Keys | What you get |
+|---|---|---|
+| Stream Deck / MK.2, mobile app | 5×3 | the full layout below |
+| Stream Deck Mini | 3×2 | score, clock and the event banner (at rest: your goals / assists / saves) |
+| Stream Deck XL | 8×4 | the full layout, with the two lower rows left free for your own keys |
+| Stream Deck Neo | 4×2 | rank, score, clock, the event banner and boost |
+| Stream Deck + | 4×2 keys, 4 dials | 8 keys and the touch strip — see [Stream Deck +](#stream-deck--touch-strip) |
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/layout-5x3.png" alt="Stream Deck 5×3 layout with every key named" width="360"><br><sub>Stream Deck 5×3</sub></td>
+    <td align="center"><img src="docs/screenshots/layout-neo.png" alt="Stream Deck Neo layout" width="300"><br><sub>Stream Deck Neo</sub></td>
+    <td align="center"><img src="docs/screenshots/layout-mini.png" alt="Stream Deck Mini layout" width="240"><br><sub>Stream Deck Mini</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><img src="docs/screenshots/layout-xl.png" alt="Stream Deck XL layout" width="720"><br><sub>Stream Deck XL</sub></td>
+  </tr>
+</table>
+
+Other decks (Pedal, Studio, + XL, …) have no bundled profile yet — the plugin does not switch them, but every action can still be
+dragged onto their keys by hand. The 5×3 profile is the one used on real hardware; the Mini, XL, Neo and + profiles are verified
+against simulated devices only (structure, profile switching, key layout).
+
 ## Stream Deck + (touch strip)
 
 The plugin also supports the **Stream Deck +** (8 keys, 4 dials and a touch strip). The animated banner that uses three keys on the
 5×3 deck can run across the whole touch strip instead.
+
+<p align="center"><img src="docs/screenshots/layout-plus.png" alt="Stream Deck + layout: 8 keys and the touch strip, every element named" width="720"></p>
 
 <p align="center"><img src="docs/screenshots/strip-idle.png" alt="The touch strip between events: rank, MMR, last goal and my stats" width="720"><br><sub>Between events: rank, MMR, last goal, your goals / assists / saves</sub></p>
 <p align="center"><img src="docs/screenshots/strip-goal.png" alt="A goal across the whole touch strip" width="720"><br><sub>A goal: ball speed on the left, GOAL! and the scorer in the middle, the assist on the right</sub></p>

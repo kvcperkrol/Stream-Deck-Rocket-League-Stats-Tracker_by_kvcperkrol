@@ -73,10 +73,41 @@ Language / Język**). Zmiana działa od razu na wszystkich klawiszach.
 Klawisze możesz dowolnie przestawiać (kategoria „Rocket League HUD”). Trzy klawisze *Baner* w jednym rzędzie łączą się
 w jeden szeroki baner (od lewej do prawej); kolejność można wymusić w panelu klawisza.
 
+## Obsługiwane decki
+
+Instalacja wtyczki tworzy osobny profil **„Rocket League HUD”** na każdym podłączonym decku obsługiwanego modelu (Stream Deck 6.6+
+robi to przy instalacji i nie przełącza się na niego). Po uruchomieniu gry deck przełącza się na swój profil, a po zamknięciu gry
+wraca do poprzedniego.
+
+| Deck | Klawisze | Co dostajesz |
+|---|---|---|
+| Stream Deck / MK.2, aplikacja mobilna | 5×3 | pełny układ poniżej |
+| Stream Deck Mini | 3×2 | wynik, czas i baner zdarzeń (w spoczynku: Twoje gole / asysty / obrony) |
+| Stream Deck XL | 8×4 | pełny układ; dwa dolne rzędy zostają wolne na Twoje klawisze |
+| Stream Deck Neo | 4×2 | ranga, wynik, czas, baner zdarzeń i boost |
+| Stream Deck + | 4×2 klawisze, 4 pokrętła | 8 klawiszy i pasek dotykowy — patrz [Stream Deck +](#stream-deck--pasek-dotykowy) |
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/layout-5x3.png" alt="Układ Stream Decka 5×3 z podpisanymi klawiszami" width="360"><br><sub>Stream Deck 5×3</sub></td>
+    <td align="center"><img src="docs/screenshots/layout-neo.png" alt="Układ Stream Decka Neo" width="300"><br><sub>Stream Deck Neo</sub></td>
+    <td align="center"><img src="docs/screenshots/layout-mini.png" alt="Układ Stream Decka Mini" width="240"><br><sub>Stream Deck Mini</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><img src="docs/screenshots/layout-xl.png" alt="Układ Stream Decka XL" width="720"><br><sub>Stream Deck XL</sub></td>
+  </tr>
+</table>
+
+Inne decki (Pedal, Studio, + XL …) nie mają jeszcze dołączonego profilu — wtyczka ich nie przełącza, ale wszystkie akcje można
+przeciągnąć na ich klawisze ręcznie. Profil 5×3 jest tym używanym na prawdziwym sprzęcie; profile Mini, XL, Neo i + sprawdziłem tylko
+na symulowanych urządzeniach (struktura, przełączanie profilu, układ klawiszy).
+
 ## Stream Deck + (pasek dotykowy)
 
 Wtyczka obsługuje też **Stream Deck +** (8 klawiszy, 4 pokrętła i pasek dotykowy). Animowany baner, który na decku 5×3 zajmuje
 trzy klawisze, może działać na całym pasku dotykowym.
+
+<p align="center"><img src="docs/screenshots/layout-plus.png" alt="Układ Stream Decka +: 8 klawiszy i pasek dotykowy z opisem każdego elementu" width="720"></p>
 
 <p align="center"><img src="docs/screenshots/strip-idle.png" alt="Pasek dotykowy między zdarzeniami: ranga, MMR, ostatni gol i moje statystyki" width="720"><br><sub>Między zdarzeniami: ranga, MMR, ostatni gol, Twoje gole / asysty / obrony</sub></p>
 <p align="center"><img src="docs/screenshots/strip-goal.png" alt="Gol na całym pasku dotykowym" width="720"><br><sub>Gol: prędkość piłki po lewej, GOL! i strzelec pośrodku, asysta po prawej</sub></p>
