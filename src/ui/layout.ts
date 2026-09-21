@@ -86,7 +86,7 @@ export const LAYOUT_MINI: Cell[] = [
  * Stream Deck XL (8×4, 32 keys): the 5×3 layout with room around it. The two lower rows stay free for the user's own keys.
  *
  *   RANK   MODE       BLUE      TIMER     ORANGE     MMR         LAST GOAL  BALL SPEED
- *   BOOST  CAR SPEED  ╔═══════ EVENT BANNER ═══╗     POSSESSION  POINTS
+ *   BOOST  CAR SPEED  ╔═══════ EVENT BANNER ═══╗     POSSESSION  POINTS  PING
  */
 export const LAYOUT_XL: Cell[] = [
 	{ col: 0, row: 0, role: "rank" },
@@ -105,6 +105,7 @@ export const LAYOUT_XL: Cell[] = [
 	{ col: 4, row: 1, role: "banner" },
 	{ col: 5, row: 1, role: "possession" },
 	{ col: 6, row: 1, role: "points" },
+	{ col: 7, row: 1, role: "ping" },
 ];
 
 /**

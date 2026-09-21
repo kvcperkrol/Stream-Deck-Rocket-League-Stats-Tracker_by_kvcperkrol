@@ -3,7 +3,7 @@
 	"SDKVersion": 2,
 	"UUID": "mov.remake.rlhud",
 	"Name": "Rocket League HUD",
-	"Version": "1.9.1.0",
+	"Version": "1.10.0.0",
 	"Author": "kvcperkrol",
 	"Description": "Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",
 	"Icon": "imgs/plugin/marketplace",
@@ -88,7 +88,7 @@
 			"Name": "MMR + session",
 			"UUID": "mov.remake.rlhud.mmr",
 			"Icon": "imgs/actions/mmr/icon",
-			"Tooltip": "MMR for the current mode and this session's wins/losses.",
+			"Tooltip": "MMR for the current mode and this session's wins/losses. Press to swap MMR and the record, press again for your current win streak, again to go back.",
 			"Controllers": [
 				"Keypad"
 			],
@@ -271,6 +271,38 @@
 			"States": [
 				{
 					"Image": "imgs/actions/points/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Clock",
+			"UUID": "mov.remake.rlhud.clock",
+			"Icon": "imgs/actions/clock/icon",
+			"Tooltip": "The current time of this computer, with the date (24-hour or 12-hour in the inspector). Also a panel for the Stream Deck + touch strip.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/clock/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Ping",
+			"UUID": "mov.remake.rlhud.ping",
+			"Icon": "imgs/actions/ping/icon",
+			"Tooltip": "Live ping to the game server of the running match, coloured by quality, with a small history graph.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/ping/key",
 					"TitleAlignment": "middle",
 					"ShowTitle": false
 				}

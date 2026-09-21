@@ -87,8 +87,8 @@ export function possessionKey(ctx: RenderCtx): string {
 			(markX !== undefined ? `<polygon points="${markX - 4},19 ${markX + 4},19 ${markX},25" fill="#ffffff"/>` : "") +
 			`<rect x="8" y="28" width="${barW}" height="14" fill="${COLORS.line}"/>` +
 			(pct ? `<rect x="8" y="28" width="${leftW}" height="14" fill="${leftColor}"/><rect x="${8 + leftW}" y="28" width="${barW - leftW}" height="14" fill="${rightColor}"/>` : "") +
-			text(pct ? `${pct[leftTeam]}%` : "—", { x: 20, y: 62, size: 15, fill: pct ? leftColor : COLORS.dim, skew: -9, maxWidth: 30 }) +
-			text(pct ? `${pct[rightTeam]}%` : "—", { x: 52, y: 62, size: 15, fill: pct ? rightColor : COLORS.dim, skew: -9, maxWidth: 30 }) +
+			text(pct ? `${pct[leftTeam]}%` : "—", { x: 19, y: 61, size: 11.5, fill: pct ? leftColor : COLORS.dim, skew: -9, maxWidth: 25 }) +
+			text(pct ? `${pct[rightTeam]}%` : "—", { x: 53, y: 61, size: 11.5, fill: pct ? rightColor : COLORS.dim, skew: -9, maxWidth: 25 }) +
 			veil(ctx),
 	);
 }

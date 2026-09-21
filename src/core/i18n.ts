@@ -44,6 +44,11 @@ const PL = {
 	unranked: "NIERANKINGOWY",
 	mmrCasual: "MMR TOWARZ.",
 	setRank: "USTAW RANGĘ",
+	ping: "PING",
+	pingNone: "BRAK MECZU",
+	pingLoss: "UTRATA",
+	record: "BILANS",
+	streak: "SERIA",
 	div: "DYW.",
 	time: "CZAS",
 	ot: "DOGR.",
@@ -103,6 +108,11 @@ const EN: Record<I18nKey, string> = {
 	unranked: "UNRANKED",
 	mmrCasual: "CASUAL MMR",
 	setRank: "SET RANK",
+	ping: "PING",
+	pingNone: "NO MATCH",
+	pingLoss: "LOSS",
+	record: "RECORD",
+	streak: "STREAK",
 	div: "DIV",
 	time: "TIME",
 	ot: "OT",
@@ -114,6 +124,16 @@ const EN: Record<I18nKey, string> = {
 	by: "by {name}",
 	noGoal: "NONE",
 	live: "MATCH IN PROGRESS",
+};
+
+/** Short weekday (Monday first) and month names for the clock. */
+export const WEEKDAYS: Record<Lang, string[]> = {
+	en: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+	pl: ["PON", "WT", "ŚR", "CZW", "PT", "SOB", "NIEDZ"],
+};
+export const MONTHS: Record<Lang, string[]> = {
+	en: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+	pl: ["STY", "LUT", "MAR", "KWI", "MAJ", "CZE", "LIP", "SIE", "WRZ", "PAŹ", "LIS", "GRU"],
 };
 
 const DICTS: Record<Lang, Record<I18nKey, string>> = { pl: PL as unknown as Record<I18nKey, string>, en: EN };

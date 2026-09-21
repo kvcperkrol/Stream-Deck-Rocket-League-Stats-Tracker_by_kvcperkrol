@@ -121,6 +121,8 @@ export interface GameState {
 	lastGoal?: LastGoal;
 	winner?: TeamNum;
 	session: Session;
+	/** Results of finished matches, oldest first (kept across sessions by the hub); drives the win streak. */
+	history: ("W" | "L")[];
 	/** Timestamp of the last UpdateState packet (0 = none yet). */
 	lastUpdateAt: number;
 	/** Last playlist id seen — surfaced in diagnostics so unknown ids can be mapped. */
@@ -468,8 +470,11 @@ export class MatchStore {
 		const key = s.guid ?? `${this.now()}`;
 		if (this.endedGuidCounted !== key && s.meTeam !== undefined) {
 			this.endedGuidCounted = key;
-			if (winner === s.meTeam) s.session.wins += 1;
+			const won = winner === s.meTeam;
+			if (won) s.session.wins += 1;
 			else s.session.losses += 1;
+			s.history = [...s.history, (won ? "W" : "L") as "W" | "L"].slice(-200);
+			this.onHistory?.(s.history);
 		}
 		const kind: BannerKind = s.meTeam === undefined ? "win" : winner === s.meTeam ? "victory" : "defeat";
 		this.push({ kind, ttl: 20000, prio: 120, team: winner });
@@ -537,10 +542,29 @@ export class MatchStore {
 		this.state.phase = "countdown";
 	}
 
+	/** Called with the full result history whenever a match result is added (the hub saves it). */
+	onHistory?: (history: ("W" | "L")[]) => void;
+
+	/** Restores the history saved by an earlier run. */
+	setHistory(history: ("W" | "L")[]): void {
+		this.state.history = history.filter((r) => r === "W" || r === "L").slice(-200);
+	}
+
+	/** The current run of identical results at the end of the history: e.g. 3 wins in a row. */
+	streak(): { kind: "W" | "L"; count: number } | undefined {
+		const h = this.state.history;
+		if (h.length === 0) return undefined;
+		const kind = h[h.length - 1]!;
+		let count = 0;
+		for (let i = h.length - 1; i >= 0 && h[i] === kind; i--) count++;
+		return { kind, count };
+	}
+
 	private resetMatch(): void {
-		const { session, gameRunning, connected, lastPlaylistId, lastGoal } = this.state;
+		const { session, gameRunning, connected, lastPlaylistId, lastGoal, history } = this.state;
 		const fresh = this.freshState();
 		fresh.session = session;
+		fresh.history = history;
 		fresh.lastGoal = lastGoal; // "last goal" stays on the deck between matches
 		fresh.gameRunning = gameRunning;
 		fresh.connected = connected;
@@ -567,6 +591,7 @@ export class MatchStore {
 			replay: false,
 			players: [],
 			session: { ...FRESH_SESSION },
+			history: [],
 			lastUpdateAt: 0,
 		};
 	}

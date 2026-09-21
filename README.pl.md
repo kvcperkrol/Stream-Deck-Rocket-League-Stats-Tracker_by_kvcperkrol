@@ -6,7 +6,7 @@ Wtyczka do 15-klawiszowego Stream Decka (5×3) i do Stream Decka +. Po uruchomie
 rangę, ostatniego strzelca z prędkością piłki, demolki, obrony oraz Twój boost, prędkość auta, posiadanie piłki i punkty.
 
 **Instalacja → uruchom grę → działa.** Wtyczka sama włącza w grze oficjalne [Stats API](https://www.rocketleague.com/developer/stats-api),
-sama przełącza Stream Decka na swój profil, gdy gra startuje, i wraca do poprzedniego, gdy gra się zamknie.
+pokazuje mecz na klawiszach. Przełączanie decka na profil wtyczki po starcie gry jest opcjonalne i **domyślnie wyłączone** (patrz [Przełączanie profilu](#przełączanie-profilu)).
 
 Wtyczka tylko czyta dane: nie steruje ani myszą, ani klawiaturą i niczego do gry nie wysyła.
 
@@ -57,7 +57,7 @@ Language / Język**). Zmiana działa od razu na wszystkich klawiszach.
 | Klawisz | Co pokazuje |
 |---|---|
 | **Ranga** | Emblemat i nazwa rangi dla trybu rankingowego, w którym grasz (Duel / Doubles / Standard …). W trybach **bez rankingu** (towarzyski, trening, mecz prywatny) pokazuje **NIERANKINGOWY** i nazwę trybu — nie pożycza rangi z podobnego trybu rankingowego. |
-| **MMR + W/P** | Twój MMR dla tego trybu i bilans wygranych/porażek od uruchomienia gry. W meczu towarzyskim jest to ukryty MMR towarzyski z logu gry, opisany „MMR TOWARZ.”. |
+| **MMR + W/P** | Twój MMR dla tego trybu i bilans wygranych/porażek od uruchomienia gry. **Naciśnij go**, żeby je zamienić (bilans staje się dużą liczbą, MMR małą pod spodem), naciśnij ponownie po **aktualną serię zwycięstw** (przetrwa restarty), a kolejny raz wraca — każda zmiana z animacją. W meczu towarzyskim jest to ukryty MMR towarzyski z logu gry, opisany „MMR TOWARZ.”. |
 | **Tryb** | Playlista i **RANKINGOWY** / **NIERANKINGOWY**, liczba graczy w drużynie. |
 | **Wynik (lewy / prawy)** | Gole drużyn w **kolorach, w jakich pokazuje je gra** (np. czarny lub szary przeciwnik). Po lewej jest **Twoja drużyna** (jak w HUD-zie gry), po prawej przeciwnik; Twoja ma znacznik „TY”. Miga po golu. W ustawieniach można wymusić „niebiescy zawsze po lewej”. Nazwa drużyny to nazwa własna (np. klubu) albo „NIEBIESCY / POMARAŃCZOWI” w języku wtyczki. |
 | **Czas** | Czas do końca, dogrywka (`+0:12`), pauza. Ostatnie 30 s na czerwono. |
@@ -68,6 +68,8 @@ Language / Język**). Zmiana działa od razu na wszystkich klawiszach.
 | **Auto** | Prędkość Twojego auta i pasek do bariery dźwięku; po jej przekroczeniu miga **SUPERSONIC**. |
 | **Posiadanie** | Która drużyna ostatnio dotykała piłki (znacznik) i jaki procent meczu piłka „była” u każdej z nich — w tych samych kolorach i kolejności co wynik. |
 | **Punkty** | Twoje punkty w meczu oraz strzały i demolki. |
+| **Zegar** | Aktualna godzina tego komputera z datą; 24- albo 12-godzinny (w panelu). Działa z grą i bez niej, także jako panel paska dotykowego. |
+| **Ping** | Ping na żywo do serwera gry Twojego meczu, kolorowany zielony / złoty / czerwony, z małym wykresem historii. Patrz [Ping](#ping). |
 
 Klawisze możesz dowolnie przestawiać (kategoria „Rocket League HUD”). Trzy klawisze *Baner* w jednym rzędzie łączą się
 w jeden szeroki baner (od lewej do prawej); kolejność można wymusić w panelu klawisza.
@@ -75,8 +77,8 @@ w jeden szeroki baner (od lewej do prawej); kolejność można wymusić w panelu
 ## Obsługiwane decki
 
 Instalacja wtyczki tworzy osobny profil **„Rocket League HUD”** na każdym podłączonym decku obsługiwanego modelu (Stream Deck 6.6+
-robi to przy instalacji i nie przełącza się na niego). Po uruchomieniu gry deck przełącza się na swój profil, a po zamknięciu gry
-wraca do poprzedniego.
+robi to przy instalacji i nie przełącza się na niego). Używasz go z listy profili Stream Decka albo pozwalasz wtyczce przełączać się po starcie
+gry i z powrotem po jej zamknięciu — patrz [Przełączanie profilu](#przełączanie-profilu).
 
 | Deck | Klawisze | Co dostajesz |
 |---|---|---|
@@ -89,6 +91,20 @@ Inne decki (Pedal, Studio, + XL …) nie mają jeszcze dołączonego profilu —
 przeciągnąć na ich klawisze ręcznie. Profil 5×3 jest tym używanym na prawdziwym sprzęcie; profile Mini, XL, Neo i + sprawdziłem tylko
 na symulowanych urządzeniach (struktura, przełączanie profilu, układ klawiszy).
 
+## Przełączanie profilu
+
+Domyślnie wtyczka **nie przełącza profili**: korzystasz z profilu „Rocket League HUD” z listy profili Stream Decka albo ustawiasz
+własny profil dla Rocket League w opcjach profilu w aplikacji Stream Deck (potrafi przełączać się sam dla danej aplikacji). Jeśli
+chcesz, żeby robiła to wtyczka — przełączała się na swój profil po starcie gry i wracała po jej zamknięciu — zaznacz w panelu
+wtyczki (Ogólne) **Przełączaj profil automatycznie po uruchomieniu gry**.
+
+## Ping
+
+Rocket League pokazuje ping w grze, ale nie udostępnia go innym programom. Gra zapisuje jednak w logu serwer, na który wchodzi, a
+wtyczka mierzy czas odpowiedzi tego adresu (zwykły ping ICMP, mniej więcej co dwie sekundy), gdy trwa mecz. To opóźnienie sieciowe
+do serwera gry — bliskie liczbie z tabeli wyników w grze, ale nie identyczne. Jeśli serwer nie odpowiada na ICMP, klawisz pokaże
+„UTRATA” zamiast liczby. Nic nie jest wysyłane nigdzie poza tym jednym serwerem.
+
 ## Stream Deck + (pasek dotykowy)
 
 Wtyczka obsługuje też **Stream Deck +** (8 klawiszy, 4 pokrętła i pasek dotykowy). Animowany baner, który na decku 5×3 zajmuje
@@ -98,11 +114,12 @@ trzy klawisze, może działać na całym pasku dotykowym.
 <p align="center"><img src="docs/screenshots/strip-idle.png" alt="Pasek dotykowy między zdarzeniami: ranga, MMR, ostatni gol i moje statystyki" width="720"><br><sub>Między zdarzeniami: ranga, MMR, ostatni gol, Twoje gole / asysty / obrony</sub></p>
 <p align="center"><img src="docs/screenshots/strip-goal.png" alt="Gol na całym pasku dotykowym" width="720"><br><sub>Gol: prędkość piłki po lewej, GOL! i strzelec pośrodku, asysta po prawej</sub></p>
 
-* Po uruchomieniu gry deck przełącza się na dołączony profil: Twój wynik, czas, wynik rywala, boost, prędkość auta, posiadanie,
-  punkty i prędkość piłki na 8 klawiszach oraz akcja **Pasek dotykowy** na każdym z czterech pokręteł.
+* Dołączony profil ma Twój wynik, czas, wynik rywala, boost, prędkość auta, posiadanie, punkty i prędkość piłki na 8 klawiszach
+  oraz akcję **Pasek dotykowy** na każdym z czterech pokręteł.
 * **Między zdarzeniami** ćwiartka paska nad każdym pokrętłem pokazuje jeden panel — ikonę i nazwę rangi, MMR ze zmianą i bilansem
   wygranych/porażek, ostatni gol oraz Twoje gole / asysty / obrony. **Gdy coś się dzieje** (gol, demolka, obrona, dogrywka,
   powtórka, zwycięstwo …) cztery ćwiartki razem pokazują ten sam animowany baner co trzy klawisze banera, na całej szerokości.
+* **Wybór paneli:** w panelu każdego pokrętła możesz przypiąć jego ćwiartkę paska do *rangi*, *MMR*, *ostatniego gola*, *moich statystyk*, *zegara* lub *pingu* (domyślnie: ranga, MMR, ostatni gol, moje statystyki). Zdarzenia i tak zajmują cały pasek, dopóki trwają.
 * Pasek jest opcjonalny: zdejmij akcje z pokręteł, a klawisze działają jak dotąd. Żeby ułożyć to samemu, przeciągnij
   **Pasek dotykowy (Stream Deck +)** na pokrętła w aplikacji Stream Deck. Każde pokrętło pokazuje ćwiartkę nad sobą; w panelu
   akcji możesz przypiąć inną.

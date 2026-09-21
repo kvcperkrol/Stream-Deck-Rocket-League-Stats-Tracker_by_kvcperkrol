@@ -6,8 +6,8 @@ A plugin for the 15-key Stream Deck (5×3) and the Stream Deck +. While Rocket L
 ball speed, demos, saves, and your own boost, car speed, possession and points on the keys.
 
 **Install → start the game → it works.** The plugin turns on the game's official
-[Stats API](https://www.rocketleague.com/developer/stats-api) by itself, switches your Stream Deck to its own profile when the
-game starts, and switches back when the game closes.
+[Stats API](https://www.rocketleague.com/developer/stats-api) by itself and shows the match on your keys. Switching the deck to its own
+profile when the game starts is optional and **off by default** (see [Profile switching](#profile-switching)).
 
 The plugin only reads data: it controls neither mouse nor keyboard and sends nothing to the game.
 
@@ -58,7 +58,7 @@ Language**). The change applies to all keys immediately.
 | Key | What it shows |
 |---|---|
 | **Rank** | Emblem and name of your rank for the ranked mode you are playing (Duel / Doubles / Standard …). In modes **without a ranking** (casual, free play, private match) it says **UNRANKED** and names the mode — it never borrows the rank of a similar ranked mode. |
-| **MMR + W/L** | Your MMR for that mode, and your win/loss record since the game started. In a casual match this is the hidden casual MMR from the game log, labelled "CASUAL MMR". |
+| **MMR + W/L** | Your MMR for that mode, and your win/loss record since the game started. **Press it** to swap them (the record becomes the big number, MMR small underneath), press again for your current **win streak** (it survives restarts), and again to go back — each with a swap animation. In a casual match this is the hidden casual MMR from the game log, labelled "CASUAL MMR". |
 | **Mode** | The playlist, **RANKED** or **UNRANKED**, and the team size. |
 | **Score (left / right)** | Each team's goals in **the colours the game shows them in** (e.g. a black or grey opponent). **Your team** is on the left (like the game's HUD), the opponent on the right; yours carries a "YOU" tag. Flashes on a goal. A setting can force "blue always on the left". The label is the team's own name (e.g. a club) or "BLUE / ORANGE" in the plugin's language. |
 | **Clock** | Time left, overtime (`+0:12`), pause. Last 30 s in red. |
@@ -69,6 +69,8 @@ Language**). The change applies to all keys immediately.
 | **Car** | Your car's speed and a bar up to the sound barrier; **SUPERSONIC** flashes once you break it. |
 | **Possession** | Which team touched the ball last (marker) and each team's share of the match — in the same colours and order as the score. |
 | **Score (points)** | Your points in the match, plus shots and demos. |
+| **Clock** | The current time of this computer with the date; 24-hour or 12-hour (inspector). Works with or without the game, and as a touch-strip panel. |
+| **Ping** | Live ping to the game server of your match, coloured green / gold / red, with a small history graph. See [Ping](#ping). |
 
 Arrange the keys any way you like (category "Rocket League HUD"). Three *Banner* keys in one row join into one wide banner
 (left to right); the order can be forced in the key's inspector.
@@ -76,8 +78,8 @@ Arrange the keys any way you like (category "Rocket League HUD"). Three *Banner*
 ## Supported decks
 
 Installing the plugin creates a separate **"Rocket League HUD"** profile on every connected deck of a supported model (Stream Deck
-6.6+ does this on install and does not switch to it). When the game starts the deck switches to its profile, and back when the
-game closes.
+6.6+ does this on install and does not switch to it). Use it from the Stream Deck's profile list, or let the plugin switch to it when the
+game starts and back when it closes — see [Profile switching](#profile-switching).
 
 | Deck | Keys | What you get |
 |---|---|---|
@@ -90,6 +92,20 @@ Other decks (Pedal, Studio, + XL, …) have no bundled profile yet — the plugi
 dragged onto their keys by hand. The 5×3 profile is the one used on real hardware; the Mini, XL, Neo and + profiles are verified
 against simulated devices only (structure, profile switching, key layout).
 
+## Profile switching
+
+By default the plugin **does not switch profiles**: you use the "Rocket League HUD" profile from the Stream Deck's own profile list,
+or set your own profile for Rocket League in the profile options of the Stream Deck app (it can switch per application by itself).
+To let the plugin do it — switch to its profile when the game starts and back when the game closes — tick **Switch profile
+automatically when the game starts** in the plugin's inspector (General).
+
+## Ping
+
+Rocket League shows ping in-game but does not report it to other programs. The game does log the dedicated server it joins, and
+the plugin measures the round trip to that address (an ordinary ICMP ping, about every two seconds) while a match runs. It is the
+network latency to the game server — close to, but not exactly, the number in the game's scoreboard. If the server does not answer
+ICMP the key shows "LOSS" instead of a number. Nothing is sent anywhere but that one server.
+
 ## Stream Deck + (touch strip)
 
 The plugin also supports the **Stream Deck +** (8 keys, 4 dials and a touch strip). The animated banner that uses three keys on the
@@ -99,11 +115,12 @@ The plugin also supports the **Stream Deck +** (8 keys, 4 dials and a touch stri
 <p align="center"><img src="docs/screenshots/strip-idle.png" alt="The touch strip between events: rank, MMR, last goal and my stats" width="720"><br><sub>Between events: rank, MMR, last goal, your goals / assists / saves</sub></p>
 <p align="center"><img src="docs/screenshots/strip-goal.png" alt="A goal across the whole touch strip" width="720"><br><sub>A goal: ball speed on the left, GOAL! and the scorer in the middle, the assist on the right</sub></p>
 
-* When the game starts the deck switches to a bundled profile: your score, the clock, the opponent's score, boost, car speed,
-  possession, points and ball speed on the 8 keys, and the **Touch strip** action on each of the four dials.
+* The bundled profile has your score, the clock, the opponent's score, boost, car speed, possession, points and ball speed on
+  the 8 keys, and the **Touch strip** action on each of the four dials.
 * **Between events** every dial's quarter of the strip shows one panel — rank icon and name, MMR with its change and your
   win/loss record, the last goal, and your goals / assists / saves. **When something happens** (goal, demo, save, overtime,
   replay, victory …) the four quarters together show the same animated banner as the three banner keys, across the full width.
+* **Choose the panels:** in the inspector of each dial you can pin that quarter of the strip to *rank*, *MMR*, *last goal*, *my stats*, *clock* or *ping* (default: rank, MMR, last goal, my stats). Events still take the whole strip while they last.
 * The strip is optional: take the actions off the dials and the keys work exactly as before. To arrange it yourself, drag
   **Touch strip (Stream Deck +)** onto the dials in the Stream Deck app. Each dial shows the quarter above it; the action's
   inspector lets you pin a different one.

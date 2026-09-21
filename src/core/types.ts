@@ -38,6 +38,8 @@ export type GlobalSettings = {
 	recordMatches: boolean;
 	/** Shifts the kickoff countdown digits: + shows each number later, − earlier (ms). For calibrating against the game on a given deck. */
 	countdownOffsetMs: number;
+	/** The clock key and strip panel: 12-hour time with AM/PM instead of 24-hour. */
+	clock12h: boolean;
 	ranks: Partial<Record<RankGroup, RankEntry>>;
 };
 
@@ -45,12 +47,13 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 	lang: "en",
 	units: "kmh",
 	playerName: "",
-	autoSwitch: true,
+	autoSwitch: false,
 	packetRate: 10,
 	installDir: "",
 	scoreOrder: "me-left",
 	recordMatches: false,
 	countdownOffsetMs: 0,
+	clock12h: false,
 	ranks: {},
 };
 
@@ -61,11 +64,12 @@ export function mergeSettings(raw: Partial<GlobalSettings> | undefined | null): 
 		lang: r.lang === "pl" || r.lang === "en" ? r.lang : DEFAULT_SETTINGS.lang,
 		units: r.units === "mph" || r.units === "uu" ? r.units : DEFAULT_SETTINGS.units,
 		playerName: typeof r.playerName === "string" ? r.playerName : DEFAULT_SETTINGS.playerName,
-		autoSwitch: r.autoSwitch !== false,
+		autoSwitch: r.autoSwitch === true,
 		packetRate: typeof r.packetRate === "number" && r.packetRate > 0 ? r.packetRate : DEFAULT_SETTINGS.packetRate,
 		installDir: typeof r.installDir === "string" ? r.installDir : DEFAULT_SETTINGS.installDir,
 		scoreOrder: r.scoreOrder === "blue-left" ? "blue-left" : "me-left",
 		recordMatches: r.recordMatches === true,
+		clock12h: r.clock12h === true,
 		countdownOffsetMs: typeof r.countdownOffsetMs === "number" && Number.isFinite(r.countdownOffsetMs) ? Math.max(-1500, Math.min(1500, Math.round(r.countdownOffsetMs))) : DEFAULT_SETTINGS.countdownOffsetMs,
 		ranks: { ...(r.ranks ?? {}) },
 	};

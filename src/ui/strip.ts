@@ -2,6 +2,7 @@ import { t } from "../core/i18n";
 import { rankFor, tierInfo } from "../core/ranks";
 import { convertSpeed } from "../core/units";
 import { emblem, iconBadge } from "./art";
+import { clockParts, pingColor, sparkline } from "./extra-keys";
 import { renderBannerStripSegment, stat, STRIP_SEGMENT, stripNeedsScene } from "./banner";
 import type { RenderCtx } from "./context";
 import { mmrInfo, rankedContext } from "./keys";
@@ -14,7 +15,7 @@ const CX = W / 2;
 const wrap = (inner: string) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${inner}</svg>`;
 
 /** Common look of a panel: the deck's dark gradient with a hairline where the next segment starts. */
-const panel = (seg: number) =>
+const panel_ = (seg: number) =>
 	linear("p", COLORS.bg2, COLORS.bg1) +
 	`<rect width="${W}" height="${H}" fill="url(#p)"/>` +
 	stripes(W, H, 0, 0.045, "#7f8fe0", 44, 14) +
@@ -86,14 +87,52 @@ function statsPanel(ctx: RenderCtx): string {
 	return out;
 }
 
+/** Segment "clock": the time of this computer, the date, and the second hand as a line along the bottom. */
+function clockPanel(ctx: RenderCtx): string {
+	const c = clockParts(ctx.now, ctx.settings.lang, ctx.settings.clock12h);
+	return (
+		text(`${c.hh}:${c.mm}`, { x: CX, y: 60, size: 54, skew: -9, maxWidth: 180 }) +
+		(c.suffix ? text(c.suffix, { x: W - 12, y: 30, size: 14, fill: COLORS.dim, anchor: "end" }) : "") +
+		text(c.date, { x: CX, y: 84, size: 14, fill: COLORS.dim, maxWidth: 176 }) +
+		`<rect x="12" y="93" width="${W - 24}" height="2" fill="${COLORS.line}"/>` +
+		`<rect x="12" y="93" width="${(((c.seconds + 1) / 60) * (W - 24)).toFixed(1)}" height="2" fill="${COLORS.blue1}"/>`
+	);
+}
+
+/** Segment "ping": the latest round trip to the game server and how it has been doing. */
+function pingPanel(ctx: RenderCtx): string {
+	const lang = ctx.settings.lang;
+	const p = ctx.store.state.gameRunning ? ctx.ping : undefined;
+	const ms = p?.ms;
+	const has = typeof ms === "number";
+	const lost = ms === null;
+	const color = has ? pingColor(ms) : lost ? COLORS.red : COLORS.dim;
+	return (
+		text(t(lang, "ping"), { x: CX, y: 22, size: 12, fill: COLORS.dim }) +
+		text(has ? String(ms) : lost ? t(lang, "pingLoss") : "—", { x: CX - (has ? 10 : 0), y: 62, size: has ? 46 : 30, fill: color, skew: -9, maxWidth: 150 }) +
+		(has ? text("ms", { x: W - 14, y: 62, size: 12, fill: COLORS.dim, anchor: "end" }) : !p?.target ? text(t(lang, "pingNone"), { x: CX, y: 80, size: 11, fill: COLORS.dim }) : "") +
+		`<rect x="14" y="74" width="${W - 28}" height="18" fill="#000000" fill-opacity="0.35"/>` +
+		(p ? sparkline(p.history, 14, 74, W - 28, 18, 34) : "")
+	);
+}
+
+/** What a dial's segment can show. "auto" is the default arrangement: rank, MMR, last goal, my stats. */
+export type StripPanel = "auto" | "rank" | "mmr" | "lastgoal" | "stats" | "clock" | "ping";
+export const STRIP_PANELS: StripPanel[] = ["auto", "rank", "mmr", "lastgoal", "stats", "clock", "ping"];
+
+const PANELS: Record<Exclude<StripPanel, "auto">, (ctx: RenderCtx) => string> = { rank: rankPanel, mmr: mmrPanel, lastgoal: lastGoalPanel, stats: statsPanel, clock: clockPanel, ping: pingPanel };
+const DEFAULT_PANEL: Exclude<StripPanel, "auto">[] = ["rank", "mmr", "lastgoal", "stats"];
+
 /**
  * One segment (0…3) of the Stream Deck + touch strip. While something happens (a goal, a demo, a save …) — or while the game is
  * not running / in the menu — the four segments together show the same animated banner as three banner keys would, only
  * wider. In between, each segment is a small panel: rank, MMR, last goal, my stats.
  */
-export function renderStrip(ctx: RenderCtx, segment: number): string {
+export function renderStrip(ctx: RenderCtx, segment: number, panel: StripPanel = "auto"): string {
 	const seg = Math.max(0, Math.min(SEGMENTS - 1, Math.trunc(segment)));
-	if (stripNeedsScene(ctx)) return renderBannerStripSegment(ctx, seg);
-	const body = [rankPanel, mmrPanel, lastGoalPanel, statsPanel][seg]!(ctx);
-	return wrap(panel(seg) + body);
+	// An event always takes the whole strip. Otherwise a segment shows its pinned panel — or, on "auto", the default one, unless
+	// the game is not running / in the menu and nothing on the strip is customised (then all four show that state together).
+	if (ctx.store.activeBanner() || (panel === "auto" && stripNeedsScene(ctx))) return renderBannerStripSegment(ctx, seg);
+	const which = panel === "auto" ? DEFAULT_PANEL[seg]! : panel;
+	return wrap(panel_(seg) + PANELS[which](ctx));
 }

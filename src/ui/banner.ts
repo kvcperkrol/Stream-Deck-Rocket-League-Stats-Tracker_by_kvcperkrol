@@ -291,6 +291,7 @@ export function renderBannerSlice(ctx: RenderCtx, slice: number): string {
 export function stripNeedsScene(ctx: RenderCtx): boolean {
 	const s = ctx.store.state;
 	if (ctx.store.activeBanner()) return true;
+	if (ctx.stripCustom) return false;
 	return !s.gameRunning || ctx.restartHint || s.phase === "menu" || !ctx.store.myStats();
 }
 

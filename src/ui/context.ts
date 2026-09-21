@@ -24,9 +24,11 @@ export type Role =
 	| "boost"
 	| "carspeed"
 	| "possession"
-	| "points";
+	| "points"
+	| "clock"
+	| "ping";
 
-export const ROLES: Role[] = ["rank", "mmr", "mode", "blue", "orange", "timer", "lastgoal", "banner", "speed", "boost", "carspeed", "possession", "points"];
+export const ROLES: Role[] = ["rank", "mmr", "mode", "blue", "orange", "timer", "lastgoal", "banner", "speed", "boost", "carspeed", "possession", "points", "clock", "ping"];
 
 export interface RenderCtx {
 	store: MatchStore;
@@ -40,9 +42,24 @@ export interface RenderCtx {
 	lastQueuedPlaylist?: number;
 	/** A rank icon (`data:` URI) the user supplied for a tier; without one the built-in emblem is drawn. */
 	rankIcon?: (tierId: number) => string | undefined;
+	/** Live ping to the game server of the running match (see sys/ping.ts). */
+	ping?: { target?: string; ms?: number | null; history: (number | null)[] };
+	/** True when the user pinned a panel to some dial of the touch strip: the strip then never turns into one wide scene while idle. */
+	stripCustom?: boolean;
+}
+
+/** Which of the three views the MMR key shows, and the one it is animating away from (a press cycles them). */
+export interface MmrView {
+	/** 0 = MMR with the record underneath, 1 = the record big with MMR underneath, 2 = the current streak. */
+	index: number;
+	from: number;
+	/** When the last press happened (ms), for the swap animation. */
+	at: number;
 }
 
 export interface RenderOpts {
 	/** Which third of the banner this key shows (0 = left … 2 = right). */
 	slice?: number;
+	/** MMR key only. */
+	view?: MmrView;
 }

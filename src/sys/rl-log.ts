@@ -127,6 +127,46 @@ export function readLocalIdentity(dir: string): LocalIdentity | undefined {
 	return undefined;
 }
 
+// ---- the game server of the running match ------------------------------------------------------------------------------
+
+/**
+ * The game logs the dedicated server it joins and leaves:
+ *   Log: LoadMap: 51.21.130.45:9066
+ *   NetComeGo: Close TcpipConnection_1 51.21.130.45:9066
+ * The plugin measures the round trip to that address (see sys/ping.ts).
+ */
+export interface ServerEvent {
+	event: "join" | "leave";
+	ip: string;
+	port: number;
+}
+
+const RE_JOIN = /Log: LoadMap: (\d{1,3}(?:\.\d{1,3}){3}):(\d+)/;
+const RE_LEAVE = /NetComeGo: Close TcpipConnection_\d+ (\d{1,3}(?:\.\d{1,3}){3}):(\d+)/;
+
+export function parseServerLine(line: string): ServerEvent | undefined {
+	let m = RE_JOIN.exec(line);
+	if (m) return { event: "join", ip: m[1]!, port: Number(m[2]) };
+	m = RE_LEAVE.exec(line);
+	return m ? { event: "leave", ip: m[1]!, port: Number(m[2]) } : undefined;
+}
+
+/** The server the current log says the game is on right now (joined, and not left again), if any. */
+export function readCurrentServer(dir: string): string | undefined {
+	let ip: string | undefined;
+	try {
+		for (const line of fs.readFileSync(path.join(dir, "Launch.log"), "utf8").split(/\r?\n/)) {
+			const e = parseServerLine(line);
+			if (!e) continue;
+			if (e.event === "join") ip = e.ip;
+			else if (e.ip === ip) ip = undefined;
+		}
+	} catch {
+		return undefined;
+	}
+	return ip;
+}
+
 // ---- locating and following the log ----------------------------------------------------------------------------
 
 /** `Documents` can be redirected (OneDrive), so ask Windows before guessing. */
@@ -177,6 +217,7 @@ export class RlLogWatcher {
 		private readonly onSample: (s: MmrSample) => void,
 		private readonly pollMs = 2000,
 		private readonly onIdentity?: (i: LocalIdentity) => void,
+		private readonly onServer?: (e: ServerEvent) => void,
 	) {}
 
 	start(): void {
@@ -222,6 +263,8 @@ export class RlLogWatcher {
 				if (s) this.onSample(s);
 				const id = this.onIdentity ? parseLocalIdentity(line) : undefined;
 				if (id) this.onIdentity!(id);
+				const sv = this.onServer ? parseServerLine(line) : undefined;
+				if (sv) this.onServer!(sv);
 			}
 		} catch {
 			/* the game holds the file open for writing; a failed read is retried on the next poll */

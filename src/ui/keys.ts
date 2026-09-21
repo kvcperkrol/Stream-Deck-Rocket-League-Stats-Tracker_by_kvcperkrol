@@ -7,7 +7,8 @@ import { emblem, iconBadge, teamDots } from "./art";
 import { renderBannerSlice } from "./banner";
 import { sideTeams, teamLabel, teamLook } from "./teams";
 import { boostKey, carSpeedKey, possessionKey, pointsKey } from "./live-keys";
-import type { RenderCtx, RenderOpts, Role } from "./context";
+import type { MmrView, RenderCtx, RenderOpts, Role } from "./context";
+import { clockKey, pingKey } from "./extra-keys";
 import { COLORS, doc, linear, stripes, text } from "./svg";
 
 const panel = (id = "p", c1: string = COLORS.bg2, c2: string = COLORS.bg1) =>
@@ -75,20 +76,78 @@ export function mmrInfo(ctx: RenderCtx) {
 	return { pl, value: value ?? undefined, delta: auto?.delta };
 }
 
-function mmrKey(ctx: RenderCtx): string {
+// ---- the MMR key and its three views ---------------------------------------------------------------------------------------
+
+const VIEW_MS = 380;
+const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+
+interface Style {
+	x: number;
+	y: number;
+	size: number;
+	/** 0 = hidden, 1 = fully visible */
+	op: number;
+}
+const st = (x: number, y: number, size: number, op: number): Style => ({ x, y, size, op });
+const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+/**
+ * A piece that stays visible only moves and resizes. One that appears or disappears fades in two steps — the old one out during
+ * the first half of the swap, the new one in during the second — so two labels never overprint each other.
+ */
+const fade = (a: number, b: number, k: number) => (a === b ? a : b < a ? a * Math.max(0, 1 - 2 * k) : b * Math.max(0, 2 * k - 1));
+const mix = (a: Style, b: Style, k: number): Style => st(lerp(a.x, b.x, k), lerp(a.y, b.y, k), lerp(a.size, b.size, k), fade(a.op, b.op, k));
+
+/**
+ * Where each piece sits in each view: 0 = MMR big with the record underneath, 1 = record big with MMR underneath,
+ * 2 = the current streak big with MMR underneath. A press moves every piece from its place in the old view to its place in the
+ * new one, so MMR and the record visibly swap places.
+ */
+const MMR_LAYOUT = {
+	mmr: [st(36, 45, 28, 1), st(48, 64, 12.5, 1), st(48, 64, 12.5, 1)],
+	tag: [st(22, 64, 8, 0), st(23, 64, 8, 1), st(23, 64, 8, 1)],
+	delta: [st(64, 14, 9.5, 1), st(64, 14, 9.5, 0), st(64, 14, 9.5, 0)],
+	record: [st(36, 64, 11, 1), st(36, 45, 23, 1), st(36, 64, 11, 0)],
+	streak: [st(36, 52, 18, 0), st(36, 52, 18, 0), st(36, 45, 30, 1)],
+	labelMmr: [st(36, 15, 10, 1), st(36, 15, 10, 0), st(36, 15, 10, 0)],
+	labelRecord: [st(36, 15, 10, 0), st(36, 15, 10, 1), st(36, 15, 10, 0)],
+	labelStreak: [st(36, 15, 10, 0), st(36, 15, 10, 0), st(36, 15, 10, 1)],
+};
+
+/** Text at an animated style; invisible pieces are left out, fully visible ones carry no opacity attribute. */
+function styled(str: string, s: Style, o: { fill: string; anchor?: "start" | "middle" | "end"; skew?: number; maxWidth?: number }): string {
+	if (s.op < 0.02) return "";
+	return text(str, { x: s.x, y: s.y, size: s.size, fill: o.fill, anchor: o.anchor, skew: o.skew, maxWidth: o.maxWidth, opacity: s.op < 0.98 ? Number(s.op.toFixed(2)) : undefined });
+}
+
+function mmrKey(ctx: RenderCtx, view?: MmrView): string {
 	const s = ctx.store.state;
 	const lang = ctx.settings.lang;
 	const { wins, losses } = s.session;
 	const { pl, value, delta } = mmrInfo(ctx);
 	const has = value !== undefined;
+	const streak = ctx.store.streak();
+	// Where every piece is right now: between the old view and the new one while the swap animates.
+	const index = view?.index ?? 0;
+	const from = view?.from ?? index;
+	const k = view ? easeInOut(Math.max(0, Math.min(1, (ctx.now - view.at) / VIEW_MS))) : 1;
+	const at = (piece: keyof typeof MMR_LAYOUT) => mix(MMR_LAYOUT[piece][from]!, MMR_LAYOUT[piece][index]!, k);
+	const bigMmr = at("mmr");
+	if (!has) bigMmr.size *= 26 / 28; // the dash is a little smaller than a number
+	const streakText = streak ? `${streak.count}${streak.kind === "W" ? t(lang, "w") : t(lang, "l")}` : "—";
+	const streakFill = streak ? (streak.kind === "W" ? COLORS.green : COLORS.red) : COLORS.dim;
+	const rec = at("record");
 	return doc(
 		panel() +
-			text(!pl.ranked && has ? t(lang, "mmrCasual") : "MMR", { y: 15, size: !pl.ranked && has ? 8.5 : 10, fill: COLORS.dim, maxWidth: 56 }) +
-			(delta ? text(`${delta > 0 ? "+" : "−"}${Math.abs(delta)}`, { x: 64, y: 14, size: 9.5, fill: delta > 0 ? COLORS.green : COLORS.red, anchor: "end", skew: -6 }) : "") +
-			text(has ? String(value) : "—", { y: 45, size: has ? 28 : 26, fill: has ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 56 }) +
+			styled(!pl.ranked && has ? t(lang, "mmrCasual") : "MMR", { ...at("labelMmr"), size: !pl.ranked && has ? 8.5 : 10 }, { fill: COLORS.dim, maxWidth: 56 }) +
+			styled(t(lang, "record"), at("labelRecord"), { fill: COLORS.dim, maxWidth: 56 }) +
+			styled(t(lang, "streak"), at("labelStreak"), { fill: COLORS.dim, maxWidth: 56 }) +
+			(delta ? styled(`${delta > 0 ? "+" : "−"}${Math.abs(delta)}`, at("delta"), { fill: delta > 0 ? COLORS.green : COLORS.red, anchor: "end", skew: -6 }) : "") +
+			styled(has ? String(value) : "—", bigMmr, { fill: has ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 56 }) +
+			styled("MMR", at("tag"), { fill: COLORS.dim, anchor: "middle" }) +
 			`<rect x="10" y="51" width="52" height="1.5" fill="${COLORS.line}"/>` +
-			text(`${wins}${t(lang, "w")}`, { x: 33, y: 64, size: 11, fill: COLORS.green, anchor: "end", skew: -6 }) +
-			text(`${losses}${t(lang, "l")}`, { x: 39, y: 64, size: 11, fill: COLORS.red, anchor: "start", skew: -6 }) +
+			styled(`${wins}${t(lang, "w")}`, { ...rec, x: 33 }, { fill: COLORS.green, anchor: "end", skew: -6 }) +
+			styled(`${losses}${t(lang, "l")}`, { ...rec, x: 39 }, { fill: COLORS.red, anchor: "start", skew: -6 }) +
+			styled(streakText, at("streak"), { fill: streakFill, skew: -9, maxWidth: 56 }) +
 			veil(ctx),
 	);
 }
@@ -198,7 +257,7 @@ export function renderRole(role: Role, ctx: RenderCtx, opts: RenderOpts = {}): s
 		case "rank":
 			return rankKey(ctx);
 		case "mmr":
-			return mmrKey(ctx);
+			return mmrKey(ctx, opts.view);
 		case "mode":
 			return modeKey(ctx);
 		case "blue":
@@ -221,5 +280,9 @@ export function renderRole(role: Role, ctx: RenderCtx, opts: RenderOpts = {}): s
 			return possessionKey(ctx);
 		case "points":
 			return pointsKey(ctx);
+		case "clock":
+			return clockKey(ctx);
+		case "ping":
+			return pingKey(ctx);
 	}
 }

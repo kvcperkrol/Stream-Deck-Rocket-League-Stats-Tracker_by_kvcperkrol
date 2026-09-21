@@ -1,4 +1,4 @@
-import streamDeck, { action, SingletonAction, type DidReceiveSettingsEvent, type WillAppearEvent, type WillDisappearEvent } from "@elgato/streamdeck";
+import streamDeck, { action, SingletonAction, type DidReceiveSettingsEvent, type KeyDownEvent, type WillAppearEvent, type WillDisappearEvent } from "@elgato/streamdeck";
 import { Hub, type KeySettings } from "./hub";
 import { ROLES, type Role } from "./ui/context";
 import { actionUuid, LEGACY_ACTIONS, legacyUuid, STRIP_ACTION } from "./ui/layout";
@@ -19,6 +19,11 @@ abstract class RoleAction extends SingletonAction<KeySettings> {
 
 	override onDidReceiveSettings(ev: DidReceiveSettingsEvent<KeySettings>): void {
 		hub.updateSettings(ev.action.id, ev.payload.settings);
+	}
+
+	/** Only the MMR key reacts to a press (it cycles its views); every other key just displays. */
+	override onKeyDown(ev: KeyDownEvent<KeySettings>): void {
+		if (this.role === "mmr") hub.press(ev.action.id);
 	}
 }
 

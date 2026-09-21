@@ -51,7 +51,9 @@
 				<option value="2" data-t="slice2">Middle</option>
 				<option value="3" data-t="slice3">Right</option>
 			</select></div>
-		<p class="note" id="sliceNote" data-t="sliceNote">Three keys of this type in one row form a single wide banner.</p>
+		<div class="row hidden" id="panelRow"><label data-t="panel">Panel</label><select id="panel" class="grow"><option value="auto" data-t="pAuto"></option><option value="rank" data-t="pRank"></option><option value="mmr" data-t="pMmr"></option><option value="lastgoal" data-t="pLast"></option><option value="stats" data-t="pStats"></option><option value="clock" data-t="pClock"></option><option value="ping" data-t="pPing"></option></select></div>
+<p class="note hidden" id="panelNote" data-t="panelNote"></p>
+<p class="note" id="sliceNote" data-t="sliceNote">Three keys of this type in one row form a single wide banner.</p>
 	</div>
 </div>
 
@@ -62,7 +64,10 @@
 <p class="note" data-t="playerNote">Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.</p>
 <div class="row"><label data-t="order">Score order</label><select id="scoreOrder" class="grow"><option value="me-left" data-t="orderMe">My team on the left (like the game)</option><option value="blue-left" data-t="orderBlue">Blue always on the left</option></select></div>
 <div class="row"><label></label><label style="flex:1"><input type="checkbox" id="recordMatches" /> <span data-t="record">Keep a small anonymised match log for diagnostics (local only)</span></label></div>
+<div class="row"><label></label><label style="flex:1"><input type="checkbox" id="clock12h" /> <span data-t="clock12">12-hour clock (AM/PM)</span></label></div>
 <div class="row"><label></label><label style="flex:1"><input type="checkbox" id="autoSwitch" /> <span data-t="autoSwitch">Switch profile automatically when the game starts</span></label></div>
+
+<p class="note" data-t="autoSwitchNote"></p>
 
 <h2 data-t="ranks">Your ranks</h2>
 <p class="note" data-t="ranksNote">MMR fills in by itself from the game log when you start a queue for a single playlist (the value from before the match) — the MMR typed here is a fallback. The game does not write a per-playlist rank or division, so you enter those. Unranked modes (casual, free play) show “UNRANKED” instead of a rank.</p>
@@ -82,6 +87,7 @@ const I18N = {
 	pl: {
 		status: "Status", refresh: "Odśwież", thisKey: "Ten klawisz", slice: "Fragment", sliceAuto: "Automatycznie (od lewej)", slice1: "Lewy", slice2: "Środkowy", slice3: "Prawy",
 		sliceNote: "Trzy klawisze tego typu w jednym rzędzie tworzą jeden szeroki baner.",
+		panel: "Panel", pAuto: "Automatycznie (ranga · MMR · ostatni gol · moje statystyki)", pRank: "Ranga", pMmr: "MMR", pLast: "Ostatni gol", pStats: "Moje statystyki", pClock: "Zegar", pPing: "Ping", panelNote: "Co pokazuje ta ćwiartka paska, gdy nic się nie dzieje. Zdarzenia (gol, demolka …) i tak zajmują cały pasek.", clock12: "Zegar 12-godzinny (AM/PM)", autoSwitchNote: "Domyślnie wyłączone: własny profil Rocket League ustawisz w opcjach profilu Stream Decka. Włączenie przełącza deck na profil wtyczki po starcie gry i z powrotem po jej zamknięciu.",
 		segment: "Segment", segAuto: "Automatycznie (ten nad pokrętłem)", seg1: "1 (lewy)", seg2: "2", seg3: "3", seg4: "4 (prawy)", segmentNote: "Którą czwartą część paska dotykowego pokazuje to pokrętło. Ustaw ten sam ekran na wszystkich czterech, a animowany baner rozciągnie się na całą szerokość.",
 		general: "Ogólne", lang: "Język", units: "Jednostki", player: "Nick w grze", playerPh: "wykrywany automatycznie",
 		playerNote: "Zostaw puste — wtyczka odczyta Twoje konto z logu gry. Wpisz nick tylko wtedy, gdy oznaczenie „TY” jest złe.",
@@ -98,6 +104,7 @@ const I18N = {
 	en: {
 		status: "Status", refresh: "Refresh", thisKey: "This key", slice: "Slice", sliceAuto: "Automatic (left to right)", slice1: "Left", slice2: "Middle", slice3: "Right",
 		sliceNote: "Three keys of this type in one row form a single wide banner.",
+		panel: "Panel", pAuto: "Automatic (rank · MMR · last goal · my stats)", pRank: "Rank", pMmr: "MMR", pLast: "Last goal", pStats: "My stats", pClock: "Clock", pPing: "Ping", panelNote: "What this quarter of the strip shows when nothing is happening. Events (goal, demo …) still take the whole strip.", clock12: "12-hour clock (AM/PM)", autoSwitchNote: "Off by default: you can set your own Rocket League profile in the Stream Deck's profile options. Turning this on switches the deck to the plugin's profile when the game starts and back when it closes.",
 		segment: "Segment", segAuto: "Automatic (the one above the dial)", seg1: "1 (left)", seg2: "2", seg3: "3", seg4: "4 (right)", segmentNote: "Which quarter of the touch strip this dial shows. Put the action on all four dials and the animated banner stretches across the whole strip.",
 		general: "General", lang: "Language", units: "Units", player: "In-game name", playerPh: "detected automatically",
 		playerNote: "Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.",
@@ -122,7 +129,7 @@ const GROUPS = ["duel", "doubles", "solo", "standard", "hoops", "rumble", "drops
 const GROUP_OF_PLAYLIST = { Duel: "duel", Doubles: "doubles", "Solo Standard": "solo", Standard: "standard", Hoops: "hoops", Rumble: "rumble", Dropshot: "dropshot" };
 
 let ws, uuid, actionInfo, role = "";
-let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: true, packetRate: 10, installDir: "", scoreOrder: "me-left", recordMatches: false, countdownOffsetMs: 0, ranks: {} };
+let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: false, packetRate: 10, installDir: "", scoreOrder: "me-left", recordMatches: false, countdownOffsetMs: 0, clock12h: false, ranks: {} };
 let keySettings = {};
 let lastStatus = null;
 
@@ -201,6 +208,8 @@ function bindGlobal() {
 	for (const [id] of map) $(id).addEventListener("input", () => { settings[id] = $(id).value; if (id === "lang") applyI18n(); saveGlobal(); });
 	$("scoreOrder").addEventListener("change", () => { settings.scoreOrder = $("scoreOrder").value; saveGlobal(); });
 	$("recordMatches").addEventListener("change", () => { settings.recordMatches = $("recordMatches").checked; saveGlobal(); });
+	$("clock12h").addEventListener("change", () => { settings.clock12h = $("clock12h").checked; saveGlobal(); });
+	$("panel").addEventListener("change", () => { keySettings.panel = $("panel").value; saveKey(); });
 	$("autoSwitch").addEventListener("change", () => { settings.autoSwitch = $("autoSwitch").checked; saveGlobal(); });
 	$("countdownOffsetMs").addEventListener("change", () => { settings.countdownOffsetMs = Math.max(-1500, Math.min(1500, Math.round(Number($("countdownOffsetMs").value) || 0))); saveGlobal(); });
 	$("packetRate").addEventListener("change", () => { settings.packetRate = Math.max(1, Math.min(120, Number($("packetRate").value) || 10)); saveGlobal(); });
@@ -210,8 +219,9 @@ function bindGlobal() {
 
 function fillForm() {
 	$("lang").value = settings.lang; $("units").value = settings.units; $("playerName").value = settings.playerName || "";
-	$("autoSwitch").checked = !!settings.autoSwitch; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("countdownOffsetMs").value = settings.countdownOffsetMs || 0; $("installDir").value = settings.installDir || "";
+	$("autoSwitch").checked = !!settings.autoSwitch; $("clock12h").checked = settings.clock12h === true; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("countdownOffsetMs").value = settings.countdownOffsetMs || 0; $("installDir").value = settings.installDir || "";
 	if (role === "banner" || role === "strip") $("slice").value = String(keySettings.slice ?? "auto");
+	if (role === "strip") $("panel").value = keySettings.panel || "auto";
 	applyI18n();
 }
 
@@ -229,6 +239,8 @@ function connectElgatoStreamDeckSocket(port, inUUID, registerEvent, info, action
 		$("slice").innerHTML = '<option value="auto" data-t="segAuto"></option>' + [1, 2, 3, 4].map((n) => `<option value="${n}" data-t="seg${n}"></option>`).join("");
 		$("sliceLabel").dataset.t = "segment";
 		$("sliceNote").dataset.t = "segmentNote";
+		$("panelRow").classList.remove("hidden");
+		$("panelNote").classList.remove("hidden");
 	}
 
 	ws = new WebSocket("ws://127.0.0.1:" + port);

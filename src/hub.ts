@@ -6,14 +6,15 @@ import { MatchStore } from "./core/match-store";
 import { describePlaylist } from "./core/playlists";
 import { DEFAULT_SETTINGS, mergeSettings, type GlobalSettings } from "./core/types";
 import { RLClient } from "./net/rl-client";
+import { PingMonitor } from "./sys/ping";
 import { RankIcons } from "./sys/rank-icons";
 import { MatchRecorder } from "./sys/recorder";
-import { findLogDir, readExistingSamples, readLocalIdentity, RlLogWatcher, type LocalIdentity, type MmrSample } from "./sys/rl-log";
+import { findLogDir, readCurrentServer, readExistingSamples, readLocalIdentity, RlLogWatcher, type LocalIdentity, type MmrSample } from "./sys/rl-log";
 import { DEFAULT_WEB_PORT, findInstallDirs, patchStatsIni, type IniResult } from "./sys/ini";
-import type { AutoMmr, RenderCtx, Role } from "./ui/context";
+import type { AutoMmr, MmrView, RenderCtx, Role } from "./ui/context";
 import { renderRole } from "./ui/keys";
 import { profileNameFor } from "./ui/layout";
-import { renderStrip } from "./ui/strip";
+import { renderStrip, type StripPanel } from "./ui/strip";
 import { svgDataUri } from "./ui/svg";
 
 // The environment override exists only so automated tests can run without ever looking at a real, running game.
@@ -29,6 +30,10 @@ const HIGH_RATE_MIN_INTERVAL_MS = 150;
 export type KeySettings = {
 	/** "auto" (or missing) orders banner keys in a row left to right; 1–3 pins a key to a slice. */
 	slice?: "auto" | 1 | 2 | 3 | 4;
+	/** MMR key: which view was showing (0 = MMR, 1 = record, 2 = streak); survives restarts. */
+	view?: number;
+	/** Touch-strip dial: the panel this segment shows ("auto" = the default arrangement). */
+	panel?: StripPanel;
 };
 
 /** A dial of the Stream Deck +: its touch-strip segment shows one fourth of the strip. */
@@ -62,6 +67,8 @@ export class Hub {
 
 	private readonly keys = new Map<string, KeyEntry>();
 	private readonly dials = new Map<string, DialEntry>();
+	private readonly mmrViews = new Map<string, MmrView>();
+	private readonly ping = new PingMonitor(undefined, () => this.store.state.gameRunning);
 	private readonly client: RLClient;
 	private readonly switched = new Set<string>();
 	private ini?: IniResult;
@@ -115,6 +122,7 @@ export class Hub {
 		this.patchIni("start");
 		this.startMmrLog();
 		this.client.start();
+		this.ping.start();
 
 		if (await isProcessRunning(GAME_EXE)) this.gameLaunched(true);
 		// Safety net in case the app's launch/terminate events are missed (e.g. plugin restarted mid-game).
@@ -126,6 +134,7 @@ export class Hub {
 		if (this.timer) clearInterval(this.timer);
 		if (this.pollTimer) clearInterval(this.pollTimer);
 		this.client.stop();
+		this.ping.stop();
 		this.logWatcher?.stop();
 	}
 
@@ -147,6 +156,7 @@ export class Hub {
 		this.launchedAt = undefined;
 		this.iniChangedWhileRunning = false;
 		this.store.setGameRunning(false);
+		this.ping.setTarget(undefined);
 		if (this.settings.autoSwitch) void this.switchProfiles(false);
 		this.patchIni("game-exit"); // the game may rewrite its config on exit
 	}
@@ -232,6 +242,7 @@ export class Hub {
 		} catch {
 			/* first run */
 		}
+		this.loadResults();
 		this.logDir = findLogDir(process.env.RLHUD_LOG_DIR);
 		if (!this.logDir) {
 			this.log.warn("Rocket League log folder not found — MMR falls back to the values typed into the property inspector");
@@ -240,11 +251,15 @@ export class Hub {
 		try {
 			for (const sample of readExistingSamples(this.logDir)) this.applySample(sample, false);
 			this.setLocal(readLocalIdentity(this.logDir));
+			this.ping.setTarget(readCurrentServer(this.logDir));
 		} catch (e) {
 			this.log.warn(`could not read existing logs: ${e}`);
 		}
 		this.saveMmr();
-		this.logWatcher = new RlLogWatcher(this.logDir, (sample) => this.applySample(sample, true), 2000, (id) => this.setLocal(id));
+		this.logWatcher = new RlLogWatcher(this.logDir, (sample) => this.applySample(sample, true), 2000, (id) => this.setLocal(id), (e) => {
+			if (e.event === "join") this.ping.setTarget(e.ip);
+			else if (this.ping.state.target === e.ip) this.ping.setTarget(undefined);
+		});
 		this.logWatcher.start();
 		this.log.info(`MMR log: ${this.logDir} (${Object.keys(this.autoMmr).length} playlist(s) known)`);
 	}
@@ -271,6 +286,28 @@ export class Hub {
 		}
 	}
 
+	/** Results of finished matches survive restarts, so a streak is not lost when the plugin or the game restarts. */
+	private get resultsFile(): string {
+		return path.join(this.dataDir, "results.json");
+	}
+
+	private loadResults(): void {
+		try {
+			const saved = JSON.parse(fs.readFileSync(this.resultsFile, "utf8")) as { results?: unknown };
+			if (Array.isArray(saved.results)) this.store.setHistory(saved.results as ("W" | "L")[]);
+		} catch {
+			/* first run */
+		}
+		this.store.onHistory = (history) => {
+			try {
+				fs.mkdirSync(path.dirname(this.resultsFile), { recursive: true });
+				fs.writeFileSync(this.resultsFile, JSON.stringify({ results: history }));
+			} catch {
+				/* not critical: the streak just starts again next time */
+			}
+		};
+	}
+
 	private saveMmr(): void {
 		try {
 			fs.mkdirSync(path.dirname(this.mmrFile), { recursive: true });
@@ -284,6 +321,7 @@ export class Hub {
 
 	register(action: KeyAction, role: Role, settings: KeySettings): void {
 		this.keys.set(action.id, { action, role, settings });
+		if (role === "mmr") this.mmrViews.set(action.id, { index: settings.view ?? 0, from: settings.view ?? 0, at: 0 });
 		this.renderOne(action.id);
 	}
 
@@ -295,6 +333,7 @@ export class Hub {
 	unregister(id: string): void {
 		this.keys.delete(id);
 		this.dials.delete(id);
+		this.mmrViews.delete(id);
 	}
 
 	updateSettings(id: string, settings: KeySettings): void {
@@ -329,6 +368,7 @@ export class Hub {
 			ranked: pl.ranked,
 			restartHint: this.restartHint(Date.now()),
 			nickMismatch: !!(this.settings.playerName.trim() && this.local && this.settings.playerName.trim().toLowerCase() !== this.local.name.toLowerCase()),
+			ping: { target: this.ping.state.target ?? null, ms: this.ping.state.ms ?? null },
 			localPlayer: this.local ? { name: this.local.name, id: this.local.id } : null,
 			rankIcons: { dir: this.rankIcons.dir, count: this.rankIcons.count() },
 			mmrLog: this.logDir ? { dir: this.logDir, playlists: Object.keys(this.autoMmr).length } : null,
@@ -346,7 +386,7 @@ export class Hub {
 	}
 
 	private context(now: number): RenderCtx {
-		return { store: this.store, settings: this.settings, now, restartHint: this.restartHint(now), autoMmr: this.autoMmr, lastQueuedPlaylist: this.lastQueued, rankIcon: (id) => this.rankIcons.get(id) };
+		return { store: this.store, settings: this.settings, now, restartHint: this.restartHint(now), autoMmr: this.autoMmr, lastQueuedPlaylist: this.lastQueued, rankIcon: (id) => this.rankIcons.get(id), ping: this.ping.state, stripCustom: this.stripCustom() };
 	}
 
 	/** Banner keys in one row form a single wide banner; slices are assigned left to right unless pinned. */
@@ -368,6 +408,27 @@ export class Hub {
 			});
 		}
 		return out;
+	}
+
+	/** A press on an MMR key: MMR → record → streak → MMR, each with the swap animation. */
+	press(id: string): void {
+		const e = this.keys.get(id);
+		const v = this.mmrViews.get(id);
+		if (!e || e.role !== "mmr" || !v) return;
+		const next = (v.index + 1) % 3;
+		this.mmrViews.set(id, { index: next, from: v.index, at: Date.now() });
+		e.settings = { ...e.settings, view: next };
+		void e.action.setSettings(e.settings as never).catch(() => undefined);
+		// The animation lasts about 0.4 s: draw it at ~25 frames a second instead of the usual 10.
+		const timer = setInterval(() => this.renderOne(id), 40);
+		setTimeout(() => clearInterval(timer), 480);
+		this.renderOne(id);
+	}
+
+	/** True when the user pinned a panel to some dial: the touch strip then never becomes one wide scene while idle. */
+	private stripCustom(): boolean {
+		for (const d of this.dials.values()) if (d.settings.panel && d.settings.panel !== "auto") return true;
+		return false;
 	}
 
 	private tick(): void {
@@ -395,7 +456,7 @@ export class Hub {
 	}
 
 	private drawDial(id: string, e: DialEntry, ctx: RenderCtx): void {
-		const svg = renderStrip(ctx, this.segmentOf(e));
+		const svg = renderStrip(ctx, this.segmentOf(e), e.settings.panel ?? "auto");
 		if (svg === e.last) return;
 		e.last = svg;
 		e.lastSentAt = ctx.now;
@@ -404,7 +465,7 @@ export class Hub {
 	}
 
 	private draw(id: string, e: KeyEntry, ctx: RenderCtx, slices: Map<string, number>): void {
-		const svg = renderRole(e.role, ctx, { slice: slices.get(id) ?? 0 });
+		const svg = renderRole(e.role, ctx, { slice: slices.get(id) ?? 0, view: this.mmrViews.get(id) });
 		if (svg === e.last) return;
 		// Values that change ten times a second (boost, speeds) are sent at most every 150 ms; the next tick catches up.
 		if (HIGH_RATE.has(e.role) && e.lastSentAt !== undefined && ctx.now - e.lastSentAt < HIGH_RATE_MIN_INTERVAL_MS) return;

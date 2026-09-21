@@ -22,7 +22,7 @@ fs.mkdirSync(OUT, { recursive: true });
 /** What each key is for: a name and a short hint, as printed under it. */
 const CAPTION: Record<Exclude<Role, "banner">, [string, string]> = {
 	rank: ["RANK", "icon · division"],
-	mmr: ["MMR", "change · wins / losses"],
+	mmr: ["MMR", "press: record · streak"],
 	mode: ["MODE", "playlist · ranked or not"],
 	blue: ["YOUR TEAM", "score · YOU tag"],
 	orange: ["OPPONENT", "score · game colours"],
@@ -33,6 +33,8 @@ const CAPTION: Record<Exclude<Role, "banner">, [string, string]> = {
 	carspeed: ["CAR SPEED", "SUPERSONIC alert"],
 	possession: ["POSSESSION", "share per team"],
 	points: ["SCORE", "points · shots · demos"],
+	clock: ["TIME", "this computer · date"],
+	ping: ["PING", "game server · history"],
 };
 
 // ---- one running match, as the deck shows it a few seconds after a goal --------------------------------------------------
@@ -82,6 +84,7 @@ const ctx: RenderCtx = {
 	restartHint: false,
 	autoMmr: { 11: { mmr: 964, at: "2026-09-20T15:00:00Z", delta: 10 } },
 	rankIcon: (id) => icons.get(id),
+	ping: { target: "51.21.130.45", ms: 33, history: [28, 30, 35, 33, 60, 90, 45, 33, 31, 120, 33, 29, 30, 33] },
 };
 
 // ---- drawing helpers ------------------------------------------------------------------------------------------------------
