@@ -33,7 +33,8 @@ const CAPTION: Record<Exclude<Role, "banner">, [string, string]> = {
 	carspeed: ["CAR SPEED", "SUPERSONIC alert"],
 	possession: ["POSSESSION", "share per team"],
 	points: ["SCORE", "points · shots · demos"],
-	clock: ["TIME", "this computer · date"],
+	clock: ["TIME", "press: 2 layouts"],
+	analog: ["ANALOG CLOCK", "round dial · hands"],
 	ping: ["PING", "game server · history"],
 };
 

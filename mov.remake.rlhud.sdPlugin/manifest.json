@@ -3,7 +3,7 @@
 	"SDKVersion": 2,
 	"UUID": "mov.remake.rlhud",
 	"Name": "Rocket League HUD",
-	"Version": "1.10.0.0",
+	"Version": "1.10.1.0",
 	"Author": "kvcperkrol",
 	"Description": "Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",
 	"Icon": "imgs/plugin/marketplace",
@@ -280,13 +280,29 @@
 			"Name": "Clock",
 			"UUID": "mov.remake.rlhud.clock",
 			"Icon": "imgs/actions/clock/icon",
-			"Tooltip": "The current time of this computer, with the date (24-hour or 12-hour in the inspector). Also a panel for the Stream Deck + touch strip.",
+			"Tooltip": "The current time of this computer, with the date (24-hour or 12-hour in the inspector). Press it to switch between hours over minutes and one smaller line. Also a panel for the Stream Deck + touch strip.",
 			"Controllers": [
 				"Keypad"
 			],
 			"States": [
 				{
 					"Image": "imgs/actions/clock/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Analog clock",
+			"UUID": "mov.remake.rlhud.analog",
+			"Icon": "imgs/actions/analog/icon",
+			"Tooltip": "A round clock face with clearly visible hour, minute and second hands, showing the time of this computer.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/analog/key",
 					"TitleAlignment": "middle",
 					"ShowTitle": false
 				}

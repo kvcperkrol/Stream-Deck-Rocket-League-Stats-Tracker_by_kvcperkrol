@@ -67,6 +67,7 @@ export class Hub {
 
 	private readonly keys = new Map<string, KeyEntry>();
 	private readonly dials = new Map<string, DialEntry>();
+	/** Keys that change their look when pressed: the MMR key (3 views) and the clock key (2 layouts). */
 	private readonly mmrViews = new Map<string, MmrView>();
 	private readonly ping = new PingMonitor(undefined, () => this.store.state.gameRunning);
 	private readonly client: RLClient;
@@ -321,7 +322,7 @@ export class Hub {
 
 	register(action: KeyAction, role: Role, settings: KeySettings): void {
 		this.keys.set(action.id, { action, role, settings });
-		if (role === "mmr") this.mmrViews.set(action.id, { index: settings.view ?? 0, from: settings.view ?? 0, at: 0 });
+		if (role === "mmr" || role === "clock") this.mmrViews.set(action.id, { index: settings.view ?? 0, from: settings.view ?? 0, at: 0 });
 		this.renderOne(action.id);
 	}
 
@@ -410,18 +411,23 @@ export class Hub {
 		return out;
 	}
 
-	/** A press on an MMR key: MMR → record → streak → MMR, each with the swap animation. */
+	/**
+	 * A key press. MMR key: MMR → record → streak → MMR, each with the swap animation. Clock key: hours over minutes ↔ one smaller
+	 * line. The choice is kept in the key's settings, so it survives restarts.
+	 */
 	press(id: string): void {
 		const e = this.keys.get(id);
 		const v = this.mmrViews.get(id);
-		if (!e || e.role !== "mmr" || !v) return;
-		const next = (v.index + 1) % 3;
+		if (!e || !v || (e.role !== "mmr" && e.role !== "clock")) return;
+		const next = (v.index + 1) % (e.role === "mmr" ? 3 : 2);
 		this.mmrViews.set(id, { index: next, from: v.index, at: Date.now() });
 		e.settings = { ...e.settings, view: next };
 		void e.action.setSettings(e.settings as never).catch(() => undefined);
-		// The animation lasts about 0.4 s: draw it at ~25 frames a second instead of the usual 10.
-		const timer = setInterval(() => this.renderOne(id), 40);
-		setTimeout(() => clearInterval(timer), 480);
+		if (e.role === "mmr") {
+			// The animation lasts about 0.4 s: draw it at ~25 frames a second instead of the usual 10.
+			const timer = setInterval(() => this.renderOne(id), 40);
+			setTimeout(() => clearInterval(timer), 480);
+		}
 		this.renderOne(id);
 	}
 

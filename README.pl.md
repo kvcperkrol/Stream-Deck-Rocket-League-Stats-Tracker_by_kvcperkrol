@@ -68,7 +68,8 @@ Language / Język**). Zmiana działa od razu na wszystkich klawiszach.
 | **Auto** | Prędkość Twojego auta i pasek do bariery dźwięku; po jej przekroczeniu miga **SUPERSONIC**. |
 | **Posiadanie** | Która drużyna ostatnio dotykała piłki (znacznik) i jaki procent meczu piłka „była” u każdej z nich — w tych samych kolorach i kolejności co wynik. |
 | **Punkty** | Twoje punkty w meczu oraz strzały i demolki. |
-| **Zegar** | Aktualna godzina tego komputera z datą; 24- albo 12-godzinny (w panelu). Działa z grą i bez niej, także jako panel paska dotykowego. |
+| **Zegar** | Aktualna godzina tego komputera z datą; 24- albo 12-godzinny (w panelu). **Naciśnij go**, żeby przełączyć między godziną nad minutami a jedną, mniejszą linią (z zapasem od krawędzi klawisza). Działa z grą i bez niej, także jako panel paska dotykowego. |
+| **Zegar analogowy** | Okrągła tarcza ze znacznikami godzin i grubymi, wyraźnymi wskazówkami: godzinowa i minutowa białe, sekundowa czerwona. |
 | **Ping** | Ping na żywo do serwera gry Twojego meczu, kolorowany zielony / złoty / czerwony, z małym wykresem historii. Patrz [Ping](#ping). |
 
 Klawisze możesz dowolnie przestawiać (kategoria „Rocket League HUD”). Trzy klawisze *Baner* w jednym rzędzie łączą się

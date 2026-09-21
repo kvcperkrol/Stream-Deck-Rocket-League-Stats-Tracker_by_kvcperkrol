@@ -69,7 +69,8 @@ Language**). The change applies to all keys immediately.
 | **Car** | Your car's speed and a bar up to the sound barrier; **SUPERSONIC** flashes once you break it. |
 | **Possession** | Which team touched the ball last (marker) and each team's share of the match — in the same colours and order as the score. |
 | **Score (points)** | Your points in the match, plus shots and demos. |
-| **Clock** | The current time of this computer with the date; 24-hour or 12-hour (inspector). Works with or without the game, and as a touch-strip panel. |
+| **Clock** | The current time of this computer with the date; 24-hour or 12-hour (inspector). **Press it** to switch between hours over minutes and one smaller line (kept clear of the key edges). Works with or without the game, and as a touch-strip panel. |
+| **Analog clock** | A round dial with hour ticks and thick, high-contrast hands: hour and minute in white, the second hand in red. |
 | **Ping** | Live ping to the game server of your match, coloured green / gold / red, with a small history graph. See [Ping](#ping). |
 
 Arrange the keys any way you like (category "Rocket League HUD"). Three *Banner* keys in one row join into one wide banner

@@ -8,7 +8,7 @@ import { renderBannerSlice } from "./banner";
 import { sideTeams, teamLabel, teamLook } from "./teams";
 import { boostKey, carSpeedKey, possessionKey, pointsKey } from "./live-keys";
 import type { MmrView, RenderCtx, RenderOpts, Role } from "./context";
-import { clockKey, pingKey } from "./extra-keys";
+import { analogKey, clockKey, pingKey } from "./extra-keys";
 import { COLORS, doc, linear, stripes, text } from "./svg";
 
 const panel = (id = "p", c1: string = COLORS.bg2, c2: string = COLORS.bg1) =>
@@ -281,7 +281,9 @@ export function renderRole(role: Role, ctx: RenderCtx, opts: RenderOpts = {}): s
 		case "points":
 			return pointsKey(ctx);
 		case "clock":
-			return clockKey(ctx);
+			return clockKey(ctx, opts.view?.index ?? 0);
+		case "analog":
+			return analogKey(ctx);
 		case "ping":
 			return pingKey(ctx);
 	}

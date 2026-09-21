@@ -62,6 +62,7 @@ const GLYPH: Record<Role, string> = {
 	carspeed: `<path d="M2,13 L3.5,9 L7,8 L9,5 L13,5 L16,8.5 L18,9.5 L18,13 Z" fill="${W}"/><circle cx="6" cy="14" r="2.2" fill="#000" stroke="${W}" stroke-width="1.4"/><circle cx="14" cy="14" r="2.2" fill="#000" stroke="${W}" stroke-width="1.4"/>`,
 	possession: `<rect x="2" y="7" width="9" height="6" fill="${W}"/><rect x="11" y="7" width="7" height="6" fill="${W}" fill-opacity="0.5"/><path d="M6.5,2.5 L9,6 L4,6 Z" fill="${W}"/>`,
 	clock: `<circle cx="10" cy="10" r="7.6" ${sw}/><path d="M10,5.4 L10,10 L13.2,11.8" ${sw}/>`,
+	analog: `<circle cx="10" cy="10" r="7.8" ${sw}/><path d="M10,10 L10,4.6 M10,10 L14.6,12.4" ${sw}/><path d="M10,1.6 L10,3.4" ${sw}/>`,
 	ping: `<path d="M2.5,13 L6,13 L8,6.5 L11,15 L13,9.5 L17.5,9.5" ${sw}/>`,
 	points: `<path d="M10,2 L12.2,7.2 L17.8,7.6 L13.5,11.2 L14.9,16.7 L10,13.7 L5.1,16.7 L6.5,11.2 L2.2,7.6 L7.8,7.2 Z" fill="${W}"/>`,
 };

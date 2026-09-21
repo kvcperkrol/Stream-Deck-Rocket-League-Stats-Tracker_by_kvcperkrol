@@ -21,9 +21,9 @@ abstract class RoleAction extends SingletonAction<KeySettings> {
 		hub.updateSettings(ev.action.id, ev.payload.settings);
 	}
 
-	/** Only the MMR key reacts to a press (it cycles its views); every other key just displays. */
+	/** The MMR key cycles its views and the clock key its layout when pressed; every other key just displays. */
 	override onKeyDown(ev: KeyDownEvent<KeySettings>): void {
-		if (this.role === "mmr") hub.press(ev.action.id);
+		if (this.role === "mmr" || this.role === "clock") hub.press(ev.action.id);
 	}
 }
 

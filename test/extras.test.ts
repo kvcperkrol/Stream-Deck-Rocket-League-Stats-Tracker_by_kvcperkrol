@@ -236,3 +236,53 @@ test("clock and ping are keys of their own, and the XL layout gets a ping key", 
 	assert.ok(ROLES.includes("clock") && ROLES.includes("ping"));
 	assert.ok(LAYOUT_XL.some((c) => c.role === "ping"));
 });
+
+// ---- clock layouts and the analog clock -----------------------------------------------------------------------------------------
+
+test("the clock key has a second layout: the time on one smaller line, away from the edges of the key", () => {
+	const ctx = ctxAt(new Date(2026, 8, 22, 21, 37, 42));
+	const stacked = renderRole("clock", ctx, { view: { index: 0, from: 0, at: 0 } });
+	assert.ok(stacked.includes(">21<") && stacked.includes(">37<") && !stacked.includes(">21:37<"), "layout 0: hours over minutes");
+	const line = renderRole("clock", ctx, { view: { index: 1, from: 0, at: 0 } });
+	assert.ok(line.includes(">21:37<") && !line.includes(">21<"), "layout 1: one line");
+	assert.ok(line.includes(">:42<") && line.includes("TUE 22 SEP"), "with the seconds and the date");
+	const size = fontSize(line, "21:37");
+	assert.ok(size < 26, `smaller than the stacked digits (${size})`);
+	assert.ok(5 * size * 0.6 <= 52 + 0.5, `at most 52 px wide, 10 px from each edge (${(5 * size * 0.6).toFixed(1)})`);
+	const pm = renderRole("clock", ctxAt(new Date(2026, 8, 22, 21, 37, 42), { twelve: true }), { view: { index: 1, from: 0, at: 0 } });
+	assert.ok(pm.includes(">9:37<") && pm.includes("PM"));
+});
+
+/** Clockwise angle from twelve o'clock (degrees) and length of the hand with this id in an analog-clock key. */
+function handOf(svg: string, id: string): { angle: number; len: number; width: number; color: string } {
+	const m = new RegExp(`<line id="${id}" x1="([\\d.-]+)" y1="([\\d.-]+)" x2="([\\d.-]+)" y2="([\\d.-]+)" stroke="([^"]+)" stroke-width="([\\d.]+)"`).exec(svg);
+	assert.ok(m, `hand ${id}`);
+	const [x1, y1, x2, y2] = [1, 2, 3, 4].map((i) => Number(m[i]));
+	const angle = (Math.atan2(x2! - x1!, -(y2! - y1!)) * 180) / Math.PI;
+	return { angle: (angle + 360) % 360, len: Math.hypot(x2! - 36, y2! - 36.5), width: Number(m[6]), color: m[5]! };
+}
+
+test("the analog clock: the hands point at the right time and are thick enough to see", () => {
+	const at = (h: number, m: number, s: number) => renderRole("analog", ctxAt(new Date(2026, 8, 22, h, m, s)));
+	const three = at(3, 0, 0);
+	assert.ok(Math.abs(handOf(three, "h-hour").angle - 90) < 1, "3:00 — the hour hand points right");
+	assert.ok(handOf(three, "h-minute").angle < 1 || handOf(three, "h-minute").angle > 359, "…and the minute hand up");
+	const t = at(10, 10, 30);
+	assert.ok(Math.abs(handOf(t, "h-hour").angle - 305.25) < 1, "10:10:30 — the hour hand has moved 10.5 minutes past 10");
+	assert.ok(Math.abs(handOf(t, "h-minute").angle - 63) < 1, "the minute hand is half a minute past 10");
+	assert.ok(Math.abs(handOf(t, "h-second").angle - 180) < 1, "the second hand points down");
+	const hour = handOf(t, "h-hour");
+	const minute = handOf(t, "h-minute");
+	const second = handOf(t, "h-second");
+	assert.ok(hour.len < minute.len, "the hour hand is the shorter one");
+	assert.ok(hour.width >= 4.5 && minute.width >= 3 && second.width >= 1.5, "clearly visible widths");
+	assert.ok(hour.width > minute.width && minute.width > second.width);
+	assert.equal(second.color, "#ff3b5c", "the second hand stands out in red");
+	assert.ok(t.includes("stroke-width=\"7.4\""), "every hand sits on a dark outline");
+});
+
+test("the analog clock is drawn without the game, and 12 o'clock is marked", () => {
+	const key = renderRole("analog", ctxAt(new Date(2026, 8, 22, 6, 5, 5)));
+	assert.ok(key.startsWith("<svg") && key.includes("#ff9a26"));
+	assert.equal((key.match(/stroke-width="2.4"/g) ?? []).length >= 4, true, "the four quarter marks");
+});

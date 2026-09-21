@@ -26,9 +26,10 @@ export type Role =
 	| "possession"
 	| "points"
 	| "clock"
+	| "analog"
 	| "ping";
 
-export const ROLES: Role[] = ["rank", "mmr", "mode", "blue", "orange", "timer", "lastgoal", "banner", "speed", "boost", "carspeed", "possession", "points", "clock", "ping"];
+export const ROLES: Role[] = ["rank", "mmr", "mode", "blue", "orange", "timer", "lastgoal", "banner", "speed", "boost", "carspeed", "possession", "points", "clock", "analog", "ping"];
 
 export interface RenderCtx {
 	store: MatchStore;
@@ -50,7 +51,7 @@ export interface RenderCtx {
 
 /** Which of the three views the MMR key shows, and the one it is animating away from (a press cycles them). */
 export interface MmrView {
-	/** 0 = MMR with the record underneath, 1 = the record big with MMR underneath, 2 = the current streak. */
+	/** MMR key: 0 = MMR with the record underneath, 1 = the record big with MMR underneath, 2 = the current streak. Clock key: 0 = stacked, 1 = one line. */
 	index: number;
 	from: number;
 	/** When the last press happened (ms), for the swap animation. */

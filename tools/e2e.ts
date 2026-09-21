@@ -189,10 +189,11 @@ async function main(): Promise<void> {
 	});
 	check("every image is a valid, renderable SVG", allValid);
 	// the clock and ping keys are not part of the 5×3 layout: place them by hand, as a user would
-	for (const [role, ctx] of [["clock", "KEY-clock"], ["ping", "KEY-ping"]] as const) {
+	for (const [role, ctx] of [["clock", "KEY-clock"], ["ping", "KEY-ping"], ["analog", "KEY-analog"]] as const) {
 		send({ event: "willAppear", action: actionUuid(role), context: ctx, device: DEVICE, payload: { controller: "Keypad", coordinates: { column: 0, row: 0 }, isInMultiAction: false, settings: {}, state: 0 } });
 	}
 	check("the clock key draws this computer's time, game or not", await waitFor(() => (images.get("KEY-clock")?.match(/>\d{1,2}<\/text>/g)?.length ?? 0) >= 2, 3000), images.get("KEY-clock")?.slice(-300));
+	check("the analog clock key draws a dial with hour, minute and second hands", await waitFor(() => ["h-hour", "h-minute", "h-second"].every((h) => (images.get("KEY-analog") ?? "").includes(`id="${h}"`)), 3000));
 	check("the ping key says there is no match yet", await waitFor(() => (images.get("KEY-ping") ?? "").includes("BRAK MECZU"), 3000), images.get("KEY-ping")?.slice(-200));
 	check("game not running → banner says so", has(3, 1, "ROCKET LEAGUE") || has(2, 1, "ROCKET LEAGUE") || has(4, 1, "ROCKET LEAGUE"), svgOf(3, 1).slice(-300));
 
@@ -369,6 +370,16 @@ async function main(): Promise<void> {
 	check("second press: the current streak", has(0, 1, ">STREAK<"), svgOf(0, 1).slice(-400));
 	await press(0, 1);
 	check("third press: back to MMR", has(0, 1, ">MMR<") && !has(0, 1, ">STREAK<") && !has(0, 1, ">RECORD<"), svgOf(0, 1).slice(-400));
+	const oneLine = () => /\d{1,2}:\d{2}</.test(images.get("KEY-clock") ?? "");
+	const pressClock = async () => {
+		send({ event: "keyDown", action: actionUuid("clock"), context: "KEY-clock", device: DEVICE, payload: { controller: "Keypad", coordinates: { column: 0, row: 0 }, isInMultiAction: false, settings: {}, state: 0 } });
+		await sleep(400);
+	};
+	check("the clock key starts with hours over minutes", !oneLine());
+	await pressClock();
+	check("one press puts the time on a single, smaller line", oneLine(), (images.get("KEY-clock") ?? "").slice(-300));
+	await pressClock();
+	check("another press goes back to hours over minutes", !oneLine());
 	send({ event: "didReceiveSettings", action: STRIP_ACTION, context: dialCtx(0), device: DEVICE_PLUS, payload: { settings: { panel: "clock" }, coordinates: { column: 0, row: 0 }, isInMultiAction: false } });
 	check("a dial pinned to the clock shows the time on the touch strip", await waitFor(() => />\d{1,2}:\d{2}</.test(feedback.get(dialCtx(0)) ?? ""), 3000), (feedback.get(dialCtx(0)) ?? "").slice(-300));
 

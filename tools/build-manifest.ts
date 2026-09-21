@@ -18,7 +18,8 @@ export const ACTION_INFO: Record<Role, { name: string; tooltip: string }> = {
 	carspeed: { name: "Car speed", tooltip: "Your car's speed; SUPERSONIC flashes when you break the sound barrier." },
 	possession: { name: "Possession", tooltip: "Which team touched the ball last, and each team's share of the match." },
 	points: { name: "Score", tooltip: "Your points, with shots and demolitions." },
-	clock: { name: "Clock", tooltip: "The current time of this computer, with the date (24-hour or 12-hour in the inspector). Also a panel for the Stream Deck + touch strip." },
+	clock: { name: "Clock", tooltip: "The current time of this computer, with the date (24-hour or 12-hour in the inspector). Press it to switch between hours over minutes and one smaller line. Also a panel for the Stream Deck + touch strip." },
+	analog: { name: "Analog clock", tooltip: "A round clock face with clearly visible hour, minute and second hands, showing the time of this computer." },
 	ping: { name: "Ping", tooltip: "Live ping to the game server of the running match, coloured by quality, with a small history graph." },
 };
 
@@ -33,7 +34,7 @@ const manifest = {
 	SDKVersion: 2,
 	UUID: PLUGIN_UUID,
 	Name: "Rocket League HUD",
-	Version: "1.10.0.0",
+	Version: "1.10.1.0",
 	Author: "kvcperkrol",
 	Description:
 		"Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",

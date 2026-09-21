@@ -32,17 +32,66 @@ export function clockParts(ms: number, lang: Lang, twelveHour: boolean): ClockPa
 	};
 }
 
-/** The clock key: hours over minutes, the date on top and a thin bar that fills once a minute. Always drawn, game or not. */
-export function clockKey(ctx: RenderCtx): string {
+/**
+ * The clock key. Layout 0: hours over minutes, big. Layout 1 (after a press): the time on one smaller line, kept 10 px away from
+ * the edges of the key, with the seconds underneath. The date is on top and a thin bar along the bottom fills once a minute.
+ * Always drawn, game or not.
+ */
+export function clockKey(ctx: RenderCtx, layout = 0): string {
 	const c = clockParts(ctx.now, ctx.settings.lang, ctx.settings.clock12h);
+	const bar = `<rect x="8" y="69" width="56" height="2" fill="${COLORS.line}"/>` + `<rect x="8" y="69" width="${((c.seconds / 60) * 56).toFixed(1)}" height="2" fill="${COLORS.blue1}"/>`;
+	if (layout === 1) {
+		const sub = `${c.suffix ? c.suffix + "  " : ""}:${String(c.seconds).padStart(2, "0")}`;
+		return doc(panel() + text(c.date, { y: 12, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) + text(`${c.hh}:${c.mm}`, { y: 43, size: 21, skew: -9, maxWidth: 52 }) + text(sub, { y: 58, size: 9, fill: COLORS.dim, maxWidth: 52 }) + bar);
+	}
 	return doc(
 		panel() +
 			text(c.date, { y: 12, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 			text(c.hh, { y: 39, size: 26, skew: -9, maxWidth: 40 }) +
 			(c.suffix ? text(c.suffix, { x: 60, y: 39, size: 8, fill: COLORS.dim, anchor: "end" }) : "") +
 			text(c.mm, { y: 65, size: 26, skew: -9, maxWidth: 40 }) +
-			`<rect x="8" y="69" width="56" height="2" fill="${COLORS.line}"/>` +
-			`<rect x="8" y="69" width="${((c.seconds / 60) * 56).toFixed(1)}" height="2" fill="${COLORS.blue1}"/>`,
+			bar,
+	);
+}
+
+// ---- analog clock ---------------------------------------------------------------------------------------------------------------
+
+const ANALOG = { cx: 36, cy: 36.5, r: 31 };
+/** Point at `deg` degrees clockwise from twelve o'clock, `len` from the centre. */
+const polar = (deg: number, len: number): [number, number] => {
+	const a = ((deg - 90) * Math.PI) / 180;
+	return [ANALOG.cx + len * Math.cos(a), ANALOG.cy + len * Math.sin(a)];
+};
+
+/** One clock hand from `tail` behind the centre to `len` in front of it, on a dark outline so it stays visible on the dial. */
+function hand(id: string, deg: number, len: number, tail: number, width: number, color: string): string {
+	const [x1, y1] = polar(deg + 180, tail);
+	const [x2, y2] = polar(deg, len);
+	const pts = `x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}"`;
+	return `<line ${pts} stroke="#05070f" stroke-width="${(width + 2.4).toFixed(1)}" stroke-linecap="round"/><line id="${id}" ${pts} stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`;
+}
+
+/** The analog clock key: a dial with hour ticks and thick, contrasting hands — hour and minute in white, the second hand red. */
+export function analogKey(ctx: RenderCtx): string {
+	const d = new Date(ctx.now);
+	const s = d.getSeconds();
+	const m = d.getMinutes() + s / 60;
+	const h = (d.getHours() % 12) + m / 60;
+	let ticks = "";
+	for (let i = 0; i < 12; i++) {
+		const big = i % 3 === 0;
+		const [x1, y1] = polar(i * 30, ANALOG.r - 3 - (big ? 6 : 3));
+		const [x2, y2] = polar(i * 30, ANALOG.r - 3);
+		ticks += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${i === 0 ? COLORS.orange1 : "#dfe6ff"}" stroke-width="${big ? 2.4 : 1.2}" stroke-linecap="round"/>`;
+	}
+	return doc(
+		`<rect width="72" height="72" fill="${COLORS.bg1}"/>` +
+			`<circle cx="${ANALOG.cx}" cy="${ANALOG.cy}" r="${ANALOG.r}" fill="#111a3a" stroke="${COLORS.line}" stroke-width="2"/>` +
+			ticks +
+			hand("h-hour", h * 30, 15, 3, 5, "#ffffff") +
+			hand("h-minute", m * 6, 24, 4, 3.4, "#ffffff") +
+			hand("h-second", s * 6, 26, 8, 1.6, COLORS.red) +
+			`<circle cx="${ANALOG.cx}" cy="${ANALOG.cy}" r="3.2" fill="${COLORS.red}" stroke="#05070f" stroke-width="1"/>`,
 	);
 }
 
