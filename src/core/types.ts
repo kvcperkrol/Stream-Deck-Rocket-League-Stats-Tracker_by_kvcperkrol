@@ -36,6 +36,8 @@ export type GlobalSettings = {
 	scoreOrder: "me-left" | "blue-left";
 	/** Keep a small, anonymised log of the Stats API for diagnostics (local file only). */
 	recordMatches: boolean;
+	/** Shifts the kickoff countdown digits: + shows each number later, − earlier (ms). For calibrating against the game on a given deck. */
+	countdownOffsetMs: number;
 	ranks: Partial<Record<RankGroup, RankEntry>>;
 };
 
@@ -48,6 +50,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 	installDir: "",
 	scoreOrder: "me-left",
 	recordMatches: false,
+	countdownOffsetMs: 0,
 	ranks: {},
 };
 
@@ -63,6 +66,7 @@ export function mergeSettings(raw: Partial<GlobalSettings> | undefined | null): 
 		installDir: typeof r.installDir === "string" ? r.installDir : DEFAULT_SETTINGS.installDir,
 		scoreOrder: r.scoreOrder === "blue-left" ? "blue-left" : "me-left",
 		recordMatches: r.recordMatches === true,
+		countdownOffsetMs: typeof r.countdownOffsetMs === "number" && Number.isFinite(r.countdownOffsetMs) ? Math.max(-1500, Math.min(1500, Math.round(r.countdownOffsetMs))) : DEFAULT_SETTINGS.countdownOffsetMs,
 		ranks: { ...(r.ranks ?? {}) },
 	};
 }

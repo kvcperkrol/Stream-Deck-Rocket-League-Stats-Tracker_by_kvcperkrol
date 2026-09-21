@@ -1,5 +1,12 @@
 import type { RLMessage, TeamNum } from "./types";
 
+/**
+ * From `CountdownBegin` to `RoundStarted` the game takes a steady 4.0 s (19 of 19 recorded rounds: 3.98–4.02 s). The on-screen
+ * 3 – 2 – 1 fills the last three of those seconds and GO coincides with the round start, so the first second is the kickoff
+ * camera.
+ */
+export const KICKOFF_COUNTDOWN_MS = 4000;
+
 export type Phase = "offline" | "menu" | "countdown" | "live" | "replay" | "ended";
 
 export type BannerKind =
@@ -254,7 +261,7 @@ export class MatchStore {
 				this.state.countdownAt = this.now();
 				this.state.replay = false;
 				this.clearStickyQuiet("replay");
-				this.push({ kind: "countdown", ttl: 3400, prio: 40 });
+				this.push({ kind: "countdown", ttl: KICKOFF_COUNTDOWN_MS + 600, prio: 40 });
 				break;
 			case "RoundStarted":
 				this.state.possessionHold = false;

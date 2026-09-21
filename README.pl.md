@@ -167,6 +167,7 @@ Panel wtyczki u góry pokazuje: czy gra działa, czy Stats API jest połączone,
 | „RESTART GRY” na banerze | Gra wystartowała, zanim wtyczka włączyła Stats API. Zrestartuj Rocket League. |
 | Baner: „Uruchom grę” mimo działającej gry | Zainstalowana wersja gry nie została znaleziona — wpisz folder w Zaawansowane → „Folder gry”. |
 | Zły tryb / „Playlist #NN” | Nieznane ID playlisty — nagraj mecz (`npm run record`) i dopisz ID w `src/core/playlists.ts`. |
+| Cyfry odliczania 3-2-1 nie pokrywają się z grą | Zaawansowane → **Przesunięcie odliczania (ms)**: wartości dodatnie pokazują cyfry później, ujemne wcześniej. Domyślnie wypełniają ostatnie 3 s przed startem rundy (gra potrzebuje stałych 4,0 s od ogłoszenia do startu). |
 
 Log wtyczki: `%APPDATA%\Elgato\StreamDeck\Plugins\mov.remake.rlhud.sdPlugin\logs`.
 

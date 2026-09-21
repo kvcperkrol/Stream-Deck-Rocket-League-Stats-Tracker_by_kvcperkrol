@@ -70,6 +70,8 @@
 <p class="note" id="iconsNote"></p>
 
 <h2 data-t="advanced">Advanced</h2>
+<div class="row"><label data-t="cdOffset">Countdown offset (ms)</label><input id="countdownOffsetMs" type="number" min="-1500" max="1500" step="50" class="grow" /></div>
+<p class="note" data-t="cdNote"></p>
 <div class="row"><label data-t="rate">Packets/s</label><input id="packetRate" type="number" min="1" max="120" class="grow" /></div>
 <div class="row"><label data-t="install">Game folder</label><input id="installDir" class="grow" data-tp="installPh" /></div>
 <p class="note" data-t="advNote">How many times per second the game sends match state. Changes need a Rocket League restart.</p>
@@ -85,7 +87,7 @@ const I18N = {
 		playerNote: "Zostaw puste — wtyczka odczyta Twoje konto z logu gry. Wpisz nick tylko wtedy, gdy oznaczenie „TY” jest złe.",
 		autoSwitch: "Przełączaj profil automatycznie po uruchomieniu gry",
 		ranks: "Twoje rangi", ranksNote: "MMR uzupełnia się sam z logu gry, gdy zaczynasz kolejkę na jedną playlistę (wartość sprzed meczu) — wpisany tu MMR to zapas. Gra nie zapisuje rangi ani dywizji dla playlisty, więc tę wpisujesz sama. Tryby bez rankingu (towarzyski, trening) pokazują „NIERANKINGOWY” zamiast rangi.",
-		advanced: "Zaawansowane", rate: "Pakiety/s", install: "Folder gry", installPh: "wykrywany automatycznie (Epic/Steam)",
+		advanced: "Zaawansowane", cdOffset: "Przesunięcie odliczania (ms)", cdNote: "Jeśli cyfry 3-2-1 na klawiszach lub pasku dotykowym nie pokrywają się z odliczaniem w grze: dodatnie wartości pokazują je później, ujemne wcześniej.", rate: "Pakiety/s", install: "Folder gry", installPh: "wykrywany automatycznie (Epic/Steam)",
 		advNote: "Ile razy na sekundę gra ma wysyłać stan meczu. Zmiany wymagają restartu Rocket League.",
 		mmrLogOk: "MMR z logu gry: {n} playl.", mmrLogMissing: "Brak logu gry (MMR ręcznie)", order: "Kolejność wyniku", orderMe: "Moja drużyna po lewej (jak w grze)", orderBlue: "Niebiescy zawsze po lewej", record: "Zapisuj dane meczu do diagnostyki (lokalnie, inni gracze zanonimizowani)", me: "Ty w grze", nickMismatch: "Wpisany nick ≠ konto z gry — wyczyść pole „Nick w grze”", gameOn: "Gra: uruchomiona", gameOff: "Gra: wyłączona", apiOn: "Stats API: połączone", apiOff: "Stats API: brak połączenia",
 		iniOk: "Konfiguracja gry: OK", iniChanged: "Konfiguracja gry: zaktualizowana", iniMissing: "Nie znaleziono Rocket League", iniErr: "Błąd konfiguracji gry",
@@ -101,7 +103,7 @@ const I18N = {
 		playerNote: "Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.",
 		autoSwitch: "Switch profile automatically when the game starts",
 		ranks: "Your ranks", ranksNote: "MMR fills in by itself from the game log when you start a queue for a single playlist (the value from before the match) — the MMR typed here is a fallback. The game does not write a per-playlist rank or division, so you enter those. Unranked modes (casual, free play) show “UNRANKED” instead of a rank.",
-		advanced: "Advanced", rate: "Packets/s", install: "Game folder", installPh: "detected automatically (Epic/Steam)",
+		advanced: "Advanced", cdOffset: "Countdown offset (ms)", cdNote: "If the 3-2-1 digits on the keys or the touch strip are not in step with the game's countdown: positive values show them later, negative earlier.", rate: "Packets/s", install: "Game folder", installPh: "detected automatically (Epic/Steam)",
 		advNote: "How many times per second the game sends match state. Changes need a Rocket League restart.",
 		mmrLogOk: "MMR from game log: {n} playlist(s)", mmrLogMissing: "No game log (manual MMR)", order: "Score order", orderMe: "My team on the left (like the game)", orderBlue: "Blue always on the left", record: "Keep a small anonymised match log for diagnostics (local only)", me: "You in game", nickMismatch: "Typed name ≠ game account — clear the “In-game name” field", gameOn: "Game: running", gameOff: "Game: not running", apiOn: "Stats API: connected", apiOff: "Stats API: not connected",
 		iniOk: "Game config: OK", iniChanged: "Game config: updated", iniMissing: "Rocket League not found", iniErr: "Game config error",
@@ -120,7 +122,7 @@ const GROUPS = ["duel", "doubles", "solo", "standard", "hoops", "rumble", "drops
 const GROUP_OF_PLAYLIST = { Duel: "duel", Doubles: "doubles", "Solo Standard": "solo", Standard: "standard", Hoops: "hoops", Rumble: "rumble", Dropshot: "dropshot" };
 
 let ws, uuid, actionInfo, role = "";
-let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: true, packetRate: 10, installDir: "", scoreOrder: "me-left", recordMatches: false, ranks: {} };
+let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: true, packetRate: 10, installDir: "", scoreOrder: "me-left", recordMatches: false, countdownOffsetMs: 0, ranks: {} };
 let keySettings = {};
 let lastStatus = null;
 
@@ -200,6 +202,7 @@ function bindGlobal() {
 	$("scoreOrder").addEventListener("change", () => { settings.scoreOrder = $("scoreOrder").value; saveGlobal(); });
 	$("recordMatches").addEventListener("change", () => { settings.recordMatches = $("recordMatches").checked; saveGlobal(); });
 	$("autoSwitch").addEventListener("change", () => { settings.autoSwitch = $("autoSwitch").checked; saveGlobal(); });
+	$("countdownOffsetMs").addEventListener("change", () => { settings.countdownOffsetMs = Math.max(-1500, Math.min(1500, Math.round(Number($("countdownOffsetMs").value) || 0))); saveGlobal(); });
 	$("packetRate").addEventListener("change", () => { settings.packetRate = Math.max(1, Math.min(120, Number($("packetRate").value) || 10)); saveGlobal(); });
 	$("refresh").addEventListener("click", askStatus);
 	$("slice").addEventListener("change", () => { const v = $("slice").value; keySettings.slice = v === "auto" ? "auto" : Number(v); saveKey(); });
@@ -207,7 +210,7 @@ function bindGlobal() {
 
 function fillForm() {
 	$("lang").value = settings.lang; $("units").value = settings.units; $("playerName").value = settings.playerName || "";
-	$("autoSwitch").checked = !!settings.autoSwitch; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("installDir").value = settings.installDir || "";
+	$("autoSwitch").checked = !!settings.autoSwitch; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("countdownOffsetMs").value = settings.countdownOffsetMs || 0; $("installDir").value = settings.installDir || "";
 	if (role === "banner" || role === "strip") $("slice").value = String(keySettings.slice ?? "auto");
 	applyI18n();
 }

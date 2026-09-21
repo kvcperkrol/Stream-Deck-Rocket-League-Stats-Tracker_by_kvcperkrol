@@ -1,4 +1,4 @@
-import type { Banner, BannerKind } from "../core/match-store";
+import { KICKOFF_COUNTDOWN_MS, type Banner, type BannerKind } from "../core/match-store";
 import { t } from "../core/i18n";
 import { convertSpeed } from "../core/units";
 import type { RenderCtx } from "./context";
@@ -33,16 +33,18 @@ export interface Geo {
 	fitMax: number;
 	betweenMax: number;
 	spanW: number;
+	/** Where the small KICKOFF label goes next to the countdown digit. */
+	kickoffLabel: { x: number; y: number };
 }
 
 /** Three keys with a physical gap between them: a headline either fits the middle key or is long enough to span all three. */
-const KEYS_GEO: Geo = { W, left: keyX(0), mid: W / 2, right: keyX(2), slotW: KEY - 16, fitMax: 58, betweenMax: 108, spanW: W - 26 };
+const KEYS_GEO: Geo = { W, left: keyX(0), mid: W / 2, right: keyX(2), slotW: KEY - 16, fitMax: 58, betweenMax: 108, spanW: W - 26, kickoffLabel: { x: keyX(0), y: 42 } };
 
 /** The touch strip is one continuous surface: no gaps to avoid, so a headline just shrinks until it fits. */
 export const STRIP_SEGMENT = { width: 200, height: 100, count: 4 } as const;
 const STRIP_K = STRIP_SEGMENT.height / H;
 const STRIP_W = (STRIP_SEGMENT.width * STRIP_SEGMENT.count) / STRIP_K;
-const STRIP_GEO: Geo = { W: STRIP_W, left: STRIP_W / 8, mid: STRIP_W / 2, right: (STRIP_W * 7) / 8, slotW: STRIP_W / 4 - 20, fitMax: 300, betweenMax: 300, spanW: STRIP_W - 40 };
+const STRIP_GEO: Geo = { W: STRIP_W, left: STRIP_W / 8, mid: STRIP_W / 2, right: (STRIP_W * 7) / 8, slotW: STRIP_W / 4 - 20, fitMax: 300, betweenMax: 300, spanW: STRIP_W - 40, kickoffLabel: { x: STRIP_W / 2, y: 11 } };
 
 /**
  * A short line of text that must stay inside ONE key: it shrinks (down to `minSize`) and is truncated with an
@@ -192,8 +194,11 @@ function scene(ctx: RenderCtx, banner: Banner | undefined, g: Geo = KEYS_GEO): S
 				};
 			}
 			case "countdown": {
-				const left = Math.max(1, Math.min(3, Math.ceil((3000 - age) / 1000)));
-				return { look: l, animated: true, content: big(String(left), 52, 50) + text(t(lang, "kickoff"), { x: g.left, y: 42, size: 9, fill: l.ink, opacity: 0.75, maxWidth: g.slotW }) };
+				// The digits follow the round start (see KICKOFF_COUNTDOWN_MS): nothing to count in the first second, then 3 – 2 – 1.
+				const remaining = KICKOFF_COUNTDOWN_MS - age + (settings.countdownOffsetMs ?? 0);
+				if (remaining > 3000) return { look: l, animated: true, content: big(t(lang, "kickoff"), 45, 22) };
+				const digit = Math.max(1, Math.min(3, Math.ceil(remaining / 1000)));
+				return { look: l, animated: true, content: big(String(digit), 52, 50) + text(t(lang, "kickoff"), { x: g.kickoffLabel.x, y: g.kickoffLabel.y, size: 9, fill: l.ink, opacity: 0.75, maxWidth: g.slotW }) };
 			}
 			case "go":
 				return { look: l, animated: true, content: centre(big(t(lang, "go"), 48, 38)) };

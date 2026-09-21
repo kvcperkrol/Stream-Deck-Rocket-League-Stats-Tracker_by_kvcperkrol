@@ -170,6 +170,7 @@ configuration and the id of the last playlist.
 | "RESTART GAME" on the banner | The game started before the plugin enabled the Stats API. Restart Rocket League. |
 | Banner says "Start the game" although it is running | The installed game was not found — enter the folder under Advanced → "Game folder". |
 | Wrong mode / "Playlist #NN" | Unknown playlist id — record a match (`npm run record`) and add the id to `src/core/playlists.ts`. |
+| The 3-2-1 kickoff digits are not in step with the game | Advanced → **Countdown offset (ms)**: positive values show the numbers later, negative earlier. By default they fill the last 3 s before the round starts (the game takes a steady 4.0 s from the announcement to the start). |
 
 Plugin log: `%APPDATA%\Elgato\StreamDeck\Plugins\mov.remake.rlhud.sdPlugin\logs`.
 
