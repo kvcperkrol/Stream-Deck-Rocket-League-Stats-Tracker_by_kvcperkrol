@@ -12,26 +12,25 @@ Wtyczka tylko czyta dane: nie steruje ani myszą, ani klawiaturą i niczego do g
 
 > Projekt nieoficjalny — nie jest powiązany z Psyonix, Epic Games ani Elgato. „Rocket League” jest znakiem towarowym Psyonix.
 
-## Zrzuty ekranu
+## Podgląd na różnych deckach
 
-<p align="center"><img src="preview/16-live-keys-supersonic.png" alt="Pokład 5×3 w trakcie meczu" width="720"></p>
+Każdy klawisz narysowany tak, jak wygląda w trwającym meczu, z nazwą jego funkcji pod spodem — jeden obraz na każdy obsługiwany deck.
+
+<p align="center"><img src="docs/screenshots/layout-5x3.png" alt="Stream Deck 5×3 z podpisanymi klawiszami" width="600"></p>
+
+<p align="center"><img src="docs/screenshots/layout-plus.png" alt="Stream Deck +: 8 klawiszy i pasek dotykowy, każdy element podpisany" width="720"></p>
 
 <table>
   <tr>
-    <td align="center"><img src="preview/04-goal-blue.png" alt="Baner gola ze strzelcem, asystą i prędkością piłki" width="360"><br><sub>Gol: strzelec, asysta i prędkość piłki na banerze</sub></td>
-    <td align="center"><img src="preview/06-demo.png" alt="Baner demolki" width="360"><br><sub>Demolka: kto kogo zdemolował</sub></td>
+    <td align="center"><img src="docs/screenshots/layout-neo.png" alt="Stream Deck Neo" width="330"><br><sub>Stream Deck Neo</sub></td>
+    <td align="center"><img src="docs/screenshots/layout-mini.png" alt="Stream Deck Mini" width="260"><br><sub>Stream Deck Mini</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="preview/18-casual-unranked.png" alt="Mecz towarzyski pokazany jako bez rankingu" width="360"><br><sub>Mecz towarzyski: <b>UNRANKED</b> zamiast rangi</sub></td>
-    <td align="center"><img src="preview/15-polish-mph.png" alt="Ten sam pokład po polsku, prędkość w mph" width="360"><br><sub>Interfejs po polsku, prędkość w mph (oba to ustawienia)</sub></td>
-  </tr>
-  <tr>
-    <td align="center" colspan="2"><img src="preview/17-orange-vs-black.png" alt="Drużyna pomarańczowa przeciw czarnemu klubowi, kolory z gry" width="360"><br><sub>Kolory drużyn pochodzą z gry: tu pomarańczowi przeciw czarnemu klubowi</sub></td>
+    <td align="center" colspan="2"><img src="docs/screenshots/layout-xl.png" alt="Stream Deck XL" width="720"><br><sub>Stream Deck XL</sub></td>
   </tr>
 </table>
 
-<sub>Rendery generowane przez `npm run preview`. Liczby (MMR, ranga, wynik, punkty, prędkości, kolory drużyn) pochodzą z prawdziwych meczów; nicki graczy to zamienniki.</sub>
-
+<sub>Rendery generowane przez `npm run preview:layout`. Liczby (MMR, ranga, wynik, punkty, prędkości) pochodzą z prawdziwych meczów; nicki graczy to zamienniki.</sub>
 
 ## Instalacja
 
@@ -86,18 +85,6 @@ wraca do poprzedniego.
 | Stream Deck XL | 8×4 | pełny układ; dwa dolne rzędy zostają wolne na Twoje klawisze |
 | Stream Deck Neo | 4×2 | ranga, wynik, czas, baner zdarzeń i boost |
 | Stream Deck + | 4×2 klawisze, 4 pokrętła | 8 klawiszy i pasek dotykowy — patrz [Stream Deck +](#stream-deck--pasek-dotykowy) |
-
-<table>
-  <tr>
-    <td align="center"><img src="docs/screenshots/layout-5x3.png" alt="Układ Stream Decka 5×3 z podpisanymi klawiszami" width="360"><br><sub>Stream Deck 5×3</sub></td>
-    <td align="center"><img src="docs/screenshots/layout-neo.png" alt="Układ Stream Decka Neo" width="300"><br><sub>Stream Deck Neo</sub></td>
-    <td align="center"><img src="docs/screenshots/layout-mini.png" alt="Układ Stream Decka Mini" width="240"><br><sub>Stream Deck Mini</sub></td>
-  </tr>
-  <tr>
-    <td align="center" colspan="3"><img src="docs/screenshots/layout-xl.png" alt="Układ Stream Decka XL" width="720"><br><sub>Stream Deck XL</sub></td>
-  </tr>
-</table>
-
 Inne decki (Pedal, Studio, + XL …) nie mają jeszcze dołączonego profilu — wtyczka ich nie przełącza, ale wszystkie akcje można
 przeciągnąć na ich klawisze ręcznie. Profil 5×3 jest tym używanym na prawdziwym sprzęcie; profile Mini, XL, Neo i + sprawdziłem tylko
 na symulowanych urządzeniach (struktura, przełączanie profilu, układ klawiszy).
@@ -107,7 +94,6 @@ na symulowanych urządzeniach (struktura, przełączanie profilu, układ klawisz
 Wtyczka obsługuje też **Stream Deck +** (8 klawiszy, 4 pokrętła i pasek dotykowy). Animowany baner, który na decku 5×3 zajmuje
 trzy klawisze, może działać na całym pasku dotykowym.
 
-<p align="center"><img src="docs/screenshots/layout-plus.png" alt="Układ Stream Decka +: 8 klawiszy i pasek dotykowy z opisem każdego elementu" width="720"></p>
 
 <p align="center"><img src="docs/screenshots/strip-idle.png" alt="Pasek dotykowy między zdarzeniami: ranga, MMR, ostatni gol i moje statystyki" width="720"><br><sub>Między zdarzeniami: ranga, MMR, ostatni gol, Twoje gole / asysty / obrony</sub></p>
 <p align="center"><img src="docs/screenshots/strip-goal.png" alt="Gol na całym pasku dotykowym" width="720"><br><sub>Gol: prędkość piłki po lewej, GOL! i strzelec pośrodku, asysta po prawej</sub></p>
