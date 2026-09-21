@@ -17,6 +17,34 @@ const H = 72;
 const keyX = (i: number) => i * (KEY + KEY_GAP) + KEY / 2;
 
 /**
+ * Where things go inside a banner scene. A scene is always laid out 72 units high; a wider scene only means more room to
+ * the sides. The three keys and the Stream Deck + touch strip (800×100 px = 576×72 units) share every event layout.
+ */
+export interface Geo {
+	/** Width of the scene. */
+	W: number;
+	/** Centre x of the left slot (ball speed, attacker), the middle (headline) and the right slot (assist, victim). */
+	left: number;
+	mid: number;
+	right: number;
+	/** The widest text that belongs to one slot. */
+	slotW: number;
+	/** A headline up to `fitMax` keeps its size; up to `betweenMax` it is shrunk to `fitMax`; a longer one spans `spanW`. */
+	fitMax: number;
+	betweenMax: number;
+	spanW: number;
+}
+
+/** Three keys with a physical gap between them: a headline either fits the middle key or is long enough to span all three. */
+const KEYS_GEO: Geo = { W, left: keyX(0), mid: W / 2, right: keyX(2), slotW: KEY - 16, fitMax: 58, betweenMax: 108, spanW: W - 26 };
+
+/** The touch strip is one continuous surface: no gaps to avoid, so a headline just shrinks until it fits. */
+export const STRIP_SEGMENT = { width: 200, height: 100, count: 4 } as const;
+const STRIP_K = STRIP_SEGMENT.height / H;
+const STRIP_W = (STRIP_SEGMENT.width * STRIP_SEGMENT.count) / STRIP_K;
+const STRIP_GEO: Geo = { W: STRIP_W, left: STRIP_W / 8, mid: STRIP_W / 2, right: (STRIP_W * 7) / 8, slotW: STRIP_W / 4 - 20, fitMax: 300, betweenMax: 300, spanW: STRIP_W - 40 };
+
+/**
  * A short line of text that must stay inside ONE key: it shrinks (down to `minSize`) and is truncated with an
  * ellipsis if it still does not fit. Small text that crosses a physical gap would lose whole letters, so every
  * sub-line goes through here; only large headlines are allowed to span keys.
@@ -75,7 +103,7 @@ interface Scene {
 }
 
 /** The scene is drawn once at 216×72 and each key shows its own 72px window of it. */
-function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
+function scene(ctx: RenderCtx, banner: Banner | undefined, g: Geo = KEYS_GEO): Scene {
 	const { settings, store, now } = ctx;
 	const lang = settings.lang;
 	const s = store.state;
@@ -83,7 +111,8 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 		const v = convertSpeed(uu, settings.units);
 		return `${v.value} ${v.unit}`;
 	};
-	const cx = W / 2;
+	const cx = g.mid;
+	const slotX = (i: number) => g.left + ((g.right - g.left) * i) / 2;
 
 	// ---- transient event ---------------------------------------------------------------------------
 	if (banner) {
@@ -93,17 +122,16 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 		const centre = (inner: string) => `<g transform="translate(${cx} 36) scale(${pop.toFixed(3)}) translate(${-cx} -36)">${inner}</g>`;
 		// Headline rule: a title either fits inside the middle key, or is long enough to span all three.
 		// Anything in between would put half a glyph into a physical gap, so it is shrunk to the middle key.
-		const MID_MAX = 58;
 		const headlineSize = (str: string, base: number) => {
 			const w = estimateWidth(str, base);
-			if (w <= MID_MAX) return base;
-			if (w <= 108) return fitSize(str, MID_MAX, base);
-			return fitSize(str, W - 26, base);
+			if (w <= g.fitMax) return base;
+			if (w <= g.betweenMax) return fitSize(str, g.fitMax, base);
+			return fitSize(str, g.spanW, base);
 		};
 		const big = (str: string, y: number, base: number) => text(str, { x: cx, y, size: headlineSize(str, base), fill: l.ink, skew: -9 });
-		const mid = (str: string, y: number, size: number, opacity = 1) => text(str, { x: cx, y, size, fill: l.ink, skew: -6, maxWidth: W - 12, opacity });
+		const mid = (str: string, y: number, size: number, opacity = 1) => text(str, { x: cx, y, size, fill: l.ink, skew: -6, maxWidth: g.W - 12, opacity });
 		/** A player name inside one key (see fitLine). */
-		const nameIn = (str: string, x: number, y: number, size: number, opacity = 1) => fitLine(str, { x, y, size, fill: l.ink, opacity });
+		const nameIn = (str: string, x: number, y: number, size: number, opacity = 1) => fitLine(str, { x, y, size, fill: l.ink, opacity, maxWidth: g.slotW });
 		const arrowRight = (x: number, y: number) => `<polygon points="${x},${y - 4.5} ${x + 8},${y} ${x},${y + 4.5}" fill="${l.ink}" fill-opacity="0.85"/>`;
 
 		switch (banner.kind) {
@@ -111,15 +139,15 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 				// One fact per key so nothing has to cross the physical gaps between keys:
 				// [ball speed] [GOAL! + scorer] [assist or team]
 				const sp = convertSpeed(banner.speedKmh ?? 0, settings.units);
-				const left = keyX(0);
-				const right = keyX(2);
+				const left = g.left;
+				const right = g.right;
 				const teamName = t(lang, banner.team === 1 ? "orange" : "blue");
 				return {
 					look: l,
 					animated: true,
 					content: centre(
 						text(sp.unit.toUpperCase(), { x: left, y: 15, size: 9.5, fill: l.ink, opacity: 0.8 }) +
-							text(sp.value > 0 ? String(sp.value) : "—", { x: left, y: 46, size: 31, fill: l.ink, skew: -9, maxWidth: 56 }) +
+							text(sp.value > 0 ? String(sp.value) : "—", { x: left, y: 46, size: 31, fill: l.ink, skew: -9, maxWidth: g.slotW }) +
 							big(t(lang, "goal"), 38, 30) +
 							text(banner.assist ? t(lang, "assist") : "", { x: right, y: 15, size: 9.5, fill: l.ink, opacity: 0.8 }) +
 							nameIn(banner.assist ?? teamName, right, banner.assist ? 44 : 42, banner.assist ? 15 : 12) +
@@ -133,9 +161,9 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 					look: l,
 					animated: true,
 					content: centre(
-						nameIn(banner.who ?? "?", keyX(0), 42, 15) +
+						nameIn(banner.who ?? "?", g.left, 42, 15) +
 							big(t(lang, "demo"), 42, 26) +
-							nameIn(banner.other ?? "?", keyX(2), 42, 15, 0.85) +
+							nameIn(banner.other ?? "?", g.right, 42, 15, 0.85) +
 							arrowRight(cx - 13, 58) +
 							arrowRight(cx - 2, 58),
 					),
@@ -160,12 +188,12 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 				return {
 					look: l,
 					animated: true,
-					content: `<polygon points="${keyX(0) - 9},26 ${keyX(0) + 9},36 ${keyX(0) - 9},46" fill="${l.ink}" fill-opacity="${blink}"/>` + big(t(lang, "replay"), 47, 30),
+					content: `<polygon points="${g.left - 9},26 ${g.left + 9},36 ${g.left - 9},46" fill="${l.ink}" fill-opacity="${blink}"/>` + big(t(lang, "replay"), 47, 30),
 				};
 			}
 			case "countdown": {
 				const left = Math.max(1, Math.min(3, Math.ceil((3000 - age) / 1000)));
-				return { look: l, animated: true, content: big(String(left), 52, 50) + text(t(lang, "kickoff"), { x: keyX(0), y: 42, size: 9, fill: l.ink, opacity: 0.75, maxWidth: 56 }) };
+				return { look: l, animated: true, content: big(String(left), 52, 50) + text(t(lang, "kickoff"), { x: g.left, y: 42, size: 9, fill: l.ink, opacity: 0.75, maxWidth: g.slotW }) };
 			}
 			case "go":
 				return { look: l, animated: true, content: centre(big(t(lang, "go"), 48, 38)) };
@@ -186,21 +214,21 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 	// ---- idle states -------------------------------------------------------------------------------
 	// A big headline may span the keys; the small line under it stays inside the middle key.
 	const idleText = (title: string, sub: string, tint = "#ffffff") =>
-		text(title, { x: cx, y: 38, size: 26, fill: tint, skew: -9, maxWidth: W - 30 }) + fitLine(sub, { x: cx, y: 58, size: 13, fill: COLORS.dim, skew: 0 });
+		text(title, { x: cx, y: 38, size: 26, fill: tint, skew: -9, maxWidth: g.W - 30 }) + fitLine(sub, { x: cx, y: 58, size: 13, fill: COLORS.dim, skew: 0, maxWidth: g.slotW });
 
 	if (!s.gameRunning) return { look: IDLE, animated: false, content: idleText(t(lang, "offlineTitle"), t(lang, "offlineSub")) };
 	if (ctx.restartHint) {
 		// [Stats API enabled] [RESTART GAME] [spinner] — one fact per key, the spinner shows the plugin is waiting.
 		const spin = (Math.floor(now / 125) * 30) % 360;
-		const arc = `<g transform="translate(${keyX(2)} 36) rotate(${spin})"><path d="M0,-15 A15,15 0 1 1 -15,0" fill="none" stroke="${COLORS.gold}" stroke-width="4" stroke-linecap="round"/><polygon points="-22,-3 -8,-3 -15,8" fill="${COLORS.gold}"/></g>`;
+		const arc = `<g transform="translate(${g.right} 36) rotate(${spin})"><path d="M0,-15 A15,15 0 1 1 -15,0" fill="none" stroke="${COLORS.gold}" stroke-width="4" stroke-linecap="round"/><polygon points="-22,-3 -8,-3 -15,8" fill="${COLORS.gold}"/></g>`;
 		return {
 			look: IDLE,
 			animated: true,
 			content:
-				fitLine(t(lang, "restartA"), { x: keyX(0), y: 33, size: 11, fill: COLORS.dim, skew: 0 }) +
-				fitLine(t(lang, "restartB"), { x: keyX(0), y: 48, size: 11, fill: COLORS.dim, skew: 0 }) +
-				text(t(lang, "restartTitle"), { x: cx, y: 33, size: 17, fill: COLORS.gold, skew: -9, maxWidth: 56 }) +
-				text(t(lang, "restartWord"), { x: cx, y: 56, size: 24, fill: COLORS.gold, skew: -9, maxWidth: 56 }) +
+				fitLine(t(lang, "restartA"), { x: g.left, y: 33, size: 11, fill: COLORS.dim, skew: 0, maxWidth: g.slotW }) +
+				fitLine(t(lang, "restartB"), { x: g.left, y: 48, size: 11, fill: COLORS.dim, skew: 0, maxWidth: g.slotW }) +
+				text(t(lang, "restartTitle"), { x: cx, y: 33, size: 17, fill: COLORS.gold, skew: -9, maxWidth: g.slotW }) +
+				text(t(lang, "restartWord"), { x: cx, y: 56, size: 24, fill: COLORS.gold, skew: -9, maxWidth: g.slotW }) +
 				arc,
 		};
 	}
@@ -214,14 +242,14 @@ function scene(ctx: RenderCtx, banner: Banner | undefined): Scene {
 	const values = [me.goals, me.assists, me.saves];
 	let out = "";
 	for (let i = 0; i < 3; i++) {
-		const x = keyX(i);
-		out += text(labels[i]!, { x, y: 15, size: 9, fill: COLORS.dim, maxWidth: 56 });
+		const x = slotX(i);
+		out += text(labels[i]!, { x, y: 15, size: 9, fill: COLORS.dim, maxWidth: g.slotW });
 		out += text(String(values[i]), { x, y: 52, size: 34, fill: "#ffffff", skew: -9 });
 	}
 	return { look: IDLE, animated: false, content: out };
 }
 
-function stat(lang: "pl" | "en", k: "goals" | "assists" | "saves"): string {
+export function stat(lang: "pl" | "en", k: "goals" | "assists" | "saves"): string {
 	const pl = { goals: "GOLE", assists: "ASYSTY", saves: "OBRONY" };
 	const en = { goals: "GOALS", assists: "ASSISTS", saves: "SAVES" };
 	return (lang === "pl" ? pl : en)[k];
@@ -252,4 +280,31 @@ export function renderBannerSlice(ctx: RenderCtx, slice: number): string {
 	const clamped = Math.max(0, Math.min(2, Math.trunc(slice)));
 	// Shift the scene instead of offsetting the root viewBox: a plain 0 0 72 72 viewport is understood by every renderer.
 	return doc(`<g transform="translate(${-clamped * (KEY + KEY_GAP)} 0)">${inner}</g>`);
+}
+
+/** Whether the wide scene (an event, or a state that needs the whole strip) is what the touch strip shows right now. */
+export function stripNeedsScene(ctx: RenderCtx): boolean {
+	const s = ctx.store.state;
+	if (ctx.store.activeBanner()) return true;
+	return !s.gameRunning || ctx.restartHint || s.phase === "menu" || !ctx.store.myStats();
+}
+
+/** One 200×100 segment (0…3) of the Stream Deck + touch strip showing the same scene the three banner keys would. */
+export function renderBannerStripSegment(ctx: RenderCtx, segment: number): string {
+	const banner = ctx.store.activeBanner();
+	const sc = scene(ctx, banner, STRIP_GEO);
+	const frame = Math.floor(ctx.now / 125);
+	const age = banner ? ctx.now - banner.born : 9999;
+	const flash = banner && age < 260 ? Math.max(0, 0.75 - age / 350) : 0;
+	const drift = sc.animated ? frame * 4 : 0;
+	const inner =
+		linear("bg", sc.look.c1, sc.look.c2, false) +
+		`<rect width="${STRIP_GEO.W}" height="${H}" fill="url(#bg)"/>` +
+		stripes(STRIP_GEO.W, H, drift, banner ? 0.11 : 0.05, sc.look.stripe) +
+		`<rect x="0" y="${H - 3}" width="${STRIP_GEO.W}" height="3" fill="${sc.look.ink}" fill-opacity="0.35"/>` +
+		sc.content +
+		(flash > 0.02 ? `<rect width="${STRIP_GEO.W}" height="${H}" fill="#ffffff" fill-opacity="${flash.toFixed(2)}"/>` : "");
+	const seg = Math.max(0, Math.min(STRIP_SEGMENT.count - 1, Math.trunc(segment)));
+	const { width, height } = STRIP_SEGMENT;
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><g transform="translate(${-seg * width} 0) scale(${STRIP_K.toFixed(5)})">${inner}</g></svg>`;
 }

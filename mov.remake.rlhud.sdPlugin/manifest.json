@@ -3,9 +3,9 @@
 	"SDKVersion": 2,
 	"UUID": "mov.remake.rlhud",
 	"Name": "Rocket League HUD",
-	"Version": "1.7.0.0",
+	"Version": "1.8.0.0",
 	"Author": "kvcperkrol",
-	"Description": "Live Rocket League HUD for a 15-key Stream Deck: score, clock, rank, goals with scorer and ball speed, demos and saves. Turns the game's Stats API on by itself — install, start the game, play.",
+	"Description": "Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",
 	"Icon": "imgs/plugin/marketplace",
 	"Category": "Rocket League HUD",
 	"CategoryIcon": "imgs/plugin/category-icon",
@@ -39,6 +39,12 @@
 		{
 			"Name": "profiles/RL",
 			"DeviceType": 3,
+			"DontAutoSwitchWhenInstalled": true,
+			"AutoInstall": true
+		},
+		{
+			"Name": "profiles/RL-Plus",
+			"DeviceType": 7,
 			"DontAutoSwitchWhenInstalled": true,
 			"AutoInstall": true
 		}
@@ -247,6 +253,32 @@
 			"States": [
 				{
 					"Image": "imgs/actions/points/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Touch strip (Stream Deck +)",
+			"UUID": "mov.remake.rlhud.strip",
+			"Icon": "imgs/actions/strip/icon",
+			"Tooltip": "For the Stream Deck +: put this on all four dials. The touch strip shows rank, MMR, last goal and your stats, and the animated event banner across its full width.",
+			"Controllers": [
+				"Encoder"
+			],
+			"Encoder": {
+				"layout": "layouts/strip.json",
+				"Icon": "imgs/actions/strip/encoder-icon",
+				"TriggerDescription": {
+					"Rotate": "",
+					"Push": "",
+					"Touch": "",
+					"LongTouch": ""
+				}
+			},
+			"States": [
+				{
+					"Image": "imgs/actions/strip/key",
 					"TitleAlignment": "middle",
 					"ShowTitle": false
 				}

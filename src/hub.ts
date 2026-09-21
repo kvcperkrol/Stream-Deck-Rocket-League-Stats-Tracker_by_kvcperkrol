@@ -1,4 +1,4 @@
-import streamDeck, { type KeyAction, type Logger } from "@elgato/streamdeck";
+import streamDeck, { type DialAction, type KeyAction, type Logger } from "@elgato/streamdeck";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -12,7 +12,8 @@ import { findLogDir, readExistingSamples, readLocalIdentity, RlLogWatcher, type 
 import { DEFAULT_WEB_PORT, findInstallDirs, patchStatsIni, type IniResult } from "./sys/ini";
 import type { AutoMmr, RenderCtx, Role } from "./ui/context";
 import { renderRole } from "./ui/keys";
-import { PROFILE_NAME } from "./ui/layout";
+import { DEVICE_TYPE_PLUS, PROFILE_NAME, PROFILE_PLUS_NAME } from "./ui/layout";
+import { renderStrip } from "./ui/strip";
 import { svgDataUri } from "./ui/svg";
 
 // The environment override exists only so automated tests can run without ever looking at a real, running game.
@@ -27,8 +28,16 @@ const HIGH_RATE_MIN_INTERVAL_MS = 150;
 /** Per-key settings written by the property inspector. */
 export type KeySettings = {
 	/** "auto" (or missing) orders banner keys in a row left to right; 1–3 pins a key to a slice. */
-	slice?: "auto" | 1 | 2 | 3;
+	slice?: "auto" | 1 | 2 | 3 | 4;
 };
+
+/** A dial of the Stream Deck +: its touch-strip segment shows one fourth of the strip. */
+interface DialEntry {
+	action: DialAction;
+	settings: KeySettings;
+	last?: string;
+	lastSentAt?: number;
+}
 
 interface KeyEntry {
 	action: KeyAction;
@@ -52,6 +61,7 @@ export class Hub {
 	settings: GlobalSettings = { ...DEFAULT_SETTINGS };
 
 	private readonly keys = new Map<string, KeyEntry>();
+	private readonly dials = new Map<string, DialEntry>();
 	private readonly client: RLClient;
 	private readonly switched = new Set<string>();
 	private ini?: IniResult;
@@ -147,11 +157,19 @@ export class Hub {
 		for (const device of streamDeck.devices) await this.switchDevice(device, toGame);
 	}
 
-	private async switchDevice(device: { id: string; name: string; isConnected: boolean; size: { columns: number; rows: number } }, toGame: boolean): Promise<void> {
-		if (!device.isConnected || device.size.columns !== 5 || device.size.rows !== 3) return;
+	/** The bundled profile that fits a device: the 5×3 grid, or the Stream Deck + (its 8 keys and touch strip). */
+	private profileFor(device: { type: number; size: { columns: number; rows: number } }): string | undefined {
+		if (device.type === DEVICE_TYPE_PLUS) return PROFILE_PLUS_NAME;
+		if (device.size.columns === 5 && device.size.rows === 3) return PROFILE_NAME;
+		return undefined;
+	}
+
+	private async switchDevice(device: { id: string; name: string; type: number; isConnected: boolean; size: { columns: number; rows: number } }, toGame: boolean): Promise<void> {
+		const profile = this.profileFor(device);
+		if (!device.isConnected || !profile) return;
 		try {
 			if (toGame) {
-				await streamDeck.profiles.switchToProfile(device.id, PROFILE_NAME);
+				await streamDeck.profiles.switchToProfile(device.id, profile);
 				this.switched.add(device.id);
 			} else if (this.switched.delete(device.id)) {
 				await streamDeck.profiles.switchToProfile(device.id); // back to the previously active profile
@@ -276,12 +294,18 @@ export class Hub {
 		this.renderOne(action.id);
 	}
 
+	registerDial(action: DialAction, settings: KeySettings): void {
+		this.dials.set(action.id, { action, settings });
+		this.renderOne(action.id);
+	}
+
 	unregister(id: string): void {
 		this.keys.delete(id);
+		this.dials.delete(id);
 	}
 
 	updateSettings(id: string, settings: KeySettings): void {
-		const e = this.keys.get(id);
+		const e = this.keys.get(id) ?? this.dials.get(id);
 		if (!e) return;
 		e.settings = settings;
 		e.last = undefined;
@@ -354,17 +378,36 @@ export class Hub {
 	}
 
 	private tick(): void {
-		if (this.keys.size === 0) return;
+		if (this.keys.size === 0 && this.dials.size === 0) return;
 		const now = Date.now();
 		const ctx = this.context(now);
 		const slices = this.sliceMap();
 		for (const [id, e] of this.keys) this.draw(id, e, ctx, slices);
+		for (const [id, e] of this.dials) this.drawDial(id, e, ctx);
 	}
 
 	private renderOne(id: string): void {
+		const ctx = this.context(Date.now());
 		const e = this.keys.get(id);
-		if (!e) return;
-		this.draw(id, e, this.context(Date.now()), this.sliceMap());
+		if (e) return this.draw(id, e, ctx, this.sliceMap());
+		const d = this.dials.get(id);
+		if (d) this.drawDial(id, d, ctx);
+	}
+
+	/** Which of the four touch-strip segments a dial shows: the one pinned in its settings, else the one above it. */
+	private segmentOf(e: DialEntry): number {
+		const pinned = e.settings.slice;
+		if (typeof pinned === "number") return Math.max(0, Math.min(3, pinned - 1));
+		return Math.max(0, Math.min(3, e.action.coordinates?.column ?? 0));
+	}
+
+	private drawDial(id: string, e: DialEntry, ctx: RenderCtx): void {
+		const svg = renderStrip(ctx, this.segmentOf(e));
+		if (svg === e.last) return;
+		e.last = svg;
+		e.lastSentAt = ctx.now;
+		const canvas = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+		e.action.setFeedback({ canvas }).catch((err) => this.log.debug(`setFeedback failed (${id}): ${err}`));
 	}
 
 	private draw(id: string, e: KeyEntry, ctx: RenderCtx, slices: Map<string, number>): void {

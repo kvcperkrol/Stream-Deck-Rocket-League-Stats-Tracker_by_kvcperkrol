@@ -2,7 +2,7 @@
 
 🇬🇧 [English](README.md) · 🇵🇱 **Polski**
 
-Wtyczka do 15-klawiszowego Stream Decka (5×3). Po uruchomieniu Rocket League pokazuje na klawiszach wynik, czas,
+Wtyczka do 15-klawiszowego Stream Decka (5×3) i do Stream Decka +. Po uruchomieniu Rocket League pokazuje na klawiszach wynik, czas,
 rangę, ostatniego strzelca z prędkością piłki, demolki, obrony oraz Twój boost, prędkość auta, posiadanie piłki i punkty.
 
 **Instalacja → uruchom grę → działa.** Wtyczka sama włącza w grze oficjalne [Stats API](https://www.rocketleague.com/developer/stats-api),
@@ -72,6 +72,27 @@ Language / Język**). Zmiana działa od razu na wszystkich klawiszach.
 
 Klawisze możesz dowolnie przestawiać (kategoria „Rocket League HUD”). Trzy klawisze *Baner* w jednym rzędzie łączą się
 w jeden szeroki baner (od lewej do prawej); kolejność można wymusić w panelu klawisza.
+
+## Stream Deck + (pasek dotykowy)
+
+Wtyczka obsługuje też **Stream Deck +** (8 klawiszy, 4 pokrętła i pasek dotykowy). Animowany baner, który na decku 5×3 zajmuje
+trzy klawisze, może działać na całym pasku dotykowym.
+
+<p align="center"><img src="docs/screenshots/strip-idle.png" alt="Pasek dotykowy między zdarzeniami: ranga, MMR, ostatni gol i moje statystyki" width="720"><br><sub>Między zdarzeniami: ranga, MMR, ostatni gol, Twoje gole / asysty / obrony</sub></p>
+<p align="center"><img src="docs/screenshots/strip-goal.png" alt="Gol na całym pasku dotykowym" width="720"><br><sub>Gol: prędkość piłki po lewej, GOL! i strzelec pośrodku, asysta po prawej</sub></p>
+
+* Po uruchomieniu gry deck przełącza się na dołączony profil: Twój wynik, czas, wynik rywala, boost, prędkość auta, posiadanie,
+  punkty i prędkość piłki na 8 klawiszach oraz akcja **Pasek dotykowy** na każdym z czterech pokręteł.
+* **Między zdarzeniami** ćwiartka paska nad każdym pokrętłem pokazuje jeden panel — ikonę i nazwę rangi, MMR ze zmianą i bilansem
+  wygranych/porażek, ostatni gol oraz Twoje gole / asysty / obrony. **Gdy coś się dzieje** (gol, demolka, obrona, dogrywka,
+  powtórka, zwycięstwo …) cztery ćwiartki razem pokazują ten sam animowany baner co trzy klawisze banera, na całej szerokości.
+* Pasek jest opcjonalny: zdejmij akcje z pokręteł, a klawisze działają jak dotąd. Żeby ułożyć to samemu, przeciągnij
+  **Pasek dotykowy (Stream Deck +)** na pokrętła w aplikacji Stream Deck. Każde pokrętło pokazuje ćwiartkę nad sobą; w panelu
+  akcji możesz przypiąć inną.
+* **Nie testowane na prawdziwym urządzeniu:** nie było pod ręką Stream Decka +. Sprawdziłem to na symulowanym urządzeniu (obrazy
+  paska, przełączenie profilu i komunikaty protokołu), a dołączony profil ma taką samą budowę jak własny profil Elgato dla
+  Stream Decka + (ten z wtyczki Volume Controller), ale nie był próbowany na prawdziwym urządzeniu. Jeśli się nie pojawi, dodaj
+  akcje ręcznie i zgłoś to jako issue.
 
 ## MMR — sam z logu gry; ranga — wpisujesz
 

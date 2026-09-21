@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ROLES, type Role } from "../src/ui/context.ts";
-import { actionUuid, LEGACY_ACTIONS, legacyUuid, PLUGIN_UUID, PROFILE_NAME } from "../src/ui/layout.ts";
+import { actionUuid, DEVICE_TYPE_PLUS, LEGACY_ACTIONS, legacyUuid, PLUGIN_UUID, PROFILE_NAME, PROFILE_PLUS_NAME, STRIP_ACTION, STRIP_LAYOUT_FILE } from "../src/ui/layout.ts";
 
 export const ACTION_INFO: Record<Role, { name: string; tooltip: string }> = {
 	rank: { name: "Rank", tooltip: "Your rank for the mode being played (set in the property inspector)." },
@@ -20,15 +20,21 @@ export const ACTION_INFO: Record<Role, { name: string; tooltip: string }> = {
 	points: { name: "Score", tooltip: "Your points, with shots and demolitions." },
 };
 
+/** The Stream Deck + touch-strip action (one per dial; each draws a quarter of the strip). */
+export const STRIP_INFO = {
+	name: "Touch strip (Stream Deck +)",
+	tooltip: "For the Stream Deck +: put this on all four dials. The touch strip shows rank, MMR, last goal and your stats, and the animated event banner across its full width.",
+};
+
 const manifest = {
 	$schema: "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
 	SDKVersion: 2,
 	UUID: PLUGIN_UUID,
 	Name: "Rocket League HUD",
-	Version: "1.7.0.0",
+	Version: "1.8.0.0",
 	Author: "kvcperkrol",
 	Description:
-		"Live Rocket League HUD for a 15-key Stream Deck: score, clock, rank, goals with scorer and ball speed, demos and saves. Turns the game's Stats API on by itself — install, start the game, play.",
+		"Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",
 	Icon: "imgs/plugin/marketplace",
 	Category: "Rocket League HUD",
 	CategoryIcon: "imgs/plugin/category-icon",
@@ -41,6 +47,7 @@ const manifest = {
 	Profiles: [
 		{ Name: PROFILE_NAME, DeviceType: 0, DontAutoSwitchWhenInstalled: true, AutoInstall: true },
 		{ Name: PROFILE_NAME, DeviceType: 3, DontAutoSwitchWhenInstalled: true, AutoInstall: true },
+		{ Name: PROFILE_PLUS_NAME, DeviceType: DEVICE_TYPE_PLUS, DontAutoSwitchWhenInstalled: true, AutoInstall: true },
 	],
 	Actions: [
 		...ROLES.map((role) => ({
@@ -51,6 +58,15 @@ const manifest = {
 			Controllers: ["Keypad"],
 			States: [{ Image: `imgs/actions/${role}/key`, TitleAlignment: "middle", ShowTitle: false }],
 		})),
+		{
+			Name: STRIP_INFO.name,
+			UUID: STRIP_ACTION,
+			Icon: "imgs/actions/strip/icon",
+			Tooltip: STRIP_INFO.tooltip,
+			Controllers: ["Encoder"],
+			Encoder: { layout: STRIP_LAYOUT_FILE, Icon: "imgs/actions/strip/encoder-icon", TriggerDescription: { Rotate: "", Push: "", Touch: "", LongTouch: "" } },
+			States: [{ Image: "imgs/actions/strip/key", TitleAlignment: "middle", ShowTitle: false }],
+		},
 		// Ids of keys that existed in earlier versions. Hidden from the actions list, but a deck that still has them in its
 		// profile keeps working: each one draws the key that replaced it.
 		...Object.entries(LEGACY_ACTIONS).map(([id, role]) => ({

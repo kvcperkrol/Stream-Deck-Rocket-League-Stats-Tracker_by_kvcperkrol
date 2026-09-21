@@ -1,7 +1,7 @@
 import streamDeck, { action, SingletonAction, type DidReceiveSettingsEvent, type WillAppearEvent, type WillDisappearEvent } from "@elgato/streamdeck";
 import { Hub, type KeySettings } from "./hub";
 import { ROLES, type Role } from "./ui/context";
-import { actionUuid, LEGACY_ACTIONS, legacyUuid } from "./ui/layout";
+import { actionUuid, LEGACY_ACTIONS, legacyUuid, STRIP_ACTION } from "./ui/layout";
 
 const hub = new Hub(streamDeck.logger.createScope("Hub"));
 
@@ -32,6 +32,22 @@ function registerRole(uuid: string, role: Role): void {
 	);
 	streamDeck.actions.registerAction(new Registered());
 }
+
+/** The touch strip of a Stream Deck +: one action per dial, each drawing its own quarter of the strip. */
+class StripAction extends SingletonAction<KeySettings> {
+	override onWillAppear(ev: WillAppearEvent<KeySettings>): void {
+		if (ev.action.isDial()) hub.registerDial(ev.action, ev.payload.settings);
+	}
+
+	override onWillDisappear(ev: WillDisappearEvent<KeySettings>): void {
+		hub.unregister(ev.action.id);
+	}
+
+	override onDidReceiveSettings(ev: DidReceiveSettingsEvent<KeySettings>): void {
+		hub.updateSettings(ev.action.id, ev.payload.settings);
+	}
+}
+streamDeck.actions.registerAction(new (action({ UUID: STRIP_ACTION })(StripAction, undefined as never))());
 
 for (const role of ROLES) registerRole(actionUuid(role), role);
 // Ids of removed keys stay alive (hidden in the actions list) so a deck that still has them keeps working.

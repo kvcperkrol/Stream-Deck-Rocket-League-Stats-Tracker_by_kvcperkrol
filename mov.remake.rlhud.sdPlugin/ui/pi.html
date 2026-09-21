@@ -44,14 +44,14 @@
 <div id="keySection" class="hidden">
 	<h2 data-t="thisKey">This key</h2>
 	<div id="bannerBox" class="hidden">
-		<div class="row"><label data-t="slice">Slice</label>
+		<div class="row"><label id="sliceLabel" data-t="slice">Slice</label>
 			<select id="slice" class="grow">
 				<option value="auto" data-t="sliceAuto">Automatic (left to right)</option>
 				<option value="1" data-t="slice1">Left</option>
 				<option value="2" data-t="slice2">Middle</option>
 				<option value="3" data-t="slice3">Right</option>
 			</select></div>
-		<p class="note" data-t="sliceNote">Three keys of this type in one row form a single wide banner.</p>
+		<p class="note" id="sliceNote" data-t="sliceNote">Three keys of this type in one row form a single wide banner.</p>
 	</div>
 </div>
 
@@ -80,6 +80,7 @@ const I18N = {
 	pl: {
 		status: "Status", refresh: "Odśwież", thisKey: "Ten klawisz", slice: "Fragment", sliceAuto: "Automatycznie (od lewej)", slice1: "Lewy", slice2: "Środkowy", slice3: "Prawy",
 		sliceNote: "Trzy klawisze tego typu w jednym rzędzie tworzą jeden szeroki baner.",
+		segment: "Segment", segAuto: "Automatycznie (ten nad pokrętłem)", seg1: "1 (lewy)", seg2: "2", seg3: "3", seg4: "4 (prawy)", segmentNote: "Którą czwartą część paska dotykowego pokazuje to pokrętło. Ustaw ten sam ekran na wszystkich czterech, a animowany baner rozciągnie się na całą szerokość.",
 		general: "Ogólne", lang: "Język", units: "Jednostki", player: "Nick w grze", playerPh: "wykrywany automatycznie",
 		playerNote: "Zostaw puste — wtyczka odczyta Twoje konto z logu gry. Wpisz nick tylko wtedy, gdy oznaczenie „TY” jest złe.",
 		autoSwitch: "Przełączaj profil automatycznie po uruchomieniu gry",
@@ -95,6 +96,7 @@ const I18N = {
 	en: {
 		status: "Status", refresh: "Refresh", thisKey: "This key", slice: "Slice", sliceAuto: "Automatic (left to right)", slice1: "Left", slice2: "Middle", slice3: "Right",
 		sliceNote: "Three keys of this type in one row form a single wide banner.",
+		segment: "Segment", segAuto: "Automatic (the one above the dial)", seg1: "1 (left)", seg2: "2", seg3: "3", seg4: "4 (right)", segmentNote: "Which quarter of the touch strip this dial shows. Put the action on all four dials and the animated banner stretches across the whole strip.",
 		general: "General", lang: "Language", units: "Units", player: "In-game name", playerPh: "detected automatically",
 		playerNote: "Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.",
 		autoSwitch: "Switch profile automatically when the game starts",
@@ -206,7 +208,7 @@ function bindGlobal() {
 function fillForm() {
 	$("lang").value = settings.lang; $("units").value = settings.units; $("playerName").value = settings.playerName || "";
 	$("autoSwitch").checked = !!settings.autoSwitch; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("installDir").value = settings.installDir || "";
-	if (role === "banner") $("slice").value = String(keySettings.slice ?? "auto");
+	if (role === "banner" || role === "strip") $("slice").value = String(keySettings.slice ?? "auto");
 	applyI18n();
 }
 
@@ -216,8 +218,15 @@ function connectElgatoStreamDeckSocket(port, inUUID, registerEvent, info, action
 	role = String(actionInfo.action || "").split(".").pop();
 	keySettings = (actionInfo.payload && actionInfo.payload.settings) || {};
 
-	$("keySection").classList.toggle("hidden", role !== "banner");
-	$("bannerBox").classList.toggle("hidden", role !== "banner");
+	const spans = role === "banner" || role === "strip";
+	$("keySection").classList.toggle("hidden", !spans);
+	$("bannerBox").classList.toggle("hidden", !spans);
+	if (role === "strip") {
+		// A dial of the Stream Deck +: pick one of the four touch-strip segments instead of one of three banner keys.
+		$("slice").innerHTML = '<option value="auto" data-t="segAuto"></option>' + [1, 2, 3, 4].map((n) => `<option value="${n}" data-t="seg${n}"></option>`).join("");
+		$("sliceLabel").dataset.t = "segment";
+		$("sliceNote").dataset.t = "segmentNote";
+	}
 
 	ws = new WebSocket("ws://127.0.0.1:" + port);
 	ws.onopen = () => {

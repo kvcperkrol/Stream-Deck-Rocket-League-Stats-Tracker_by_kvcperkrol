@@ -2,7 +2,7 @@
 
 🇬🇧 **English** · 🇵🇱 [Polski](README.pl.md)
 
-A plugin for the 15-key Stream Deck (5×3). While Rocket League runs it shows the score, clock, rank, the last scorer with the
+A plugin for the 15-key Stream Deck (5×3) and the Stream Deck +. While Rocket League runs it shows the score, clock, rank, the last scorer with the
 ball speed, demos, saves, and your own boost, car speed, possession and points on the keys.
 
 **Install → start the game → it works.** The plugin turns on the game's official
@@ -73,6 +73,27 @@ Language**). The change applies to all keys immediately.
 
 Arrange the keys any way you like (category "Rocket League HUD"). Three *Banner* keys in one row join into one wide banner
 (left to right); the order can be forced in the key's inspector.
+
+## Stream Deck + (touch strip)
+
+The plugin also supports the **Stream Deck +** (8 keys, 4 dials and a touch strip). The animated banner that uses three keys on the
+5×3 deck can run across the whole touch strip instead.
+
+<p align="center"><img src="docs/screenshots/strip-idle.png" alt="The touch strip between events: rank, MMR, last goal and my stats" width="720"><br><sub>Between events: rank, MMR, last goal, your goals / assists / saves</sub></p>
+<p align="center"><img src="docs/screenshots/strip-goal.png" alt="A goal across the whole touch strip" width="720"><br><sub>A goal: ball speed on the left, GOAL! and the scorer in the middle, the assist on the right</sub></p>
+
+* When the game starts the deck switches to a bundled profile: your score, the clock, the opponent's score, boost, car speed,
+  possession, points and ball speed on the 8 keys, and the **Touch strip** action on each of the four dials.
+* **Between events** every dial's quarter of the strip shows one panel — rank icon and name, MMR with its change and your
+  win/loss record, the last goal, and your goals / assists / saves. **When something happens** (goal, demo, save, overtime,
+  replay, victory …) the four quarters together show the same animated banner as the three banner keys, across the full width.
+* The strip is optional: take the actions off the dials and the keys work exactly as before. To arrange it yourself, drag
+  **Touch strip (Stream Deck +)** onto the dials in the Stream Deck app. Each dial shows the quarter above it; the action's
+  inspector lets you pin a different one.
+* **Not tested on real hardware:** there was no Stream Deck + to try it on. It is verified against a simulated device (the
+  strip images, the profile switch and the protocol messages), and the bundled profile has the same structure as Elgato's own
+  Stream Deck + profile (the one that ships with the Volume Controller plugin), but it has not been tried on a real device. If
+  it does not show up, add the actions by hand and please open an issue.
 
 ## MMR comes from the game log; the rank you enter
 

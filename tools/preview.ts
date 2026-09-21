@@ -12,6 +12,7 @@ import type { RenderCtx } from "../src/ui/context.ts";
 import { KEY_GAP } from "../src/ui/banner.ts";
 import { LAYOUT } from "../src/ui/layout.ts";
 import { renderRole } from "../src/ui/keys.ts";
+import { renderStrip } from "../src/ui/strip.ts";
 
 import { RankIcons } from "../src/sys/rank-icons.ts";
 
@@ -273,6 +274,17 @@ function deckSvg(ctx: RenderCtx): string {
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`;
 }
 
+function stripSvg(ctx: RenderCtx): string {
+	let body = `<rect width="840" height="140" rx="14" fill="#15161a"/>`;
+	for (let i = 0; i < 4; i++) {
+		const svg = renderStrip(ctx, i)
+			.replace(/id="([^"]+)"/g, (_m, id) => `id="s${i}-${id}"`)
+			.replace(/url\(#([^)]+)\)/g, (_m, id) => `url(#s${i}-${id})`);
+		body += `<svg x="${20 + i * 200}" y="20" width="200" height="100" viewBox="0 0 200 100">${svg.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "")}</svg>`;
+	}
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="840" height="140" viewBox="0 0 840 140">${body}</svg>`;
+}
+
 const only = process.argv[2];
 for (const sc of scenarios) {
 	if (only && !sc.name.includes(only)) continue;
@@ -292,5 +304,9 @@ for (const sc of scenarios) {
 	const svg = deckSvg(ctx);
 	const png = new Resvg(svg, { fitTo: { mode: "zoom", value: SCALE }, font: { loadSystemFonts: true, defaultFontFamily: "Bahnschrift" } }).render().asPng();
 	fs.writeFileSync(path.join(OUT, `${sc.name}.png`), png);
+	// The same moment on the Stream Deck + touch strip (4 segments of 200×100, one continuous surface).
+	const stripDir = path.join(OUT, "strip");
+	fs.mkdirSync(stripDir, { recursive: true });
+	fs.writeFileSync(path.join(stripDir, `${sc.name}.png`), new Resvg(stripSvg(ctx), { fitTo: { mode: "zoom", value: 2 }, font: { loadSystemFonts: true, defaultFontFamily: "Bahnschrift" } }).render().asPng());
 	console.log("wrote", `${sc.name}.png`);
 }

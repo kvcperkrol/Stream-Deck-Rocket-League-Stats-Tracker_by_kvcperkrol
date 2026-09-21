@@ -12,12 +12,13 @@ import os from "node:os";
 import path from "node:path";
 import { WebSocketServer, type WebSocket } from "ws";
 import { KEY_GAP } from "../src/ui/banner.ts";
-import { actionUuid, LAYOUT, legacyUuid, PLUGIN_UUID, PROFILE_NAME } from "../src/ui/layout.ts";
+import { actionUuid, LAYOUT, legacyUuid, PLUGIN_UUID, PLUS_DIALS, PROFILE_NAME, PROFILE_PLUS_NAME, STRIP_ACTION } from "../src/ui/layout.ts";
 import { freshSim, startMockRl, updateState } from "./mock-rl.ts";
 
 const PLUGIN_DIR = path.resolve(`${PLUGIN_UUID}.sdPlugin`);
 const RL_PORT = 49555;
 const DEVICE = "DEVICE-5X3";
+const DEVICE_PLUS = "DEVICE-PLUS";
 // Hermetic: never look at a real Rocket League that may be running on this machine.
 const FAKE_GAME = "RLHUDTestGame.exe";
 
@@ -64,6 +65,7 @@ fs.writeFileSync(iniPath, `[TAGame.MatchStatsExporter_TA]\r\n\r\n; tcp\r\nPort=4
 type Msg = Record<string, any>;
 const images = new Map<string, string>(); // context → latest svg
 const imageCount = new Map<string, number>();
+const feedback = new Map<string, string>(); // dial context → latest touch-strip SVG
 const received: Msg[] = [];
 let sd: WebSocket | undefined;
 const ctxOf = (col: number, row: number) => `KEY-${col}-${row}`;
@@ -81,12 +83,18 @@ wss.on("connection", (ws) => {
 		if (m.event === "registerPlugin") {
 			// The real app announces every connected device right after the plugin registers.
 			send({ event: "deviceDidConnect", device: DEVICE, deviceInfo: info.devices[0] });
+			send({ event: "deviceDidConnect", device: DEVICE_PLUS, deviceInfo: info.devices[1] });
 		}
 		if (m.event === "getGlobalSettings") {
 			send({
 				event: "didReceiveGlobalSettings",
 				payload: { settings: { installDir: fake, lang: "pl", autoSwitch: true, recordMatches: true, ranks: { doubles: { tier: 14, div: 2, mmr: 900 } } } },
 			});
+		}
+		if (m.event === "setFeedback") {
+			// A Stream Deck + touch-strip segment: `canvas` is a base64 SVG data URI.
+			const uri: string = m.payload.canvas;
+			feedback.set(m.context, Buffer.from(uri.slice(uri.indexOf(",") + 1), "base64").toString("utf8"));
 		}
 		if (m.event === "setImage") {
 			const uri: string = m.payload.image;
@@ -101,7 +109,10 @@ const info = {
 	application: { font: "Segoe UI", language: "en", platform: "windows", platformVersion: "10.0.26200", version: "7.0.3.22071" },
 	colors: { buttonMouseOverBackgroundColor: "#464646", buttonPressedBackgroundColor: "#303030", buttonPressedBorderColor: "#646464", buttonPressedTextColor: "#969696", disabledColor: "#787878" },
 	devicePixelRatio: 1,
-	devices: [{ id: DEVICE, name: "Stream Deck MK.2", size: { columns: 5, rows: 3 }, type: 0 }],
+	devices: [
+		{ id: DEVICE, name: "Stream Deck MK.2", size: { columns: 5, rows: 3 }, type: 0 },
+		{ id: DEVICE_PLUS, name: "Stream Deck +", size: { columns: 4, rows: 2 }, type: 7 },
+	],
 	plugin: { uuid: PLUGIN_UUID, version: "1.0.0.0" },
 };
 
@@ -172,6 +183,26 @@ async function main(): Promise<void> {
 	check("every image is a valid, renderable SVG", allValid);
 	check("game not running → banner says so", has(3, 1, "ROCKET LEAGUE") || has(2, 1, "ROCKET LEAGUE") || has(4, 1, "ROCKET LEAGUE"), svgOf(3, 1).slice(-300));
 
+	console.log("\n[2b] Stream Deck +: the four dials of the touch strip appear");
+	const dialCtx = (i: number) => `DIAL-${i}`;
+	for (let i = 0; i < PLUS_DIALS; i++) {
+		send({ event: "willAppear", action: STRIP_ACTION, context: dialCtx(i), device: DEVICE_PLUS, payload: { controller: "Encoder", coordinates: { column: i, row: 0 }, isInMultiAction: false, settings: {}, state: 0 } });
+	}
+	check("all four dials get a touch-strip image", await waitFor(() => feedback.size === PLUS_DIALS, 5000), `got ${feedback.size}`);
+	check(
+		"every strip segment is a valid 200×100 SVG",
+		[...feedback.values()].every((svg) => {
+			try {
+				new Resvg(svg).render();
+				return svg.includes('width="200" height="100"');
+			} catch {
+				return false;
+			}
+		}),
+	);
+	check("game not running → the whole strip says so", [0, 1, 2, 3].every((i) => (feedback.get(dialCtx(i)) ?? "").includes("ROCKET LEAGUE")));
+	check("each segment shows its own quarter of the same scene", new Set([0, 1, 2, 3].map((i) => feedback.get(dialCtx(i)))).size === 4 && (feedback.get(dialCtx(2)) ?? "").includes("translate(-400 0)"));
+
 	console.log("\n[3] game config is patched automatically");
 	const ini = fs.readFileSync(iniPath, "utf8");
 	check("PacketSendRate switched on in DefaultStatsAPI.ini", /PacketSendRate=10\s*$/.test(ini), ini);
@@ -188,6 +219,8 @@ async function main(): Promise<void> {
 	const sw = () => received.find((m) => m.event === "switchToProfile" && m.payload?.profile === PROFILE_NAME);
 	check("switchToProfile → profiles/RL for the 5×3 device", await waitFor(() => !!sw(), 3000));
 	check("…targets the right device", sw()?.device === DEVICE, JSON.stringify(sw()));
+	const swPlus = () => received.find((m) => m.event === "switchToProfile" && m.payload?.profile === PROFILE_PLUS_NAME);
+	check("switchToProfile → profiles/RL-Plus for the Stream Deck +", (await waitFor(() => !!swPlus(), 3000)) && swPlus()?.device === DEVICE_PLUS, JSON.stringify(swPlus()));
 
 	console.log("\n[6] live match");
 	const sim = freshSim();
@@ -222,6 +255,11 @@ async function main(): Promise<void> {
 	check("banner (right key) shows the assist", has(4, 1, "Mate"));
 	check("scorer named on the banner", has(3, 1, "Player1"));
 	check("last-goal key: scorer + speed", has(1, 1, "Player1") && has(1, 1, ">102<"));
+	check(
+		"touch strip: GOL! across the dials, with the speed on the left and the scorer in the middle",
+		(await waitFor(() => [0, 1, 2, 3].every((i) => (feedback.get(dialCtx(i)) ?? "").includes("GOL!")), 2000)) && (feedback.get(dialCtx(0)) ?? "").includes(">102<") && (feedback.get(dialCtx(1)) ?? "").includes("Player1"),
+		(feedback.get(dialCtx(1)) ?? "").slice(-300),
+	);
 	await sleep(350);
 	deckPng(path.resolve("preview", "e2e-goal.png"));
 
@@ -303,8 +341,8 @@ async function main(): Promise<void> {
 
 	console.log("\n[11] game closes");
 	send({ event: "applicationDidTerminate", payload: { application: FAKE_GAME } });
-	const back = () => received.filter((m) => m.event === "switchToProfile").length >= 2;
-	check("previous profile is restored", await waitFor(back, 3000));
+	const back = () => received.filter((m) => m.event === "switchToProfile" && m.payload?.profile === undefined).length >= 2; // one per deck
+	check("previous profile is restored on both decks", await waitFor(back, 3000));
 	const last = received.filter((m) => m.event === "switchToProfile").at(-1);
 	check("…by switching without a profile name", last?.payload?.profile === undefined, JSON.stringify(last));
 	check("banner is back to 'launch the game'", await waitFor(() => has(3, 1, "ROCKET LEAGUE") || has(2, 1, "ROCKET"), 2000));

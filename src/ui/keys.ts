@@ -27,7 +27,7 @@ function currentPlaylist(ctx: RenderCtx) {
  * The playlist the rank and MMR keys talk about: the match being played, else (in the menu) the one queued last. Only ranked
  * playlists have a rank — casual, free play and private matches must never borrow the rank of a same-sized ranked mode.
  */
-function rankedContext(ctx: RenderCtx) {
+export function rankedContext(ctx: RenderCtx) {
 	const s = ctx.store.state;
 	const id = s.playlistId ?? ctx.lastQueuedPlaylist ?? s.lastPlaylistId;
 	const pl = s.playlistId !== undefined ? currentPlaylist(ctx) : describePlaylist(id, undefined, 0);
@@ -62,18 +62,25 @@ function rankKey(ctx: RenderCtx): string {
 	);
 }
 
-function mmrKey(ctx: RenderCtx): string {
-	const s = ctx.store.state;
-	const lang = ctx.settings.lang;
-	const { wins, losses } = s.session;
-	// In a match: that playlist. In the menu: the playlist queued last. The game log is the source; a value typed for a ranked
-	// playlist is the fallback (it never applies to casual play, which has its own hidden MMR).
+/**
+ * The MMR the MMR key (and the touch strip) shows. In a match: that playlist. In the menu: the playlist queued last. The game
+ * log is the source; a value typed for a ranked playlist is the fallback (it never applies to casual play, which has its own
+ * hidden MMR).
+ */
+export function mmrInfo(ctx: RenderCtx) {
 	const { id, pl } = rankedContext(ctx);
 	const auto = id !== undefined ? ctx.autoMmr?.[id] : undefined;
 	const typed = pl.ranked ? rankFor(ctx.settings.ranks, pl.group).mmr : null;
 	const value = auto?.mmr ?? typed;
-	const has = value !== null && value !== undefined;
-	const delta = auto?.delta;
+	return { pl, value: value ?? undefined, delta: auto?.delta };
+}
+
+function mmrKey(ctx: RenderCtx): string {
+	const s = ctx.store.state;
+	const lang = ctx.settings.lang;
+	const { wins, losses } = s.session;
+	const { pl, value, delta } = mmrInfo(ctx);
+	const has = value !== undefined;
 	return doc(
 		panel() +
 			text(!pl.ranked && has ? t(lang, "mmrCasual") : "MMR", { y: 15, size: !pl.ranked && has ? 8.5 : 10, fill: COLORS.dim, maxWidth: 56 }) +

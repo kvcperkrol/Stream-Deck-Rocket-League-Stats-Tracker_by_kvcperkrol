@@ -68,6 +68,13 @@ for (const role of ROLES) {
 	both(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">${glyph}</svg>`, 20, path.join(root, "actions", role, "icon"));
 }
 
+// ---- the Stream Deck + touch-strip action: icon, dial icon and actions-list image ------------------------------------
+const STRIP_GLYPH = `<rect x="1.5" y="5.5" width="17" height="9" rx="1.5" ${sw}/><path d="M6,5.5 L6,14.5 M10,5.5 L10,14.5 M14,5.5 L14,14.5" ${sw}/>`;
+both(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">${STRIP_GLYPH}</svg>`, 20, path.join(root, "actions", "strip", "icon"));
+const dialArt = `<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72"><defs><linearGradient id="d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171f45"/><stop offset="1" stop-color="#0b1024"/></linearGradient></defs><circle cx="36" cy="36" r="32" fill="url(#d)" stroke="#2a3566" stroke-width="3"/><g transform="translate(16 16) scale(2)">${STRIP_GLYPH}</g></svg>`;
+both(dialArt, 72, path.join(root, "actions", "strip", "encoder-icon"));
+both(dialArt, 72, path.join(root, "actions", "strip", "key"));
+
 // ---- default key images: what each key looks like in a running match ------------------------------------------------
 const store = new MatchStore(() => 1_000_000);
 store.setGameRunning(true);
