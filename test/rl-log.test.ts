@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { MatchmakingParser, muToMmr, parseMatchmakingLog, readExistingSamples, RlLogWatcher, type MmrSample } from "../src/sys/rl-log.ts";
+import { findLogDir, MatchmakingParser, muToMmr, parseMatchmakingLog, readExistingSamples, RlLogWatcher, type MmrSample } from "../src/sys/rl-log.ts";
 
 const real = fs.readFileSync(path.resolve("test", "fixtures", "matchmaking-real.log"), "utf8");
 
@@ -43,6 +43,14 @@ test("a queue in a party (leader may be someone else) is not used", () => {
 function tmp(): string {
 	return fs.mkdtempSync(path.join(os.tmpdir(), "rlhud-log-"));
 }
+
+test("an explicit override wins even where the usual Windows guesses find nothing (e.g. Rocket League under Proton)", () => {
+	const dir = tmp();
+	fs.writeFileSync(path.join(dir, "Launch.log"), "");
+	assert.equal(findLogDir(dir), dir, "the override directory itself has Launch.log");
+	assert.equal(findLogDir(path.join(dir, "no-such-subfolder")), undefined, "a bad override is not silently swapped for a guess");
+	fs.rmSync(dir, { recursive: true, force: true });
+});
 
 test("existing logs (backups + current) are read oldest first", () => {
 	const dir = tmp();

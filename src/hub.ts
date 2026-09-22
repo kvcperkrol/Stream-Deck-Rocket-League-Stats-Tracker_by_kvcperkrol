@@ -83,6 +83,8 @@ export class Hub {
 	private logDir?: string;
 	private recorder?: MatchRecorder;
 	private local?: LocalIdentity;
+	/** True once {@link start} has run the initial {@link startMmrLog} — settings changes before that must not re-trigger it. */
+	private started = false;
 
 	constructor(private readonly log: Logger) {
 		this.client = new RLClient({
@@ -129,6 +131,7 @@ export class Hub {
 		// Safety net in case the app's launch/terminate events are missed (e.g. plugin restarted mid-game).
 		this.pollTimer = setInterval(() => void this.pollProcess(), 20_000);
 		this.timer = setInterval(() => this.tick(), TICK_MS);
+		this.started = true;
 	}
 
 	stop(): void {
@@ -193,6 +196,8 @@ export class Hub {
 			this.recorder = this.settings.recordMatches ? new MatchRecorder(path.join(this.dataDir, "captures", "stats-api.ndjson"), this.local) : undefined;
 		}
 		if (previous.installDir !== this.settings.installDir || previous.packetRate !== this.settings.packetRate) this.patchIni("settings");
+		// Only react once the initial startMmrLog() (called from start()) has run — the very first applySettings() must not race it.
+		if (this.started && previous.logFolder !== this.settings.logFolder) this.initLogWatcher();
 	}
 
 	private patchIni(reason: string): void {
@@ -244,7 +249,19 @@ export class Hub {
 			/* first run */
 		}
 		this.loadResults();
-		this.logDir = findLogDir(process.env.RLHUD_LOG_DIR);
+		this.initLogWatcher();
+	}
+
+	/**
+	 * Finds Launch.log and (re)starts watching it. Called once from {@link startMmrLog} at startup, and again whenever
+	 * the "Log folder" setting changes — needed on setups the registry/Documents guesses in {@link findLogDir} miss
+	 * entirely, e.g. Rocket League run through Proton on Linux (the log then sits under the Proton prefix, not under
+	 * the plugin's own home directory).
+	 */
+	private initLogWatcher(): void {
+		this.logWatcher?.stop();
+		this.logWatcher = undefined;
+		this.logDir = findLogDir(this.settings.logFolder || process.env.RLHUD_LOG_DIR);
 		if (!this.logDir) {
 			this.log.warn("Rocket League log folder not found — MMR falls back to the values typed into the property inspector");
 			return;

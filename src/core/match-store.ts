@@ -571,7 +571,9 @@ export class MatchStore {
 		fresh.lastPlaylistId = lastPlaylistId;
 		fresh.phase = gameRunning ? "menu" : "offline";
 		this.state = fresh;
-		this.banners = this.banners.filter((b) => b.kind === "victory" || b.kind === "defeat" || b.kind === "win");
+		// The victory/defeat banner clears as soon as the match does, like every other banner, instead of lingering
+		// into the menu for whatever was left of its ttl — the "last goal" key above is what remembers the match.
+		this.banners = [];
 	}
 
 	private freshState(): GameState {

@@ -169,7 +169,8 @@ test("the MMR key has three views; each press moves MMR, the record and the stre
 	assert.equal(fontSize(mmr, "964"), 28, "view 0: MMR is the big number…");
 	assert.equal(fontSize(mmr, "7W"), 11, "…with the record small underneath");
 	const record = view(1, 0, 0);
-	assert.equal(fontSize(record, "7W"), 23, "view 1: the record is big…");
+	// Shrunk from the 23 the layout asks for: unclamped, "7W" would spill past the key's safe area (reported with "4W 2L").
+	assert.equal(fontSize(record, "7W"), 20.8, "view 1: the record is big…");
 	assert.equal(fontSize(record, "964"), 12.5, "…and MMR small underneath");
 	assert.ok(record.includes(">RECORD<"));
 	const streak = view(2, 1, 0);
@@ -177,6 +178,18 @@ test("the MMR key has three views; each press moves MMR, the record and the stre
 	assert.equal(fontSize(streak, "964"), 12.5);
 	const back = view(0, 2, 0);
 	assert.equal(fontSize(back, "964"), 28, "and one more press returns to MMR");
+});
+
+test("a double-digit record shrinks further still, so it keeps fitting next to its opponent", () => {
+	const store = played([]);
+	store.state.session.wins = 14;
+	store.state.session.losses = 2;
+	const ctx: RenderCtx = { store, settings: mergeSettings({ lang: "en" }), now: 0, restartHint: false };
+	const record = renderRole("mmr", ctx, { view: { index: 1, from: 1, at: 0 } });
+	const wins = fontSize(record, "14W");
+	const losses = fontSize(record, "2L");
+	assert.ok(wins < 20.8, `"14W" must shrink below the single-digit size: ${wins}`);
+	assert.ok(losses <= 20.8, `losses stays at the single-digit size: ${losses}`);
 });
 
 test("the swap is animated: halfway through, MMR and the record are between their two places", () => {

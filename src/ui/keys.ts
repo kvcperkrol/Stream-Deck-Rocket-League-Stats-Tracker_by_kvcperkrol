@@ -145,8 +145,10 @@ function mmrKey(ctx: RenderCtx, view?: MmrView): string {
 			styled(has ? String(value) : "—", bigMmr, { fill: has ? "#ffffff" : COLORS.dim, skew: -9, maxWidth: 56 }) +
 			styled("MMR", at("tag"), { fill: COLORS.dim, anchor: "middle" }) +
 			`<rect x="10" y="51" width="52" height="1.5" fill="${COLORS.line}"/>` +
-			styled(`${wins}${t(lang, "w")}`, { ...rec, x: 33 }, { fill: COLORS.green, anchor: "end", skew: -6 }) +
-			styled(`${losses}${t(lang, "l")}`, { ...rec, x: 39 }, { fill: COLORS.red, anchor: "start", skew: -6 }) +
+			// maxWidth keeps double-digit wins/losses inside the key even in the big "record" view (index 1, size 23) —
+			// without it a result like 14W spills past the left edge (reported with 4W 2L already crowding it).
+			styled(`${wins}${t(lang, "w")}`, { ...rec, x: 33 }, { fill: COLORS.green, anchor: "end", skew: -6, maxWidth: 25 }) +
+			styled(`${losses}${t(lang, "l")}`, { ...rec, x: 39 }, { fill: COLORS.red, anchor: "start", skew: -6, maxWidth: 25 }) +
 			styled(streakText, at("streak"), { fill: streakFill, skew: -9, maxWidth: 56 }) +
 			veil(ctx),
 	);
@@ -196,7 +198,9 @@ function timerKey(ctx: RenderCtx): string {
 	const s = ctx.store.state;
 	const lang = ctx.settings.lang;
 	const live = s.gameRunning && s.phase !== "menu";
-	const urgent = live && !s.overtime && s.time <= 30 && s.phase === "live";
+	// Free Play / training has no fixed match length: TimeSeconds is elapsed time, not a countdown, so a low value there
+	// is not "about to end" and must not flash red.
+	const urgent = live && !s.overtime && s.time <= 30 && s.phase === "live" && currentPlaylist(ctx).timed !== false;
 	const blink = urgent && Math.floor(ctx.now / 500) % 2 === 0;
 	const color = s.overtime ? COLORS.orange1 : urgent ? (blink ? COLORS.red : "#ffffff") : "#ffffff";
 	const label = s.paused ? t(lang, "paused") : s.overtime ? t(lang, "ot") : s.replay ? t(lang, "replay") : t(lang, "time");

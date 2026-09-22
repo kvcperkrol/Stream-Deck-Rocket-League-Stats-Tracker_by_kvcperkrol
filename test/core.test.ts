@@ -137,7 +137,7 @@ test("MatchEnded counts the session once and reports victory/defeat relative to 
 	store.handle({ Event: "MatchDestroyed", Data: {} });
 	assert.equal(store.state.phase, "menu");
 	assert.equal(store.state.session.wins, 1, "session survives the match");
-	assert.equal(store.activeBanner()!.kind, "victory", "result stays visible after leaving");
+	assert.equal(store.activeBanner(), undefined, "the banner clears as soon as you leave, instead of lingering in the menu");
 
 	store.handle(update({ Teams: [{ TeamNum: 0, Score: 0 }, { TeamNum: 1, Score: 3 }] }));
 	store.handle({ Event: "MatchEnded", Data: { MatchGuid: "G2", WinnerTeamNum: 1 } });

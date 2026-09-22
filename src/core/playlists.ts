@@ -9,6 +9,8 @@ export interface PlaylistInfo {
 	size?: number;
 	/** True when the info was inferred and not taken from the id table. */
 	inferred?: boolean;
+	/** False when the mode has no fixed match length, so `TimeSeconds` is elapsed session time, not a countdown to zero (e.g. Free Play, which the game also reports training/local sessions under). Everything else counts down, so this defaults to true. */
+	timed?: boolean;
 }
 
 /**
@@ -22,8 +24,9 @@ const KNOWN: Record<number, PlaylistInfo> = {
 	3: { name: "Standard", ranked: false, group: "standard", size: 3 },
 	4: { name: "Chaos", ranked: false, size: 4 },
 	6: { name: "Private", ranked: false },
-	// Seen in a live capture with a single player on TrainStation_Dawn_P (training / local match).
-	9: { name: "Free Play", ranked: false },
+	// Seen in a live capture with a single player on TrainStation_Dawn_P (training / local match): TimeSeconds climbed
+	// from 4 to 175 over the session instead of counting down, so this is elapsed time, not a countdown.
+	9: { name: "Free Play", ranked: false, timed: false },
 	10: { name: "Duel", ranked: true, group: "duel", size: 1 },
 	11: { name: "Doubles", ranked: true, group: "doubles", size: 2 },
 	12: { name: "Solo Standard", ranked: true, group: "solo", size: 3 },

@@ -32,6 +32,8 @@ export type GlobalSettings = {
 	packetRate: number;
 	/** Optional manual install folder (auto-detected from Epic/Steam when empty). */
 	installDir: string;
+	/** Optional manual folder for Launch.log (auto-detected when empty; needed on e.g. Proton, where the registry lookup and the usual Documents guesses do not apply). */
+	logFolder: string;
 	/** Which team goes on the left score key: my own (as the game's HUD does) or always the blue one. */
 	scoreOrder: "me-left" | "blue-left";
 	/** Keep a small, anonymised log of the Stats API for diagnostics (local file only). */
@@ -50,6 +52,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 	autoSwitch: false,
 	packetRate: 10,
 	installDir: "",
+	logFolder: "",
 	scoreOrder: "me-left",
 	recordMatches: false,
 	countdownOffsetMs: 0,
@@ -67,6 +70,7 @@ export function mergeSettings(raw: Partial<GlobalSettings> | undefined | null): 
 		autoSwitch: r.autoSwitch === true,
 		packetRate: typeof r.packetRate === "number" && r.packetRate > 0 ? r.packetRate : DEFAULT_SETTINGS.packetRate,
 		installDir: typeof r.installDir === "string" ? r.installDir : DEFAULT_SETTINGS.installDir,
+		logFolder: typeof r.logFolder === "string" ? r.logFolder : DEFAULT_SETTINGS.logFolder,
 		scoreOrder: r.scoreOrder === "blue-left" ? "blue-left" : "me-left",
 		recordMatches: r.recordMatches === true,
 		clock12h: r.clock12h === true,

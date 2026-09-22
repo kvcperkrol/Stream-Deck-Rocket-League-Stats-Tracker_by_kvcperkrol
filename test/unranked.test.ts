@@ -5,9 +5,10 @@ import { t } from "../src/core/i18n.ts";
 import { DEFAULT_SETTINGS, mergeSettings } from "../src/core/types.ts";
 import type { AutoMmr, RenderCtx } from "../src/ui/context.ts";
 import { renderRole } from "../src/ui/keys.ts";
+import { COLORS } from "../src/ui/svg.ts";
 
 /** A 2v2 match on the given playlist; the ranks below make Diamond II the user's doubles rank. */
-function inMatch(playlist: number, arena = "Stadium_P") {
+function inMatch(playlist: number, arena = "Stadium_P", time = 200) {
 	const store = new MatchStore(() => 5_000);
 	store.setGameRunning(true);
 	store.setConnected(true);
@@ -17,7 +18,7 @@ function inMatch(playlist: number, arena = "Stadium_P") {
 		Data: {
 			MatchGuid: "G",
 			Players: [p("a", 0), p("b", 0), p("c", 1), p("d", 1)],
-			Game: { Teams: [{ Name: "Blue", TeamNum: 0, Score: 0 }, { Name: "Orange", TeamNum: 1, Score: 0 }], PlaylistId: playlist, TimeSeconds: 200, bOvertime: false, Ball: { Speed: 0, TeamNum: 255 }, bReplay: false, Arena: arena, bHasTarget: false },
+			Game: { Teams: [{ Name: "Blue", TeamNum: 0, Score: 0 }, { Name: "Orange", TeamNum: 1, Score: 0 }], PlaylistId: playlist, TimeSeconds: time, bOvertime: false, Ball: { Speed: 0, TeamNum: 255 }, bReplay: false, Arena: arena, bHasTarget: false },
 		},
 	});
 	return store;
@@ -82,6 +83,13 @@ test("MMR: a casual match uses the casual MMR from the log, never the value type
 	assert.ok(!none.includes("CASUAL MMR"), "no value, so just a dash under a plain MMR label");
 	const ranked = renderRole("mmr", ctx(inMatch(11)));
 	assert.ok(ranked.includes(">964<") && !ranked.includes("CASUAL"), "ranked still falls back to the typed value");
+});
+
+test("a low clock value in Free Play / training does not flash red — it is elapsed time, not a countdown to zero", () => {
+	const training = renderRole("timer", ctx(inMatch(9, "TrainStation_Dawn_P", 4))); // real capture: TimeSeconds climbs from 4, it never counts down
+	assert.ok(!training.includes(COLORS.red), "Free Play must stay in its normal colour however low TimeSeconds is");
+	const ranked = renderRole("timer", ctx(inMatch(11, "Stadium_P", 4))); // a real match with 4 s left is genuinely urgent
+	assert.ok(ranked.includes(COLORS.red), "a timed mode still flashes red in the last 30 s");
 });
 
 test("the Polish texts exist for the unranked keys", () => {
