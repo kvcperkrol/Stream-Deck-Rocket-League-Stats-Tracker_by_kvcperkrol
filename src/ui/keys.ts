@@ -9,10 +9,7 @@ import { sideTeams, teamLabel, teamLook } from "./teams";
 import { boostKey, carSpeedKey, possessionKey, pointsKey } from "./live-keys";
 import type { MmrView, RenderCtx, RenderOpts, Role } from "./context";
 import { analogKey, clockKey, pingKey } from "./extra-keys";
-import { COLORS, doc, linear, stripes, text } from "./svg";
-
-const panel = (id = "p", c1: string = COLORS.bg2, c2: string = COLORS.bg1) =>
-	linear(id, c1, c2) + `<rect width="72" height="72" fill="url(#${id})"/>` + stripes(72, 72, 0, 0.045, "#7f8fe0", 30, 10);
+import { COLORS, doc, linear, panel, stripes, text } from "./svg";
 
 const frame = (color: string) => `<rect x="1" y="1" width="70" height="70" fill="none" stroke="${color}" stroke-width="1.6" stroke-opacity="0.55"/>`;
 
@@ -44,7 +41,7 @@ function rankKey(ctx: RenderCtx): string {
 		// Casual, free play, private: there is no rank to show, and the key says so instead of showing a ranked one.
 		const none = tierInfo(0);
 		return doc(
-			panel() +
+			panel(ctx.settings.keyTheme) +
 				(ctx.rankIcon?.(0) ? iconBadge(ctx.rankIcon(0)!, 36, 25) : emblem(none, 36, 25, 0.95, "—")) +
 				text(t(lang, "unranked"), { y: 54, size: 11.5, fill: none.color, skew: -6, maxWidth: 56 }) +
 				text(pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
@@ -55,7 +52,7 @@ function rankKey(ctx: RenderCtx): string {
 	const tier = tierInfo(entry.tier);
 	const div = tier.rank >= 1 && tier.rank <= 7 ? `${t(lang, "div")} ${entry.div}` : "";
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			(ctx.rankIcon?.(tier.id) ? iconBadge(ctx.rankIcon(tier.id)!, 36, 25) : emblem(tier, 36, 25, 0.95)) +
 			text(tier.rank === 0 ? t(lang, "setRank") : tier.family, { y: 54, size: tier.rank === 0 ? 10 : 11.5, fill: tier.color, skew: -6, maxWidth: 56 }) +
 			text(tier.roman && tier.rank !== 8 ? `${tier.roman}${div ? "  ·  " + div : ""}` : div || pl.name.toUpperCase(), { y: 66, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
@@ -137,7 +134,7 @@ function mmrKey(ctx: RenderCtx, view?: MmrView): string {
 	const streakFill = streak ? (streak.kind === "W" ? COLORS.green : COLORS.red) : COLORS.dim;
 	const rec = at("record");
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			styled(!pl.ranked && has ? t(lang, "mmrCasual") : "MMR", { ...at("labelMmr"), size: !pl.ranked && has ? 8.5 : 10 }, { fill: COLORS.dim, maxWidth: 56 }) +
 			styled(t(lang, "record"), at("labelRecord"), { fill: COLORS.dim, maxWidth: 56 }) +
 			styled(t(lang, "streak"), at("labelStreak"), { fill: COLORS.dim, maxWidth: 56 }) +
@@ -158,11 +155,11 @@ function modeKey(ctx: RenderCtx): string {
 	const s = ctx.store.state;
 	const lang = ctx.settings.lang;
 	if (!s.gameRunning || s.phase === "menu") {
-		return doc(panel() + text(t(lang, "menuTitle"), { y: 42, size: 20, fill: s.gameRunning ? "#ffffff" : COLORS.dim, skew: -9 }) + veil(ctx));
+		return doc(panel(ctx.settings.keyTheme) + text(t(lang, "menuTitle"), { y: 42, size: 20, fill: s.gameRunning ? "#ffffff" : COLORS.dim, skew: -9 }) + veil(ctx));
 	}
 	const pl = currentPlaylist(ctx);
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			text(pl.name.toUpperCase(), { y: 27, size: 14, skew: -9, maxWidth: 56 }) +
 			text(pl.ranked ? t(lang, "ranked_") : t(lang, "unranked"), { y: 42, size: 10.5, fill: pl.ranked ? COLORS.gold : COLORS.dim, maxWidth: 56 }) +
 			teamDots(pl.size ?? ctx.store.teamSize() ?? 3, 36, 58, teamLook(s, sideTeams(s, ctx.settings.scoreOrder)[0]).accent, teamLook(s, sideTeams(s, ctx.settings.scoreOrder)[1]).accent) +
@@ -206,7 +203,7 @@ function timerKey(ctx: RenderCtx): string {
 	const label = s.paused ? t(lang, "paused") : s.overtime ? t(lang, "ot") : s.replay ? t(lang, "replay") : t(lang, "time");
 	const clock = live ? (s.overtime ? `+${formatClock(s.time)}` : formatClock(s.time)) : "--:--";
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			frame(s.overtime ? COLORS.orange1 : urgent ? COLORS.red : COLORS.line) +
 			text(label, { y: 16, size: 9.5, fill: s.overtime || s.paused ? COLORS.orange1 : COLORS.dim, maxWidth: 56 }) +
 			text(clock, { y: 51, size: 30, fill: live ? color : COLORS.dim, skew: -9, maxWidth: 56 }) +
@@ -223,7 +220,7 @@ function lastGoalKey(ctx: RenderCtx): string {
 	const barColor = g ? teamLook(ctx.store.state, g.team).accent : COLORS.line;
 	const speed = g ? convertSpeed(g.speedKmh, units) : undefined;
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			`<rect width="72" height="4" fill="${barColor}"/>` +
 			text(t(lang, "lastGoal"), { y: 15, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 			text(g ? g.scorer : t(lang, "noGoal"), { y: 30, size: 13, fill: g ? "#ffffff" : COLORS.dim, skew: -8, maxWidth: 56 }) +
@@ -243,7 +240,7 @@ function speedKey(ctx: RenderCtx): string {
 	const barW = Math.round(56 * ratio);
 	const hot = ratio > 0.7 ? COLORS.red : ratio > 0.4 ? COLORS.orange1 : COLORS.blue1;
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			text(t(lang, "ball"), { y: 15, size: 9.5, fill: COLORS.dim }) +
 			text(String(v.value), { y: 43, size: 29, fill: "#ffffff", skew: -9, maxWidth: 56 }) +
 			text(v.unit, { y: 53, size: 8.5, fill: COLORS.dim }) +

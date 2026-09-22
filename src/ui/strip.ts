@@ -7,19 +7,24 @@ import { renderBannerStripSegment, stat, STRIP_SEGMENT, stripNeedsScene } from "
 import type { RenderCtx } from "./context";
 import { mmrInfo, rankedContext } from "./keys";
 import { teamLook } from "./teams";
-import { COLORS, linear, stripes, text } from "./svg";
+import { COLORS, KEY_THEMES, linear, stripes, text } from "./svg";
+import type { KeyTheme } from "../core/types";
 
 const { width: W, height: H, count: SEGMENTS } = STRIP_SEGMENT;
 const CX = W / 2;
 
 const wrap = (inner: string) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${inner}</svg>`;
 
-/** Common look of a panel: the deck's dark gradient with a hairline where the next segment starts. */
-const panel_ = (seg: number) =>
-	linear("p", COLORS.bg2, COLORS.bg1) +
-	`<rect width="${W}" height="${H}" fill="url(#p)"/>` +
-	stripes(W, H, 0, 0.045, "#7f8fe0", 44, 14) +
-	(seg < SEGMENTS - 1 ? `<rect x="${W - 1}" y="8" width="1" height="${H - 16}" fill="${COLORS.line}"/>` : "");
+/** Common look of a panel: the deck's dark gradient (tinted by the chosen key theme) with a hairline where the next segment starts. */
+const panel_ = (seg: number, theme: KeyTheme) => {
+	const { top, bottom, stripe } = KEY_THEMES[theme];
+	return (
+		linear("p", top, bottom) +
+		`<rect width="${W}" height="${H}" fill="url(#p)"/>` +
+		stripes(W, H, 0, 0.045, stripe, 44, 14) +
+		(seg < SEGMENTS - 1 ? `<rect x="${W - 1}" y="8" width="1" height="${H - 16}" fill="${COLORS.line}"/>` : "")
+	);
+};
 
 /** Segment 0: the rank icon with its name and division, and the mode underneath. */
 function rankPanel(ctx: RenderCtx): string {
@@ -134,5 +139,5 @@ export function renderStrip(ctx: RenderCtx, segment: number, panel: StripPanel =
 	// the game is not running / in the menu and nothing on the strip is customised (then all four show that state together).
 	if (ctx.store.activeBanner() || (panel === "auto" && stripNeedsScene(ctx))) return renderBannerStripSegment(ctx, seg);
 	const which = panel === "auto" ? DEFAULT_PANEL[seg]! : panel;
-	return wrap(panel_(seg) + PANELS[which](ctx));
+	return wrap(panel_(seg, ctx.settings.keyTheme) + PANELS[which](ctx));
 }

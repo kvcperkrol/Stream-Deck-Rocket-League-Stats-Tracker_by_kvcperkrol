@@ -383,6 +383,30 @@ async function main(): Promise<void> {
 	send({ event: "didReceiveSettings", action: STRIP_ACTION, context: dialCtx(0), device: DEVICE_PLUS, payload: { settings: { panel: "clock" }, coordinates: { column: 0, row: 0 }, isInMultiAction: false } });
 	check("a dial pinned to the clock shows the time on the touch strip", await waitFor(() => />\d{1,2}:\d{2}</.test(feedback.get(dialCtx(0)) ?? ""), 3000), (feedback.get(dialCtx(0)) ?? "").slice(-300));
 
+	console.log("\n[10f] a dial press cycles its pinned panel, like the MMR/clock keys");
+	const pressDial = async (i: number) => {
+		send({ event: "dialDown", action: STRIP_ACTION, context: dialCtx(i), device: DEVICE_PLUS, payload: { controller: "Encoder", coordinates: { column: i, row: 0 }, settings: {} } });
+		await sleep(300);
+	};
+	const before = feedback.get(dialCtx(1)) ?? ""; // still "auto" (never pinned): quarter 1 defaults to the MMR panel
+	await pressDial(1);
+	check("one press moves the dial off 'auto' onto the first panel (rank)", await waitFor(() => (feedback.get(dialCtx(1)) ?? "") !== before && (feedback.get(dialCtx(1)) ?? "").includes("DIAMOND"), 2000), (feedback.get(dialCtx(1)) ?? "").slice(-300));
+	await pressDial(1);
+	check("a second press moves on to the next panel (MMR)", await waitFor(() => (feedback.get(dialCtx(1)) ?? "").includes(">MMR<"), 2000), (feedback.get(dialCtx(1)) ?? "").slice(-300));
+	check("the choice is saved to the dial's own settings, like the MMR/clock keys", received.some((m) => m.event === "setSettings" && m.context === dialCtx(1) && m.payload?.panel === "mmr"), JSON.stringify(received.filter((m) => m.event === "setSettings" && m.context === dialCtx(1))));
+
+	console.log("\n[10g] switching to a different account clears the cached MMR instead of keeping the previous one's");
+	fs.appendFileSync(
+		path.join(logDir, "Launch.log"),
+		"[0030.00] Party: HandleLocalPlayerLoginStatusChanged PlayerName=Sibling PlayerID=Epic|2000|0 LoginStatus=LS_LoggedIn IsPrimary=True IsInParty=False\n" + queueBlock(20.0, "2026-09-20 12:00:00"),
+	);
+	check("the MMR key shows the new account's own value (500), not the previous account's 964", await waitFor(() => has(0, 1, ">500<") && !has(0, 1, ">964<"), 6000), svgOf(0, 1).slice(-350));
+	send({ event: "sendToPlugin", action: actionUuid("banner"), context: ctxOf(3, 1), payload: { cmd: "status" } });
+	const latestStatus = () => received.filter((m) => m.event === "sendToPropertyInspector" && m.payload?.type === "status").at(-1);
+	check("the property inspector now names the new local player", await waitFor(() => latestStatus()?.payload?.localPlayer?.name === "Sibling", 3000), JSON.stringify(latestStatus()?.payload?.localPlayer));
+	const mmrJson = () => JSON.parse(fs.readFileSync(path.join(fake, "data", "mmr.json"), "utf8"));
+	check("the saved cache is now attributed to the new account", await waitFor(() => mmrJson().ownerId === "Epic|2000|0", 3000), JSON.stringify(mmrJson()));
+
 	console.log("\n[11] game closes");
 	send({ event: "applicationDidTerminate", payload: { application: FAKE_GAME } });
 	const back = () => received.filter((m) => m.event === "switchToProfile" && m.payload?.profile === undefined).length >= 5; // one per deck

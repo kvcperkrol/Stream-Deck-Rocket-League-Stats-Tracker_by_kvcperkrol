@@ -14,7 +14,7 @@ import { DEFAULT_WEB_PORT, findInstallDirs, patchStatsIni, type IniResult } from
 import type { AutoMmr, MmrView, RenderCtx, Role } from "./ui/context";
 import { renderRole } from "./ui/keys";
 import { profileNameFor } from "./ui/layout";
-import { renderStrip, type StripPanel } from "./ui/strip";
+import { renderStrip, STRIP_PANELS, type StripPanel } from "./ui/strip";
 import { svgDataUri } from "./ui/svg";
 
 // The environment override exists only so automated tests can run without ever looking at a real, running game.
@@ -79,6 +79,8 @@ export class Hub {
 	private pollTimer?: NodeJS.Timeout;
 	private autoMmr: Record<number, AutoMmr> = {};
 	private lastQueued?: number;
+	/** The account {@link autoMmr}/{@link lastQueued} belong to, so a switch to a different one invalidates them instead of blending in. */
+	private mmrOwner?: string;
 	private logWatcher?: RlLogWatcher;
 	private logDir?: string;
 	private recorder?: MatchRecorder;
@@ -242,9 +244,10 @@ export class Hub {
 	private startMmrLog(): void {
 		// What was known last time (the game keeps only a few old logs), then whatever the logs still contain, oldest first.
 		try {
-			const saved = JSON.parse(fs.readFileSync(this.mmrFile, "utf8")) as { autoMmr?: Record<number, AutoMmr>; lastQueued?: number };
+			const saved = JSON.parse(fs.readFileSync(this.mmrFile, "utf8")) as { autoMmr?: Record<number, AutoMmr>; lastQueued?: number; ownerId?: string };
 			this.autoMmr = saved.autoMmr ?? {};
 			this.lastQueued = saved.lastQueued;
+			this.mmrOwner = saved.ownerId;
 		} catch {
 			/* first run */
 		}
@@ -267,8 +270,9 @@ export class Hub {
 			return;
 		}
 		try {
-			for (const sample of readExistingSamples(this.logDir)) this.applySample(sample, false);
+			// The account first, so replaying history below can already tell a stale account's samples apart from ours.
 			this.setLocal(readLocalIdentity(this.logDir));
+			for (const sample of readExistingSamples(this.logDir)) this.applySample(sample, false);
 			this.ping.setTarget(readCurrentServer(this.logDir));
 		} catch (e) {
 			this.log.warn(`could not read existing logs: ${e}`);
@@ -285,13 +289,25 @@ export class Hub {
 	/** The account the game is logged in with — the reliable way to know which player in a match is the user. */
 	private setLocal(identity: LocalIdentity | undefined): void {
 		if (!identity || (this.local?.id === identity.id && this.local.name === identity.name)) return;
+		// A different account than whichever one autoMmr/lastQueued were last saved for: that cache would otherwise
+		// keep showing as if it were this account's, on a live switch as much as across a restart.
+		if (this.mmrOwner !== undefined && this.mmrOwner !== identity.id) {
+			this.autoMmr = {};
+			this.lastQueued = undefined;
+			this.log.info(`account switched (${this.mmrOwner} → ${identity.id}): cached MMR/record cleared`);
+		}
+		this.mmrOwner = identity.id;
 		this.local = identity;
+		this.saveMmr();
 		this.store.setLocalIdentity(identity);
 		this.recorder?.setLocal(identity);
 		this.log.info(`local player: ${identity.name} (${identity.id})`);
 	}
 
 	private applySample(sample: MmrSample, save: boolean): void {
+		// A sample the log attributes to a different, currently inactive account never overwrites this one's cache —
+		// even when its timestamp looks newer (mixed backup logs from more than one account on the same computer).
+		if (sample.playerId && this.local && sample.playerId !== this.local.id) return;
 		const prev = this.autoMmr[sample.playlist];
 		if (prev && sample.at <= prev.at) return; // an older queue than what we already have
 		// The value is read before the match. A change since the last queue is the result of the match played in between.
@@ -329,7 +345,7 @@ export class Hub {
 	private saveMmr(): void {
 		try {
 			fs.mkdirSync(path.dirname(this.mmrFile), { recursive: true });
-			fs.writeFileSync(this.mmrFile, JSON.stringify({ autoMmr: this.autoMmr, lastQueued: this.lastQueued }));
+			fs.writeFileSync(this.mmrFile, JSON.stringify({ autoMmr: this.autoMmr, lastQueued: this.lastQueued, ownerId: this.mmrOwner }));
 		} catch {
 			/* not critical: the logs are read again next time */
 		}
@@ -445,6 +461,17 @@ export class Hub {
 			const timer = setInterval(() => this.renderOne(id), 40);
 			setTimeout(() => clearInterval(timer), 480);
 		}
+		this.renderOne(id);
+	}
+
+	/** A dial press: cycles this segment's pinned panel, the same way pressing the MMR/clock keys cycles their view. */
+	pressDial(id: string): void {
+		const e = this.dials.get(id);
+		if (!e) return;
+		const current = e.settings.panel ?? "auto";
+		const next = STRIP_PANELS[(STRIP_PANELS.indexOf(current) + 1) % STRIP_PANELS.length]!;
+		e.settings = { ...e.settings, panel: next };
+		void e.action.setSettings(e.settings as never).catch(() => undefined);
 		this.renderOne(id);
 	}
 

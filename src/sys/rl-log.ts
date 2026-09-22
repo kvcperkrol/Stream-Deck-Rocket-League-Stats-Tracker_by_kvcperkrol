@@ -32,6 +32,8 @@ export interface MmrSample {
 	at: string;
 	/** Highest tier the game reports for the player (informational). */
 	tier?: number;
+	/** The account (same format as the Stats API's PrimaryId) the log said was logged in when this queue was written, if any login line came before it in the same file. */
+	playerId?: string;
 }
 
 const RE_POST = /Matchmaking: Post-divide PartyLeaderMMR: (-?[\d.]+)/;
@@ -45,8 +47,15 @@ export class MatchmakingParser {
 	private tier?: number;
 	private at?: string;
 	private playlists: number[] = [];
+	/** The most recent account the same line stream said was logged in, so every sample can be tagged with it. */
+	private playerId?: string;
 
 	feed(line: string): MmrSample | undefined {
+		const login = RE_LOCAL.exec(line);
+		if (login) {
+			this.playerId = login[2];
+			return undefined;
+		}
 		let m = RE_POST.exec(line);
 		if (m) {
 			this.mu = Number(m[1]);
@@ -67,7 +76,7 @@ export class MatchmakingParser {
 		if ((m = RE_PARTY.exec(line))) {
 			const usable = this.mu !== undefined && Number.isFinite(this.mu) && this.at !== undefined && this.playlists.length === 1 && Number(m[1]) === 1 && Number(m[2]) === 1;
 			const sample: MmrSample | undefined = usable
-				? { playlist: this.playlists[0]!, mu: this.mu!, mmr: muToMmr(this.mu!), at: this.at!, tier: this.tier }
+				? { playlist: this.playlists[0]!, mu: this.mu!, mmr: muToMmr(this.mu!), at: this.at!, tier: this.tier, playerId: this.playerId }
 				: undefined;
 			this.mu = undefined;
 			this.at = undefined;

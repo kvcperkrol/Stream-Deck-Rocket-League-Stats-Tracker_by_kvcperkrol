@@ -65,6 +65,7 @@
 <div class="row"><label data-t="order">Score order</label><select id="scoreOrder" class="grow"><option value="me-left" data-t="orderMe">My team on the left (like the game)</option><option value="blue-left" data-t="orderBlue">Blue always on the left</option></select></div>
 <div class="row"><label></label><label style="flex:1"><input type="checkbox" id="recordMatches" /> <span data-t="record">Keep a small anonymised match log for diagnostics (local only)</span></label></div>
 <div class="row"><label></label><label style="flex:1"><input type="checkbox" id="clock12h" /> <span data-t="clock12">12-hour clock (AM/PM)</span></label></div>
+<div class="row"><label data-t="keyTheme">Key colour</label><select id="keyTheme" class="grow"><option value="blue" data-t="themeBlue">Blue (default)</option><option value="purple" data-t="themePurple">Purple</option><option value="green" data-t="themeGreen">Green</option><option value="graphite" data-t="themeGraphite">Graphite</option></select></div>
 <div class="row"><label></label><label style="flex:1"><input type="checkbox" id="autoSwitch" /> <span data-t="autoSwitch">Switch profile automatically when the game starts</span></label></div>
 
 <p class="note" data-t="autoSwitchNote"></p>
@@ -89,7 +90,7 @@ const I18N = {
 	pl: {
 		status: "Status", refresh: "Odśwież", thisKey: "Ten klawisz", slice: "Fragment", sliceAuto: "Automatycznie (od lewej)", slice1: "Lewy", slice2: "Środkowy", slice3: "Prawy",
 		sliceNote: "Trzy klawisze tego typu w jednym rzędzie tworzą jeden szeroki baner.",
-		panel: "Panel", pAuto: "Automatycznie (ranga · MMR · ostatni gol · moje statystyki)", pRank: "Ranga", pMmr: "MMR", pLast: "Ostatni gol", pStats: "Moje statystyki", pClock: "Zegar", pPing: "Ping", panelNote: "Co pokazuje ta ćwiartka paska, gdy nic się nie dzieje. Zdarzenia (gol, demolka …) i tak zajmują cały pasek.", clock12: "Zegar 12-godzinny (AM/PM)", autoSwitchNote: "Domyślnie wyłączone: własny profil Rocket League ustawisz w opcjach profilu Stream Decka. Włączenie przełącza deck na profil wtyczki po starcie gry i z powrotem po jej zamknięciu.",
+		panel: "Panel", pAuto: "Automatycznie (ranga · MMR · ostatni gol · moje statystyki)", pRank: "Ranga", pMmr: "MMR", pLast: "Ostatni gol", pStats: "Moje statystyki", pClock: "Zegar", pPing: "Ping", panelNote: "Co pokazuje ta ćwiartka paska, gdy nic się nie dzieje. Zdarzenia (gol, demolka …) i tak zajmują cały pasek.", clock12: "Zegar 12-godzinny (AM/PM)", keyTheme: "Kolor klawiszy", themeBlue: "Niebieski (domyślny)", themePurple: "Fioletowy", themeGreen: "Zielony", themeGraphite: "Grafitowy", autoSwitchNote: "Domyślnie wyłączone: własny profil Rocket League ustawisz w opcjach profilu Stream Decka. Włączenie przełącza deck na profil wtyczki po starcie gry i z powrotem po jej zamknięciu.",
 		segment: "Segment", segAuto: "Automatycznie (ten nad pokrętłem)", seg1: "1 (lewy)", seg2: "2", seg3: "3", seg4: "4 (prawy)", segmentNote: "Którą czwartą część paska dotykowego pokazuje to pokrętło. Ustaw ten sam ekran na wszystkich czterech, a animowany baner rozciągnie się na całą szerokość.",
 		general: "Ogólne", lang: "Język", units: "Jednostki", player: "Nick w grze", playerPh: "wykrywany automatycznie",
 		playerNote: "Zostaw puste — wtyczka odczyta Twoje konto z logu gry. Wpisz nick tylko wtedy, gdy oznaczenie „TY” jest złe.",
@@ -107,7 +108,7 @@ const I18N = {
 	en: {
 		status: "Status", refresh: "Refresh", thisKey: "This key", slice: "Slice", sliceAuto: "Automatic (left to right)", slice1: "Left", slice2: "Middle", slice3: "Right",
 		sliceNote: "Three keys of this type in one row form a single wide banner.",
-		panel: "Panel", pAuto: "Automatic (rank · MMR · last goal · my stats)", pRank: "Rank", pMmr: "MMR", pLast: "Last goal", pStats: "My stats", pClock: "Clock", pPing: "Ping", panelNote: "What this quarter of the strip shows when nothing is happening. Events (goal, demo …) still take the whole strip.", clock12: "12-hour clock (AM/PM)", autoSwitchNote: "Off by default: you can set your own Rocket League profile in the Stream Deck's profile options. Turning this on switches the deck to the plugin's profile when the game starts and back when it closes.",
+		panel: "Panel", pAuto: "Automatic (rank · MMR · last goal · my stats)", pRank: "Rank", pMmr: "MMR", pLast: "Last goal", pStats: "My stats", pClock: "Clock", pPing: "Ping", panelNote: "What this quarter of the strip shows when nothing is happening. Events (goal, demo …) still take the whole strip.", clock12: "12-hour clock (AM/PM)", keyTheme: "Key colour", themeBlue: "Blue (default)", themePurple: "Purple", themeGreen: "Green", themeGraphite: "Graphite", autoSwitchNote: "Off by default: you can set your own Rocket League profile in the Stream Deck's profile options. Turning this on switches the deck to the plugin's profile when the game starts and back when it closes.",
 		segment: "Segment", segAuto: "Automatic (the one above the dial)", seg1: "1 (left)", seg2: "2", seg3: "3", seg4: "4 (right)", segmentNote: "Which quarter of the touch strip this dial shows. Put the action on all four dials and the animated banner stretches across the whole strip.",
 		general: "General", lang: "Language", units: "Units", player: "In-game name", playerPh: "detected automatically",
 		playerNote: "Leave empty — the plugin reads your account from the game log. Enter a name only if the “YOU” marker is wrong.",
@@ -133,7 +134,7 @@ const GROUPS = ["duel", "doubles", "solo", "standard", "hoops", "rumble", "drops
 const GROUP_OF_PLAYLIST = { Duel: "duel", Doubles: "doubles", "Solo Standard": "solo", Standard: "standard", Hoops: "hoops", Rumble: "rumble", Dropshot: "dropshot" };
 
 let ws, uuid, actionInfo, role = "";
-let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: false, packetRate: 10, installDir: "", logFolder: "", scoreOrder: "me-left", recordMatches: false, countdownOffsetMs: 0, clock12h: false, ranks: {} };
+let settings = { lang: "en", units: "kmh", playerName: "", autoSwitch: false, packetRate: 10, installDir: "", logFolder: "", scoreOrder: "me-left", recordMatches: false, countdownOffsetMs: 0, clock12h: false, keyTheme: "blue", ranks: {} };
 let keySettings = {};
 let lastStatus = null;
 
@@ -213,6 +214,7 @@ function bindGlobal() {
 	$("scoreOrder").addEventListener("change", () => { settings.scoreOrder = $("scoreOrder").value; saveGlobal(); });
 	$("recordMatches").addEventListener("change", () => { settings.recordMatches = $("recordMatches").checked; saveGlobal(); });
 	$("clock12h").addEventListener("change", () => { settings.clock12h = $("clock12h").checked; saveGlobal(); });
+	$("keyTheme").addEventListener("change", () => { settings.keyTheme = $("keyTheme").value; saveGlobal(); });
 	$("panel").addEventListener("change", () => { keySettings.panel = $("panel").value; saveKey(); });
 	$("autoSwitch").addEventListener("change", () => { settings.autoSwitch = $("autoSwitch").checked; saveGlobal(); });
 	$("countdownOffsetMs").addEventListener("change", () => { settings.countdownOffsetMs = Math.max(-1500, Math.min(1500, Math.round(Number($("countdownOffsetMs").value) || 0))); saveGlobal(); });
@@ -223,7 +225,7 @@ function bindGlobal() {
 
 function fillForm() {
 	$("lang").value = settings.lang; $("units").value = settings.units; $("playerName").value = settings.playerName || "";
-	$("autoSwitch").checked = !!settings.autoSwitch; $("clock12h").checked = settings.clock12h === true; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("countdownOffsetMs").value = settings.countdownOffsetMs || 0; $("installDir").value = settings.installDir || ""; $("logFolder").value = settings.logFolder || "";
+	$("autoSwitch").checked = !!settings.autoSwitch; $("clock12h").checked = settings.clock12h === true; $("keyTheme").value = settings.keyTheme || "blue"; $("scoreOrder").value = settings.scoreOrder || "me-left"; $("recordMatches").checked = settings.recordMatches === true; $("packetRate").value = settings.packetRate; $("countdownOffsetMs").value = settings.countdownOffsetMs || 0; $("installDir").value = settings.installDir || ""; $("logFolder").value = settings.logFolder || "";
 	if (role === "banner" || role === "strip") $("slice").value = String(keySettings.slice ?? "auto");
 	if (role === "strip") $("panel").value = keySettings.panel || "auto";
 	applyI18n();

@@ -8,6 +8,8 @@ export interface RLMessage {
 export type TeamNum = 0 | 1;
 export type Lang = "pl" | "en";
 export type Units = "kmh" | "mph" | "uu";
+/** The key panel's background colour — a small built-in palette (the default is the game's own dark blue). */
+export type KeyTheme = "blue" | "purple" | "green" | "graphite";
 
 export type RankGroup = "duel" | "doubles" | "solo" | "standard" | "hoops" | "rumble" | "dropshot" | "snowday";
 
@@ -42,6 +44,8 @@ export type GlobalSettings = {
 	countdownOffsetMs: number;
 	/** The clock key and strip panel: 12-hour time with AM/PM instead of 24-hour. */
 	clock12h: boolean;
+	/** Background colour of every key panel (not the score/team keys, which always use the team's own colours). */
+	keyTheme: KeyTheme;
 	ranks: Partial<Record<RankGroup, RankEntry>>;
 };
 
@@ -57,6 +61,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 	recordMatches: false,
 	countdownOffsetMs: 0,
 	clock12h: false,
+	keyTheme: "blue",
 	ranks: {},
 };
 
@@ -74,6 +79,7 @@ export function mergeSettings(raw: Partial<GlobalSettings> | undefined | null): 
 		scoreOrder: r.scoreOrder === "blue-left" ? "blue-left" : "me-left",
 		recordMatches: r.recordMatches === true,
 		clock12h: r.clock12h === true,
+		keyTheme: r.keyTheme === "purple" || r.keyTheme === "green" || r.keyTheme === "graphite" ? r.keyTheme : DEFAULT_SETTINGS.keyTheme,
 		countdownOffsetMs: typeof r.countdownOffsetMs === "number" && Number.isFinite(r.countdownOffsetMs) ? Math.max(-1500, Math.min(1500, Math.round(r.countdownOffsetMs))) : DEFAULT_SETTINGS.countdownOffsetMs,
 		ranks: { ...(r.ranks ?? {}) },
 	};

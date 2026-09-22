@@ -3,7 +3,7 @@
 	"SDKVersion": 2,
 	"UUID": "mov.remake.rlhud",
 	"Name": "Rocket League HUD",
-	"Version": "1.10.2.0",
+	"Version": "1.10.3.0",
 	"Author": "kvcperkrol",
 	"Description": "Live Rocket League HUD for a 15-key Stream Deck and the Stream Deck + (touch strip): score, clock, rank, MMR, goals with scorer and ball speed, demos, saves, boost and possession. Turns the game's Stats API on by itself — install, start the game, play.",
 	"Icon": "imgs/plugin/marketplace",

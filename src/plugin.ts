@@ -1,4 +1,4 @@
-import streamDeck, { action, SingletonAction, type DidReceiveSettingsEvent, type KeyDownEvent, type WillAppearEvent, type WillDisappearEvent } from "@elgato/streamdeck";
+import streamDeck, { action, SingletonAction, type DialDownEvent, type DidReceiveSettingsEvent, type KeyDownEvent, type WillAppearEvent, type WillDisappearEvent } from "@elgato/streamdeck";
 import { Hub, type KeySettings } from "./hub";
 import { ROLES, type Role } from "./ui/context";
 import { actionUuid, LEGACY_ACTIONS, legacyUuid, STRIP_ACTION } from "./ui/layout";
@@ -50,6 +50,11 @@ class StripAction extends SingletonAction<KeySettings> {
 
 	override onDidReceiveSettings(ev: DidReceiveSettingsEvent<KeySettings>): void {
 		hub.updateSettings(ev.action.id, ev.payload.settings);
+	}
+
+	/** Like the MMR/clock keys, a press cycles this dial's pinned panel — rank → MMR → last goal → my stats → clock → ping → auto → … */
+	override onDialDown(ev: DialDownEvent<KeySettings>): void {
+		hub.pressDial(ev.action.id);
 	}
 }
 streamDeck.actions.registerAction(new (action({ UUID: STRIP_ACTION })(StripAction, undefined as never))());

@@ -2,6 +2,7 @@
  * Tiny SVG toolkit. The Stream Deck app renders key images with a conservative SVG engine, so everything
  * here sticks to gradients, paths, transforms and plain text — no filters, masks or CSS.
  */
+import type { KeyTheme } from "../core/types";
 
 export const FONT = "Bahnschrift, 'Segoe UI Semibold', 'Arial Narrow', Arial, sans-serif";
 
@@ -77,6 +78,23 @@ export function stripes(width: number, height: number, offset: number, opacity =
 		out += `<polygon points="${x},${height} ${x + lean},0 ${x + lean + thick},0 ${x + thick},${height}" fill="${color}" fill-opacity="${opacity}"/>`;
 	}
 	return out;
+}
+
+/**
+ * Background colour of a key panel — a small built-in palette. "blue" is the game's own dark navy (the default and,
+ * until now, the only option); the rest just retint the same gradient + stripe texture.
+ */
+export const KEY_THEMES: Record<KeyTheme, { top: string; bottom: string; stripe: string }> = {
+	blue: { top: COLORS.bg2, bottom: COLORS.bg1, stripe: "#7f8fe0" },
+	purple: { top: "#2a1650", bottom: "#100a24", stripe: "#b98af0" },
+	green: { top: "#0e3b34", bottom: "#071e1a", stripe: "#5be0b0" },
+	graphite: { top: "#242832", bottom: "#0c0e12", stripe: COLORS.dim },
+};
+
+/** Common look of a key panel: the dark gradient with the game's slanted-stripe texture, tinted by the chosen theme. */
+export function panel(theme: KeyTheme, id = "p"): string {
+	const { top, bottom, stripe } = KEY_THEMES[theme];
+	return linear(id, top, bottom) + `<rect width="72" height="72" fill="url(#${id})"/>` + stripes(72, 72, 0, 0.045, stripe, 30, 10);
 }
 
 export function svgDataUri(svg: string): string {

@@ -1,9 +1,7 @@
 import { MONTHS, t, WEEKDAYS } from "../core/i18n";
 import type { Lang } from "../core/types";
 import type { RenderCtx } from "./context";
-import { COLORS, doc, linear, stripes, text } from "./svg";
-
-const panel = () => linear("p", COLORS.bg2, COLORS.bg1) + `<rect width="72" height="72" fill="url(#p)"/>` + stripes(72, 72, 0, 0.045, "#7f8fe0", 30, 10);
+import { COLORS, doc, panel, text } from "./svg";
 
 // ---- clock -------------------------------------------------------------------------------------------------------------------
 
@@ -42,10 +40,10 @@ export function clockKey(ctx: RenderCtx, layout = 0): string {
 	const bar = `<rect x="8" y="69" width="56" height="2" fill="${COLORS.line}"/>` + `<rect x="8" y="69" width="${((c.seconds / 60) * 56).toFixed(1)}" height="2" fill="${COLORS.blue1}"/>`;
 	if (layout === 1) {
 		const sub = `${c.suffix ? c.suffix + "  " : ""}:${String(c.seconds).padStart(2, "0")}`;
-		return doc(panel() + text(c.date, { y: 12, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) + text(`${c.hh}:${c.mm}`, { y: 43, size: 21, skew: -9, maxWidth: 52 }) + text(sub, { y: 58, size: 9, fill: COLORS.dim, maxWidth: 52 }) + bar);
+		return doc(panel(ctx.settings.keyTheme) + text(c.date, { y: 12, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) + text(`${c.hh}:${c.mm}`, { y: 43, size: 21, skew: -9, maxWidth: 52 }) + text(sub, { y: 58, size: 9, fill: COLORS.dim, maxWidth: 52 }) + bar);
 	}
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			text(c.date, { y: 12, size: 8.5, fill: COLORS.dim, maxWidth: 56 }) +
 			text(c.hh, { y: 39, size: 26, skew: -9, maxWidth: 40 }) +
 			(c.suffix ? text(c.suffix, { x: 60, y: 39, size: 8, fill: COLORS.dim, anchor: "end" }) : "") +
@@ -126,7 +124,7 @@ export function pingKey(ctx: RenderCtx): string {
 	const match = !!p?.target;
 	const color = has ? pingColor(ms) : lost ? COLORS.red : COLORS.dim;
 	return doc(
-		panel() +
+		panel(ctx.settings.keyTheme) +
 			text(t(lang, "ping"), { y: 15, size: 10, fill: COLORS.dim }) +
 			text(has ? String(ms) : lost ? t(lang, "pingLoss") : "—", { y: 43, size: has ? 29 : lost ? 16 : 26, fill: color, skew: -9, maxWidth: 56 }) +
 			(has ? text("ms", { y: 53, size: 8.5, fill: COLORS.dim }) : !match ? text(t(lang, "pingNone"), { y: 56, size: 8, fill: COLORS.dim, maxWidth: 56 }) : "") +

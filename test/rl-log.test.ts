@@ -40,6 +40,30 @@ test("a queue in a party (leader may be someone else) is not used", () => {
 	assert.equal(parseMatchmakingLog(block(2)).length, 0);
 });
 
+test("a queue is tagged with whichever account the log most recently said was logged in", () => {
+	const login = (name: string, id: string) => `[0000.00] Party: HandleLocalPlayerLoginStatusChanged PlayerName=${name} PlayerID=${id} LoginStatus=LS_LoggedIn IsPrimary=True`;
+	const queue = (mu: number, time: string) =>
+		[
+			`[0001.00] Matchmaking: Post-divide PartyLeaderMMR: ${mu}`,
+			"[0001.00] Matchmaking: PartyLeaderTier=(12)",
+			`[0001.00] Matchmaking: StartMatchmaking at 2026-09-20 ${time} in EU7 for playlists 11 on game server `,
+			"[0001.00] Matchmaking: PreferredRegions.Length=(5) PreferredPlaylists.Length=(1) Party.GetOrderedPartyMemberIDs().Length=(1)",
+		].join("\n");
+	// Someone plays on their own account, then hands the computer to a sibling who logs into theirs and queues too.
+	const log = [login("Me", "Epic|AAA|0"), queue(40, "10:00:00"), login("Sibling", "Epic|BBB|0"), queue(45, "11:00:00")].join("\n");
+	const samples = parseMatchmakingLog(log);
+	assert.deepEqual(samples.map((s) => s.playerId), ["Epic|AAA|0", "Epic|BBB|0"]);
+});
+
+test("a queue before any login line in the file is tagged with no account (old logs, or a file cut mid-session)", () => {
+	const samples = parseMatchmakingLog(
+		["[0001.00] Matchmaking: Post-divide PartyLeaderMMR: 40.0", "[0001.00] Matchmaking: StartMatchmaking at 2026-09-20 10:00:00 in EU7 for playlists 11 on game server ", "[0001.00] Matchmaking: PreferredRegions.Length=(5) PreferredPlaylists.Length=(1) Party.GetOrderedPartyMemberIDs().Length=(1)"].join(
+			"\n",
+		),
+	);
+	assert.equal(samples[0]!.playerId, undefined);
+});
+
 function tmp(): string {
 	return fs.mkdtempSync(path.join(os.tmpdir(), "rlhud-log-"));
 }
